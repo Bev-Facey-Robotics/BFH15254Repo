@@ -1,11 +1,6 @@
 ## NOTICE
 
 This repository uses the FTC SDK as a base for our code. You can clone it here: git clone https://github.com/FIRST-Tech-Challenge/FtcRobotController.git
-* Or, if you prefer, you can use the "Download Zip" button available through the main repository page.  Downloading the project as a .ZIP file will keep the size of the download manageable.
-
-* You can also download the project folder (as a .zip or .tar.gz archive file) from the Downloads subsection of the [Releases](https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases) page for this repository.
-
-* The Releases page also contains prebuilt APKs.
 
 ## Welcome!
 This repository contains the code that Team 15254 used to control and score points in the First tech Challange "Into the Deep",
