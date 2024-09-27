@@ -32,7 +32,7 @@ public final class TwoDeadWheelLocalizer implements Localizer {
 
     public static Params PARAMS = new Params();
 
-    public final Encoder par, perp;
+    public final Encoder EncF, EncS;
     public final IMU imu;
 
     private int lastParPos, lastPerpPos;
@@ -47,8 +47,8 @@ public final class TwoDeadWheelLocalizer implements Localizer {
         // TODO: make sure your config has **motors** with these names (or change them)
         //   the encoders should be plugged into the slot matching the named motor
         //   see https://ftc-docs.firstinspires.org/en/latest/hardware_and_software_configuration/configuring/index.html
-        par = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "par")));
-        perp = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "perp")));
+        EncF = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "EncF")));
+        EncS = new OverflowEncoder(new RawEncoder(hardwareMap.get(DcMotorEx.class, "EncS")));
 
         // TODO: reverse encoder directions if needed
         //   par.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -61,8 +61,8 @@ public final class TwoDeadWheelLocalizer implements Localizer {
     }
 
     public Twist2dDual<Time> update() {
-        PositionVelocityPair parPosVel = par.getPositionAndVelocity();
-        PositionVelocityPair perpPosVel = perp.getPositionAndVelocity();
+        PositionVelocityPair parPosVel = EncF.getPositionAndVelocity();
+        PositionVelocityPair perpPosVel = EncS.getPositionAndVelocity();
 
         YawPitchRollAngles angles = imu.getRobotYawPitchRollAngles();
         // Use degrees here to work around https://github.com/FIRST-Tech-Challenge/FtcRobotController/issues/1070

@@ -5,9 +5,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 // import though bore enocoder
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 //Import the IMU specific things
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -21,15 +19,19 @@ public class TeleopPain extends LinearOpMode {
 
     //TO DO LIST
 
+    //Tune fucking roadrunner
+    //EncF
+    //EncS
+
 
 
     //Call the IMU Class
 
     //Make Motor Happy With Variables
-    public DcMotor FR;
-    public DcMotor FL;
-    public DcMotor BR;
-    public DcMotor BL;
+    public DcMotor frontLeft;
+    public DcMotor frontRight;
+    public DcMotor backLeft;
+    public DcMotor backRight;
 
 
     //IMU Varibles
@@ -65,10 +67,10 @@ public class TeleopPain extends LinearOpMode {
 
 
         // Initialize the motors
-        FR = hardwareMap.get(DcMotor.class, "FR");
-        FL = hardwareMap.get(DcMotor.class, "FL");
-        BR = hardwareMap.get(DcMotor.class, "BR");
-        BL = hardwareMap.get(DcMotor.class, "BL");
+        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
+        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
+        backRight= hardwareMap.get(DcMotor.class, "backRight");
+        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
 
 
         //Don't look for encoders please, it does funky shit
@@ -105,29 +107,29 @@ public class TeleopPain extends LinearOpMode {
         float rightStickX = Math.abs(gamepad1.right_stick_x) > 0.4 ? gamepad1.right_stick_x : 0;
 
         // Calculate motor powers for straight movement
-        double powerFR = leftStickY;
-        double powerFL = -leftStickY;
-        double powerBR = -leftStickY;
-        double powerBL = leftStickY;
+        double powerfrontRight = leftStickY;
+        double powerfrontLeft = -leftStickY;
+        double powerbackRight = -leftStickY;
+        double powerbackLeft = leftStickY;
 
 
         // Adjust motor powers for turning
-        powerFR -= leftStickX;
-        powerFL -= leftStickX;
-        powerBR += leftStickX;
-        powerBL += leftStickX;
+        powerfrontRight -= leftStickX;
+        powerfrontLeft -= leftStickX;
+        powerbackRight += leftStickX;
+        powerbackLeft += leftStickX;
 
         // Adjust motor powers for strafing
-        powerFR += rightStickX;
-        powerFL += rightStickX;
-        powerBR += rightStickX;
-        powerBL += rightStickX;
+        powerfrontRight += rightStickX;
+        powerfrontLeft += rightStickX;
+        powerbackRight += rightStickX;
+        powerbackLeft += rightStickX;
 
         // Set the power of the motors
-        FR.setPower(powerFR);
-        FL.setPower(powerFL);
-        BR.setPower(powerBR);
-        BL.setPower(powerBL);
+        frontRight.setPower(powerfrontRight);
+        frontLeft.setPower(powerfrontLeft);
+        backRight.setPower(powerbackRight);
+        backLeft.setPower(powerbackLeft);
     }
 
 

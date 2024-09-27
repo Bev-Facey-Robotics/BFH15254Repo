@@ -33,7 +33,7 @@ import java.util.List;
 
 public final class TuningOpModes {
     // TODO: change this to TankDrive.class if you're using tank
-    public static final Class<?> DRIVE_CLASS = MecanumDrive.class;
+    public static final Class<?> DRIVE_CLASS = TwoDeadWheelLocalizer.class;
 
     public static final String GROUP = "quickstart";
     public static final boolean DISABLED = false;
@@ -72,8 +72,8 @@ public final class TuningOpModes {
                     perpEncs.add(dl.perp);
                 } else if (md.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) md.localizer;
-                    parEncs.add(dl.par);
-                    perpEncs.add(dl.perp);
+                    parEncs.add(dl.EncF);
+                    perpEncs.add(dl.EncS);
                 } else {
                     throw new RuntimeException("unknown localizer: " + md.localizer.getClass().getName());
                 }
@@ -121,8 +121,8 @@ public final class TuningOpModes {
                     perpEncs.add(dl.perp);
                 } else if (td.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) td.localizer;
-                    parEncs.add(dl.par);
-                    perpEncs.add(dl.perp);
+                    parEncs.add(dl.EncF);
+                    perpEncs.add(dl.EncS);
                 } else {
                     throw new RuntimeException("unknown localizer: " + td.localizer.getClass().getName());
                 }
