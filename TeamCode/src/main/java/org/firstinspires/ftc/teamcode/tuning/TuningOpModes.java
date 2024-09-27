@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.tuning;
 
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.reflection.ReflectionConfig;
 import com.acmerobotics.roadrunner.MotorFeedforward;
@@ -20,6 +21,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpModeRegistrar;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.internal.opmode.OpModeMeta;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -72,8 +74,8 @@ public final class TuningOpModes {
                     perpEncs.add(dl.perp);
                 } else if (md.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) md.localizer;
-                    parEncs.add(dl.EncF);
-                    perpEncs.add(dl.EncS);
+                    parEncs.add(dl.par);
+                    perpEncs.add(dl.perp);
                 } else {
                     throw new RuntimeException("unknown localizer: " + md.localizer.getClass().getName());
                 }
@@ -121,8 +123,8 @@ public final class TuningOpModes {
                     perpEncs.add(dl.perp);
                 } else if (td.localizer instanceof TwoDeadWheelLocalizer) {
                     TwoDeadWheelLocalizer dl = (TwoDeadWheelLocalizer) td.localizer;
-                    parEncs.add(dl.EncF);
-                    perpEncs.add(dl.EncS);
+                    parEncs.add(dl.par);
+                    perpEncs.add(dl.perp);
                 } else {
                     throw new RuntimeException("unknown localizer: " + td.localizer.getClass().getName());
                 }

@@ -20,18 +20,17 @@ public class TeleopPain extends LinearOpMode {
     //TO DO LIST
 
     //Tune fucking roadrunner
-    //EncF
-    //EncS
+
 
 
 
     //Call the IMU Class
 
     //Make Motor Happy With Variables
-    public DcMotor frontLeft;
-    public DcMotor frontRight;
-    public DcMotor backLeft;
-    public DcMotor backRight;
+    public DcMotor rightBack;
+    public DcMotor rightFront;
+    public DcMotor leftBack;
+    public DcMotor leftFront;
 
 
     //IMU Varibles
@@ -67,10 +66,10 @@ public class TeleopPain extends LinearOpMode {
 
 
         // Initialize the motors
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        backRight= hardwareMap.get(DcMotor.class, "backRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
+        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotor.class, "rightBack");
+        leftBack= hardwareMap.get(DcMotor.class, "leftBack");
+        leftFront = hardwareMap.get(DcMotor.class, "leftRight");
 
 
         //Don't look for encoders please, it does funky shit
@@ -107,10 +106,10 @@ public class TeleopPain extends LinearOpMode {
         float rightStickX = Math.abs(gamepad1.right_stick_x) > 0.4 ? gamepad1.right_stick_x : 0;
 
         // Calculate motor powers for straight movement
-        double powerfrontRight = leftStickY;
-        double powerfrontLeft = -leftStickY;
-        double powerbackRight = -leftStickY;
-        double powerbackLeft = leftStickY;
+        double powerfrontRight = -leftStickY;
+        double powerfrontLeft = leftStickY;
+        double powerbackRight = leftStickY;
+        double powerbackLeft = -leftStickY;
 
 
         // Adjust motor powers for turning
@@ -126,10 +125,10 @@ public class TeleopPain extends LinearOpMode {
         powerbackLeft += rightStickX;
 
         // Set the power of the motors
-        frontRight.setPower(powerfrontRight);
-        frontLeft.setPower(powerfrontLeft);
-        backRight.setPower(powerbackRight);
-        backLeft.setPower(powerbackLeft);
+        rightFront.setPower(powerfrontRight);
+        rightBack.setPower(powerfrontLeft);
+        leftFront.setPower(powerbackRight);
+        leftBack.setPower(powerbackLeft);
     }
 
 
