@@ -19,6 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalDouble;
 
+/**
+ * This class is used to find the position of the robot on the field. It uses the IMU to find the yaw of the robot, and the AprilTags to find the x and y position of the robot.
+ * It should be used in a separate thread, as it will constantly update the position of the robot.
+ * To initialize, call InitializePositionFinder with the webcam and IMU.
+ * Example: positionFinder.InitializePositionFinder(hardwareMap.get(WebcamName.class, "Webcam 1"), hardwareMap.get(IMU.class, "imu"));
+ * In order to start grabbing our position, call FindBotPosition. MAKE SURE TO CALL IT IN A SEPARATE THREAD.
+ */
 public class PositionFinder {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
 
@@ -123,6 +130,7 @@ public class PositionFinder {
 
     /**
      * Main loop that finds our bot's pos.
+     * Should be ran always in a different thread than the primary one.
      */
     public void FindBotPosition() {
         while (isOpmodeRunning) {
