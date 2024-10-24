@@ -39,7 +39,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private Vector<Double> addDriveVectors(Vector<Double> a, Vector<Double> b) {
-        Vector<Double> c = new Vector<Double>();
+        Vector<Double> c = new Vector<>();
         c.add(a.get(0) + b.get(0));
         c.add(a.get(1) + b.get(1));
         c.add(a.get(2) + b.get(2));
@@ -48,7 +48,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private Vector<Double> subtractDriveVectors(Vector<Double> a, Vector<Double> b) {
-        Vector<Double> c = new Vector<Double>();
+        Vector<Double> c = new Vector<>();
         c.add(a.get(0) - b.get(0));
         c.add(a.get(1) - b.get(1));
         c.add(a.get(2) - b.get(2));
@@ -57,7 +57,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private Vector<Double> multiplyDriveVectors(Vector<Double> a, Vector<Double> b) {
-        Vector<Double> c = new Vector<Double>();
+        Vector<Double> c = new Vector<>();
         c.add(a.get(0) * b.get(0));
         c.add(a.get(1) * b.get(1));
         c.add(a.get(2) * b.get(2));
@@ -67,7 +67,7 @@ public class LoganTestBot extends OpMode {
 
     // Drive Functions
     private Vector<Double> calculateDriveGamepadMotorSpeed() {
-        Vector<Double> speeds = new Vector<Double>();
+        Vector<Double> speeds = new Vector<>();
         speeds.add((double) gamepad1.left_stick_y);
         speeds.add((double) gamepad1.left_stick_y * -1);
         speeds.add((double) gamepad1.left_stick_y * -1);
@@ -76,7 +76,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private Vector<Double> calculateTurnGamepadMotorSpeed() {
-        Vector<Double> speeds = new Vector<Double>();
+        Vector<Double> speeds = new Vector<>();
         speeds.add((double) gamepad1.right_stick_x * -1);
         speeds.add((double) gamepad1.right_stick_x * -1);
         speeds.add((double) gamepad1.right_stick_x);
@@ -85,7 +85,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private Vector<Double> calculateStrafeGamepadMotorSpeed() {
-        Vector<Double> speeds = new Vector<Double>();
+        Vector<Double> speeds = new Vector<>();
         speeds.add((double) gamepad1.left_stick_x * -1);
         speeds.add((double) gamepad1.left_stick_x * -1);
         speeds.add((double) gamepad1.left_stick_x * -1);
@@ -94,7 +94,7 @@ public class LoganTestBot extends OpMode {
     }
 
     private void DriveRobotWithController() {
-        Vector<Double> drive = new Vector<Double>();
+        Vector<Double> drive = new Vector<>();
         drive = calculateDriveGamepadMotorSpeed();
         drive = addDriveVectors(drive, calculateTurnGamepadMotorSpeed());
         drive = addDriveVectors(drive, calculateStrafeGamepadMotorSpeed());
