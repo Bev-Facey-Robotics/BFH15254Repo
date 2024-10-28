@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -61,7 +59,10 @@ public class PositionFinder {
     final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  e.g. Ramp up to 37% power at a 25 degree Yaw error.   (0.375 / 25.0)
     final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-
+    // Properties for encoder position finder
+    static final double     COUNTS_PER_MOTOR_REV    = 8192 ;    // eg: Through Bore Encoder
+    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
+    static final double     WHEEL_DIAMETER_CM   = 6.0 ;     // For figuring circumference
     /**
      * Our x position in cm relative to the field
      */
@@ -70,6 +71,11 @@ public class PositionFinder {
      * Our y position in cm relative to the field
      */
     public double y;
+
+    /**
+     * Our previous yaw in degrees
+     */
+    public double prevYaw = 123456789; // 123456789 is our "we don't got stuff" value
     /**
      * Our yaw in degrees
      */
@@ -109,6 +115,10 @@ public class PositionFinder {
     public boolean isOpmodeRunning = true;
 
     /**
+     * Not implemented yet
+     */
+    public boolean isPositionFinderReady = false;
+    /**
      * Initializes the position finder with the camera, and IMU.
      * The position finder initializes the IMU, so do not initialize the IMU elsewhere.
      * @param _camera The hardwareMap.get of our webcam
@@ -134,27 +144,34 @@ public class PositionFinder {
      */
     public void FindBotPosition() {
         while (isOpmodeRunning) {
-            processAprilTagData();
+            boolean hasFoundAprilTag = processAprilTagData();
             if (!hasObtainedYawLock) {
+                aprilTag.setDecimation(1);
                 // At present moment we have unreliable yaw data, and auto will most likely be unable to start.
-                // We need to figure out our yaw offset
+                // We need to figure out our yaw
+                yaw = imu.getRobotYawPitchRollAngles().getYaw();// Get our impersice yaw
                 if (firstObtainedAprilYaw != 123456789) {
                     // We have our first yaw data, so we can now calculate our offset
-                    imuPosOffset = firstObtainedAprilYaw - yaw;
+                    imuPosOffset = normalizeRotation(firstObtainedAprilYaw - yaw);
                     hasObtainedYawLock = true;
+                    continue;
                 }
-
+            } else {
+                // Do our yaw stuff
+                prevYaw = yaw; // used for our odometer position calculations.
+                yaw = normalizeRotation(imu.getRobotYawPitchRollAngles().getYaw() - imuPosOffset);// Get our yaw
+                aprilTag.setDecimation(3);
             }
-            // our IMU yaw with our offset
-            yaw = imu.getRobotYawPitchRollAngles().getYaw() - imuPosOffset;
-
-
+            if (!hasFoundAprilTag) {
+                // Looks like we need to do odometer stuff to find our current position
+                // This will not give us a perfect position, but it should be close enough where if we have a way to correct it after a bit (with april tags), we should be good.
+                
+            }
         }
     }
     private void initIMU() {
 
         // Retrieve and initialize the IMU.
-        // This sample expects the IMU to be in a REV Hub and named "imu".
         IMU.Parameters parameters;
 
         parameters = new IMU.Parameters(
@@ -181,7 +198,7 @@ public class PositionFinder {
                 //.setDrawTagOutline(true)
                 //.setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 //.setTagLibrary(AprilTagGameDatabase.getCenterStageTagLibrary())
-                //.setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setOutputUnits(DistanceUnit.CM, AngleUnit.DEGREES)
                 .setCameraPose(cameraPosition, cameraOrientation)
 
                 // == CAMERA CALIBRATION ==
@@ -239,7 +256,7 @@ public class PositionFinder {
     /**
      * This uses data we have from any april tags we have detected, and tries to calculate a position from it. It only calculates our yaw on first launch, because then our IMU can take over, which is waaaaay more accurate.
      */
-    private void processAprilTagData() {
+    private boolean processAprilTagData() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         List<Double> aprilsX = new ArrayList<>();
         List<Double> aprilsY = new ArrayList<>();
@@ -275,7 +292,14 @@ public class PositionFinder {
             // The "if it's not present" check is just to get java to shut up.
             x = averageX.isPresent() ? averageX.getAsDouble() : 0;
             y = averageY.isPresent() ? averageY.getAsDouble() : 0;
+            return true;
         }
-
+        return false;
+    }
+    // Method to normalize angle between -90 and 90 degrees
+    private double normalizeRotation(double angle) {
+        while (angle > 180) angle -= 360;
+        while (angle < -180) angle += 360;
+        return angle;
     }
 }

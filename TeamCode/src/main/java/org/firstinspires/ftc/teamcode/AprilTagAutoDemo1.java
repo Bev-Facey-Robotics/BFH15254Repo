@@ -126,8 +126,7 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
                     positionFinder.x,
                     positionFinder.y,
                     positionFinder.yaw));
-            telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);
-            // Push telemetry to the Driver Station.
+            telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);// Push telemetry to the Driver Station.
             telemetry.update();
 
             if (gamepad1.right_bumper) { // TEMPORARY
@@ -136,6 +135,9 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
                 double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
                 double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
                 moveRobot(drive,strafe,turn);
+            }
+            if (gamepad1.left_bumper) {
+                moveRobot(0,0,-positionFinder.yaw/3);
             }
 
             moveRobotInternal();
