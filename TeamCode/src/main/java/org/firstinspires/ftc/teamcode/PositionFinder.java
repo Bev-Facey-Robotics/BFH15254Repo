@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -63,6 +64,14 @@ public class PositionFinder {
     static final double     COUNTS_PER_MOTOR_REV    = 8192 ;    // eg: Through Bore Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
     static final double     WHEEL_DIAMETER_CM   = 6.0 ;     // For figuring circumference
+    static final double     COUNTS_PER_CM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
+            (WHEEL_DIAMETER_CM * 3.1415);
+
+    public DcMotor xAxisEncoder;
+    public DcMotor yAxisEncoder;
+
+
+
     /**
      * Our x position in cm relative to the field
      */
@@ -124,7 +133,9 @@ public class PositionFinder {
      * @param _camera The hardwareMap.get of our webcam
      * @param _imu The hardwareMap.get of our IMU
      */
-    public void InitializePositionFinder(WebcamName _camera, IMU _imu) {
+    public void InitializePositionFinder(WebcamName _camera, IMU _imu, DcMotor _xAxisEncoder, DcMotor _yAxisEncoder) {
+        xAxisEncoder = _xAxisEncoder;
+        yAxisEncoder = _yAxisEncoder;
         imu = _imu;
         hwWebcam = _camera;
         initIMU();
@@ -137,6 +148,7 @@ public class PositionFinder {
     public void OnOpmodeStopped() {
         visionPortal.close();
     }
+
 
     /**
      * Main loop that finds our bot's pos.
@@ -152,7 +164,7 @@ public class PositionFinder {
                 yaw = imu.getRobotYawPitchRollAngles().getYaw();// Get our impersice yaw
                 if (firstObtainedAprilYaw != 123456789) {
                     // We have our first yaw data, so we can now calculate our offset
-                    imuPosOffset = normalizeRotation(firstObtainedAprilYaw - yaw);
+                    imuPosOffset = normalizeRotation(firstObtainedAprilYaw - yaw); // -45 is because the 0 rot is stupid, and is at an angle
                     hasObtainedYawLock = true;
                     continue;
                 }
@@ -165,9 +177,64 @@ public class PositionFinder {
             if (!hasFoundAprilTag) {
                 // Looks like we need to do odometer stuff to find our current position
                 // This will not give us a perfect position, but it should be close enough where if we have a way to correct it after a bit (with april tags), we should be good.
-                
+                //GetPositionFromOdometer();
             }
         }
+    }
+
+    /**
+     * Gets an odometer's distance travelled in cm
+     * @param encoder The encoder to get the distance from
+     * @return The distance travelled in cm
+     */
+    private double GetOdometerDistanceTravelled(DcMotor encoder) {
+        return encoder.getCurrentPosition() / COUNTS_PER_CM;
+    }
+
+    /**
+     * Get the position of the robot from the odometers.
+     * Used for filling in the void where we are missing AprilTag data.
+     */
+    private void GetPositionFromOdometer() {
+        // Convert yaw to radians
+        double radYaw = Math.toRadians(this.yaw + 180);
+        double radPrevYaw = Math.toRadians(this.prevYaw + 180);
+        // Get wheel distance
+        // TODO: Later move this to a global variable so we can get the wheel delta, that this expects.
+        double xDistanceCm = GetOdometerDistanceTravelled(xAxisEncoder); // Strafe (left/right)
+        double yDistanceCm = GetOdometerDistanceTravelled(yAxisEncoder);; // Drive forward/backward
+
+        // Calculate yaw difference for the turn (in radians)
+        double deltaYaw = radYaw - radPrevYaw;
+
+        // Calculate the midpoint yaw for more accurate movement calculation
+        double averageYaw = radYaw + deltaYaw / 2.0;
+
+        double deltaXGlobal, deltaYGlobal;
+
+        // Check if we're turning (deltaYaw != 0)
+        if (Math.abs(deltaYaw) > 1e-6) {
+            // Compute radius of turn (R) and arc length (L) based on wheel distances
+            double R = (xDistanceCm + yDistanceCm) / (2 * deltaYaw); // Radius of curvature
+            double arcLength = R * deltaYaw; // Total arc length of the movement
+
+            // Compute global X and Y displacements from arc movement
+            deltaXGlobal = arcLength * Math.cos(averageYaw);
+            deltaYGlobal = arcLength * Math.sin(averageYaw);
+
+            // Add strafe component (top wheel) to the global displacement
+            deltaXGlobal += xDistanceCm * Math.cos(averageYaw + Math.PI / 2);
+            deltaYGlobal += xDistanceCm * Math.sin(averageYaw + Math.PI / 2);
+        } else {
+            // No turning; approximate as straight-line movement
+            deltaXGlobal = yDistanceCm * Math.cos(radYaw) - xDistanceCm * Math.sin(radYaw);
+            deltaYGlobal = yDistanceCm * Math.sin(radYaw) + xDistanceCm * Math.cos(radYaw);
+        }
+
+        // Update the global position
+        this.x += deltaXGlobal;
+        this.y += deltaYGlobal;
+
     }
     private void initIMU() {
 

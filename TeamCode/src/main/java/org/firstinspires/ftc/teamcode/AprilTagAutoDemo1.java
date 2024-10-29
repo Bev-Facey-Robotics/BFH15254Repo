@@ -39,21 +39,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.vision.VisionPortal;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import org.firstinspires.ftc.teamcode.PositionFinder;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.OptionalDouble;
+import java.util.Base64;
 
 /*
  * This OpMode illustrates the basics of AprilTag based localization.
@@ -105,7 +93,12 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
     public void runOpMode() {
         initializeHardware();
         // Let's get our position finder ready
-        positionFinder.InitializePositionFinder(hardwareMap.get(WebcamName.class, "Webcam 1"), hardwareMap.get(IMU.class, "imu"));
+        positionFinder.InitializePositionFinder(
+                hardwareMap.get(WebcamName.class, "Webcam 1"),
+                hardwareMap.get(IMU.class, "imu"),
+                hardwareMap.get(DcMotor.class, "rightFront"), // X axis encoder, hooked up to motor 1
+                hardwareMap.get(DcMotor.class, "leftFront")   // Y axis encoder, hooked up to motor 0
+        );
         // Multithreading at it's finest
         Thread positionFinderThread = new Thread(new Runnable() {
             @Override
@@ -126,8 +119,9 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
                     positionFinder.x,
                     positionFinder.y,
                     positionFinder.yaw));
-            telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);// Push telemetry to the Driver Station.
-            telemetry.update();
+            telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);
+            telemetry.addLine("IMU Yaw: " + positionFinder.imu.getRobotYawPitchRollAngles().getYaw());
+            telemetry.update(); // Push telemetry to the Driver Station.
 
             if (gamepad1.right_bumper) { // TEMPORARY
                 // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
@@ -137,7 +131,7 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
                 moveRobot(drive,strafe,turn);
             }
             if (gamepad1.left_bumper) {
-                moveRobot(0,0,-positionFinder.yaw/3);
+                moveRobot(0,0,-positionFinder.yaw/30);
             }
 
             moveRobotInternal();
