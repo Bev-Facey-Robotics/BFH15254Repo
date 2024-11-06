@@ -14,6 +14,7 @@ public class LoganTestBot extends OpMode {
     private DcMotor motorFR = null; // Front Right
     private DcMotor motorBL = null; // Back Left
     private DcMotor motorBR = null; // Back Right
+    private DcMotor motorSlide = null;
 
 
     @Override
@@ -29,6 +30,7 @@ public class LoganTestBot extends OpMode {
         motorFR = hardwareMap.get(DcMotor.class, "rightFront");
         motorBL = hardwareMap.get(DcMotor.class, "leftBack");
         motorBR = hardwareMap.get(DcMotor.class, "rightBack");
+        motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
     }
 
     private void driveBot(Vector<Double> driveParams) {
@@ -104,6 +106,7 @@ public class LoganTestBot extends OpMode {
 
     @Override
     public void loop() {
-        DriveRobotWithController();
+        //DriveRobotWithController();
+        motorSlide.setPower(gamepad1.left_stick_x);
     }
 }

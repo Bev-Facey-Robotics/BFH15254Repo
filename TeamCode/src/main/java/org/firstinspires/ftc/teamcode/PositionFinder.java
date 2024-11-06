@@ -67,6 +67,16 @@ public class PositionFinder {
     static final double     COUNTS_PER_CM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_CM * 3.1415);
 
+    // Our encoder wheel distances
+    private double xAxisEncoderPrevDistance = 0;
+    private double xAxisEncoderDistance = 0;
+    private double xAxisEncoderDelta = 0;
+
+    private double yAxisEncoderPrevDistance = 0;
+    private double yAxisEncoderDistance = 0;
+    private double yAxisEncoderDelta = 0;
+
+
     public DcMotor xAxisEncoder;
     public DcMotor yAxisEncoder;
 
@@ -174,14 +184,32 @@ public class PositionFinder {
                 yaw = normalizeRotation(imu.getRobotYawPitchRollAngles().getYaw() - imuPosOffset);// Get our yaw
                 aprilTag.setDecimation(3);
             }
+            GetOdometerData();
             if (!hasFoundAprilTag) {
                 // Looks like we need to do odometer stuff to find our current position
                 // This will not give us a perfect position, but it should be close enough where if we have a way to correct it after a bit (with april tags), we should be good.
-                //GetPositionFromOdometer();
+                GetPositionFromOdometer();
             }
         }
     }
 
+    /**
+     * Gets Odometer Data from our encoders
+     * Includes distance travelled, distance travelled since last check, and delta of the distance travelled (all in cm)
+     */
+    private void GetOdometerData() {
+        // Make sure we set our previous distances
+        xAxisEncoderPrevDistance = xAxisEncoderDistance;
+        yAxisEncoderPrevDistance = yAxisEncoderDistance;
+
+        // Current Distances
+        xAxisEncoderDistance = GetOdometerDistanceTravelled(xAxisEncoder);
+        yAxisEncoderDistance = GetOdometerDistanceTravelled(yAxisEncoder);
+
+        // Deltas
+        xAxisEncoderDelta = xAxisEncoderDistance - xAxisEncoderPrevDistance;
+        yAxisEncoderDelta = yAxisEncoderDistance - yAxisEncoderPrevDistance;
+    }
     /**
      * Gets an odometer's distance travelled in cm
      * @param encoder The encoder to get the distance from
@@ -199,10 +227,6 @@ public class PositionFinder {
         // Convert yaw to radians
         double radYaw = Math.toRadians(this.yaw + 180);
         double radPrevYaw = Math.toRadians(this.prevYaw + 180);
-        // Get wheel distance
-        // TODO: Later move this to a global variable so we can get the wheel delta, that this expects.
-        double xDistanceCm = GetOdometerDistanceTravelled(xAxisEncoder); // Strafe (left/right)
-        double yDistanceCm = GetOdometerDistanceTravelled(yAxisEncoder);; // Drive forward/backward
 
         // Calculate yaw difference for the turn (in radians)
         double deltaYaw = radYaw - radPrevYaw;
@@ -215,27 +239,27 @@ public class PositionFinder {
         // Check if we're turning (deltaYaw != 0)
         if (Math.abs(deltaYaw) > 1e-6) {
             // Compute radius of turn (R) and arc length (L) based on wheel distances
-            double R = (xDistanceCm + yDistanceCm) / (2 * deltaYaw); // Radius of curvature
+            double R = (xAxisEncoderDelta + yAxisEncoderDelta) / (2 * deltaYaw); // Radius of curvature
             double arcLength = R * deltaYaw; // Total arc length of the movement
 
             // Compute global X and Y displacements from arc movement
             deltaXGlobal = arcLength * Math.cos(averageYaw);
             deltaYGlobal = arcLength * Math.sin(averageYaw);
 
-            // Add strafe component (top wheel) to the global displacement
-            deltaXGlobal += xDistanceCm * Math.cos(averageYaw + Math.PI / 2);
-            deltaYGlobal += xDistanceCm * Math.sin(averageYaw + Math.PI / 2);
+            // Add strafe component (bottom wheel) to the global displacement
+            deltaXGlobal += yAxisEncoderDelta * Math.cos(averageYaw + Math.PI / 2);
+            deltaYGlobal += yAxisEncoderDelta * Math.sin(averageYaw + Math.PI / 2);
         } else {
             // No turning; approximate as straight-line movement
-            deltaXGlobal = yDistanceCm * Math.cos(radYaw) - xDistanceCm * Math.sin(radYaw);
-            deltaYGlobal = yDistanceCm * Math.sin(radYaw) + xDistanceCm * Math.cos(radYaw);
+            deltaXGlobal = xAxisEncoderDelta * Math.cos(radYaw) + yAxisEncoderDelta * Math.cos(radYaw + Math.PI / 2);
+            deltaYGlobal = xAxisEncoderDelta * Math.sin(radYaw) + yAxisEncoderDelta * Math.sin(radYaw + Math.PI / 2);
         }
 
         // Update the global position
         this.x += deltaXGlobal;
         this.y += deltaYGlobal;
-
     }
+
     private void initIMU() {
 
         // Retrieve and initialize the IMU.
