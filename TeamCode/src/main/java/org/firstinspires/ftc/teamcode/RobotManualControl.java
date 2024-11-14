@@ -37,6 +37,13 @@ public class RobotManualControl extends OpMode {
     //endregion
     //endregion
 
+    // Current Drive setting
+    // This is here so I can be lazy and reuse some automode code
+    // TODO: Later implement this in a different class to practice DRY, and make some things easier
+    private double drivePwr = 0;
+    private double strafePwr = 0;
+    private double yawPwr = 0;
+
 //region Initialization
     @Override
     public void init() {
@@ -54,6 +61,12 @@ public class RobotManualControl extends OpMode {
         motorFR = hardwareMap.get(DcMotor.class, "rightFront");
         motorBL = hardwareMap.get(DcMotor.class, "leftBack");
         motorBR = hardwareMap.get(DcMotor.class, "rightBack");
+
+        motorFL.setDirection(DcMotor.Direction.REVERSE);
+        motorBL.setDirection(DcMotor.Direction.REVERSE);
+        motorFR.setDirection(DcMotor.Direction.FORWARD);
+        motorBR.setDirection(DcMotor.Direction.FORWARD);
+
         //endregion
 
         motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
@@ -77,21 +90,10 @@ public class RobotManualControl extends OpMode {
     //region Primary Loop
     @Override
     public void loop() {
-//        //region Drive
-//        double leftStickY = -gamepad1.left_stick_y;
-//        double leftStickX = gamepad1.left_stick_x;
-//        double rightStickX = gamepad1.right_stick_x;
-//
-//        double fl = leftStickY + leftStickX + rightStickX;
-//        double fr = leftStickY - leftStickX - rightStickX;
-//        double bl = leftStickY - leftStickX + rightStickX;
-//        double br = leftStickY + leftStickX - rightStickX;
-//
-//        motorFL.setPower(fl);
-//        motorFR.setPower(fr);
-//        motorBL.setPower(bl);
-//        motorBR.setPower(br);
-//        //endregion
+        //region Drive
+        MoveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
+        moveRobotInternal();
+        //endregion
 
         //region Arm
         double armPower = gamepad2.left_stick_x * 0.5;
@@ -136,4 +138,36 @@ public class RobotManualControl extends OpMode {
         telemetry.update();
     }
     //endregion
+    public void MoveRobot(double x, double y, double yaw) {
+        drivePwr = x;
+        strafePwr = y;
+        yawPwr = yaw;
+    }
+
+    private void moveRobotInternal() {
+        // Calculate wheel powers.
+        double leftFrontPower    =   drivePwr -strafePwr -yawPwr;
+        double rightFrontPower   =   drivePwr +strafePwr +yawPwr;
+        double leftBackPower     =  -drivePwr -strafePwr +yawPwr;
+        double rightBackPower    =  -drivePwr +strafePwr -yawPwr;
+
+        // Normalize wheel powers to be less than 1.0
+        double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+        if (max > 1.0) {
+            leftFrontPower /= max;
+            rightFrontPower /= max;
+            leftBackPower /= max;
+            rightBackPower /= max;
+        }
+
+        // Send powers to the wheels.
+        motorFL.setPower(leftFrontPower);
+        motorFR.setPower(rightFrontPower);
+        motorBL.setPower(leftBackPower);
+        motorBR.setPower(rightBackPower);
+    }
 }
+
