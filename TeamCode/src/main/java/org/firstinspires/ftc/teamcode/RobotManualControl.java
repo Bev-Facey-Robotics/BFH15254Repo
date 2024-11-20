@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import java.util.concurrent.TimeUnit;
+
 @TeleOp(name = "Robot Manual Drive", group = "Concept")
 public class RobotManualControl extends OpMode {
     //region Hardware
@@ -51,6 +53,9 @@ public class RobotManualControl extends OpMode {
     private double drivePwr = 0;
     private double strafePwr = 0;
     private double yawPwr = 0;
+
+    // Targets
+    private int swingTarget = 0;
     private boolean isClipped = false;
     private boolean lastControllerState = false;
 
@@ -60,8 +65,27 @@ public class RobotManualControl extends OpMode {
         ConfigureHardware();
         arm_SmallHorizontal.setPosition(0.8);
         arm_VerticalServo.setPosition(0.5);
-        telemetry.addLine("hello world!");
+        telemetry.addLine("Getting Calibration Data...");
         telemetry.update();
+        arm_BigHorizontal.setPower(0.2);
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        arm_BigHorizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        arm_BigHorizontal.setTargetPosition(-140);
+        arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        arm_BigHorizontal.setPower(1);
+        while (arm_BigHorizontal.isBusy()) {
+            telemetry.addLine("Calibrating Arm");
+            telemetry.addData("Position", arm_BigHorizontal.getCurrentPosition());
+            telemetry.update();
+        }
+        arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addLine("Ready to Start");
+        telemetry.update();
+
 
     }
 
@@ -87,7 +111,8 @@ public class RobotManualControl extends OpMode {
 
         motorSwing = hardwareMap.get(DcMotor.class, "swing");
         motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motorSwing.setTargetPosition(0);
+        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         clawServo = hardwareMap.get(Servo.class, "claw");
 
@@ -116,10 +141,11 @@ public class RobotManualControl extends OpMode {
             speed = 0.5;
         }
         MoveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
-
+        moveRobotInternal(speed);
         //endregion
 
         //region Arm
+        // -131 to -10
         double armPower = gamepad2.left_stick_x * 0.2;
         arm_BigHorizontal.setPower(armPower);
 
@@ -136,10 +162,10 @@ public class RobotManualControl extends OpMode {
 
         // Arm telemetry
         telemetry.addLine("Arm data");
+        telemetry.addLine("Big Horizontal " + arm_BigHorizontal.getCurrentPosition());
         telemetry.addLine("Small Horizonal " + arm_SmallHorizontal.getPosition());
         telemetry.addLine("Vertical " + arm_VerticalServo.getPosition());
 
-        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
         //endregion
 
 
@@ -157,6 +183,26 @@ public class RobotManualControl extends OpMode {
         }
         motorSlide.setPower(slidePower);
 
+        // Swing
+        // swing 0 to -113
+        swingTarget += ((gamepad2.dpad_up ? 1 : 0) - (gamepad2.dpad_down ? 1 : 0)) * 2;
+
+        // Adjust target based on position limits
+        if (swingTarget <= -110) {
+            // Prevent the motor from moving further negative
+            swingTarget = -109;
+        } else if (swingTarget >= 0) {
+            // Prevent the motor from moving further positive
+            swingTarget = -1;
+        }
+
+        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorSwing.setTargetPosition(swingTarget);
+        motorSwing.setPower(1);
+
+        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
+        telemetry.addLine("Swing Target" + swingTarget);
+        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
 
         // Clip
 
