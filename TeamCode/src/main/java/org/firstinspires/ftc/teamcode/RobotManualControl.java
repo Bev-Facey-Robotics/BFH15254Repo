@@ -55,10 +55,12 @@ public class RobotManualControl extends OpMode {
     private double yawPwr = 0;
 
     // Targets
-    private int swingTarget = 0;
+    private int swingTarget = -4;
     private int armTarget = 0;
     private boolean isClipped = false;
+    private boolean altArmMode = false;
     private boolean lastControllerState = false;
+    private boolean lastControllerState2 = false;
 
 //region Initialization
     @Override
@@ -69,6 +71,7 @@ public class RobotManualControl extends OpMode {
         telemetry.addLine("Getting Calibration Data...");
         telemetry.update();
         arm_BigHorizontal.setPower(0.2);
+        motorSwing.setPower(0.2);
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
@@ -77,10 +80,17 @@ public class RobotManualControl extends OpMode {
         arm_SmallHorizontal.setPosition(0.52);
         arm_VerticalServo.setPosition(0.57);
         arm_BigHorizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         armTarget = -127;
         arm_BigHorizontal.setTargetPosition(armTarget);
         arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         arm_BigHorizontal.setPower(0.2);
+
+        motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorSwing.setTargetPosition(-4);
+        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
         while (arm_BigHorizontal.isBusy()) {
             telemetry.addLine("Calibrating Arm");
             telemetry.addData("Position", arm_BigHorizontal.getCurrentPosition());
@@ -113,9 +123,8 @@ public class RobotManualControl extends OpMode {
         motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         motorSwing = hardwareMap.get(DcMotor.class, "swing");
-        motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSwing.setTargetPosition(0);
-        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         clawServo = hardwareMap.get(Servo.class, "claw");
 
@@ -140,35 +149,69 @@ public class RobotManualControl extends OpMode {
     public void loop() {
         //region Drive
         double speed = 1.0;
-        if (gamepad1.right_bumper) {
+        if (gamepad1.left_trigger > 0.15) {
             speed = 0.5;
+        }
+        if (gamepad1.right_trigger > 0.15) {
+            speed = 0.25;
         }
         MoveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         moveRobotInternal(speed);
         //endregion
 
+        boolean isSlowModeActive = !gamepad2.left_bumper;
+
         //region Arm
         // -131 to -10
-        armTarget = arm_BigHorizontal.getCurrentPosition ()  + (int)(gamepad2.left_stick_x * 10);
-        // Adjust target based on position limits
-        if (armTarget <= -130) {
-            // Prevent the motor from moving further negative
-            armTarget = -125;
-        } else if (armTarget >= -10) {
-            // Prevent the motor from moving further positive
-            armTarget = -15;
+
+
+        if (gamepad2.back) {
+            if (!lastControllerState2) {
+                altArmMode = !altArmMode;
+                lastControllerState2 = true;
+            }
+        } else {
+            lastControllerState2 = false;
         }
 
-        arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm_BigHorizontal.setTargetPosition(armTarget);
-        arm_BigHorizontal.setPower(1);
+        if (altArmMode) {
+            double armPower = gamepad2.left_stick_x * (isSlowModeActive ? 0.2 : 0.5);
+            arm_BigHorizontal.setPower(armPower);
+            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_USING_ENCODER ||
+                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
 
-        armSmallHorizontal += -gamepad2.right_stick_x * 0.01;
-        armSmallHorizontal = Math.max(-1, Math.min(1, armSmallHorizontal));
+                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+        } else {
+            if (gamepad2.left_stick_x != 0) {
+                armTarget = (arm_BigHorizontal.getCurrentPosition() + (int) (gamepad2.left_stick_x * (isSlowModeActive ? 10 : 20)));
+            }
+            // Adjust target based on position limits
+            if (armTarget <= -130) {
+                // Prevent the motor from moving further negative
+                armTarget = -125;
+            } else if (armTarget >= -10) {
+                // Prevent the motor from moving further positive
+                armTarget = -15;
+            }
+
+            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_TO_POSITION ||
+                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
+
+                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            }
+            arm_BigHorizontal.setPower(1);
+            arm_BigHorizontal.setTargetPosition(armTarget);
+        }
+
+        armSmallHorizontal += -gamepad2.right_stick_x * (isSlowModeActive ? .01 : .03);
+        armSmallHorizontal = Math.max(0.35, Math.min(0.85, armSmallHorizontal));
         arm_SmallHorizontal.setPosition(armSmallHorizontal);
 
-        armVertical += -gamepad2.right_stick_y * 0.01;
-        armVertical = Math.max(-1, Math.min(1, armVertical));
+        armVertical += -gamepad2.right_stick_y * (isSlowModeActive ? .01 : .03);
+        armVertical = Math.max(0.15, Math.min(0.75, armVertical));
         arm_VerticalServo.setPosition(armVertical);
 
         double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
@@ -199,15 +242,15 @@ public class RobotManualControl extends OpMode {
 
         // Swing
         // swing 0 to -113
-        swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * 2;
+        swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
 
         // Adjust target based on position limits
-        if (swingTarget <= -110) {
+        if (swingTarget < -130) {
             // Prevent the motor from moving further negative
-            swingTarget = -109;
-        } else if (swingTarget >= 1) {
+            swingTarget = -130;
+        } else if (swingTarget > 1) {
             // Prevent the motor from moving further positive
-            swingTarget = 0;
+            swingTarget = 1;
         }
 
         motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -249,7 +292,7 @@ public class RobotManualControl extends OpMode {
         double rightBackPower    =  -drivePwr +strafePwr -yawPwr;
 
         // Normalize wheel powers to be less than 1.0
-        double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        double max = (Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower)));
         max = Math.max(max, Math.abs(leftBackPower));
         max = Math.max(max, Math.abs(rightBackPower));
 
@@ -261,10 +304,10 @@ public class RobotManualControl extends OpMode {
         }
 
         // Send powers to the wheels.
-        motorFL.setPower(leftFrontPower);
-        motorFR.setPower(rightFrontPower);
-        motorBL.setPower(leftBackPower);
-        motorBR.setPower(rightBackPower);
+        motorFL.setPower(leftFrontPower*speedLimit);
+        motorFR.setPower(rightFrontPower*speedLimit);
+        motorBL.setPower(leftBackPower*speedLimit);
+        motorBR.setPower(rightBackPower*speedLimit);
     }
 }
 
