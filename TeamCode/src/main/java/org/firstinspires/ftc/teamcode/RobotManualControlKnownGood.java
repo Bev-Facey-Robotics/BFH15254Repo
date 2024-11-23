@@ -1,16 +1,13 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 
-import java.util.concurrent.TimeUnit;
-
-@TeleOp(name = "Robot Manual Drive (mod)", group = "Concept")
-public class RobotManualControl extends OpMode {
+@TeleOp(name = "Robot Manual Drive (known good)", group = "Concept")
+public class RobotManualControlKnownGood extends OpMode {
     //region Hardware
     //region Drive Motors
     private DcMotor motorFL = null; // Front Left
@@ -55,17 +52,12 @@ public class RobotManualControl extends OpMode {
     private double yawPwr = 0;
 
     // Targets
-    private double swingTarget = -4;
+    private int swingTarget = -4;
     private int armTarget = 0;
     private boolean isClipped = false;
     private boolean altArmMode = false;
     private boolean lastControllerState = false;
     private boolean lastControllerState2 = false;
-    private boolean lastControllerStateX = false;
-    private boolean altSwingMode = false;
-
-    // Bot Config
-    double deadzone = 0.1;
 
 //region Initialization
     @Override
@@ -160,15 +152,7 @@ public class RobotManualControl extends OpMode {
         if (gamepad1.right_trigger > 0.15) {
             speed = 0.25;
         }
-
-
-
-        // Apply deadzone to joystick inputs
-        double drive = Math.abs(gamepad1.left_stick_y) > deadzone ? -gamepad1.left_stick_y : 0;
-        double strafe = Math.abs(gamepad1.left_stick_x) > deadzone ? -gamepad1.left_stick_x : 0;
-        double turn = Math.abs(gamepad1.right_stick_x) > deadzone ? -gamepad1.right_stick_x : 0;
-
-        MoveRobot(drive, strafe, turn);
+        MoveRobot(-gamepad1.left_stick_y, -gamepad1.left_stick_x, -gamepad1.right_stick_x);
         moveRobotInternal(speed);
         //endregion
 
@@ -244,58 +228,30 @@ public class RobotManualControl extends OpMode {
         //region Slide
         double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
         // Adjust slidePower based on position limits
-        if (motorSlide.getCurrentPosition() <= -9240 && slidePower < 0) { // Limit is -8950
+        if (motorSlide.getCurrentPosition() <= -8750 && slidePower < 0) { // Limit is -8950
             // Prevent the motor from moving further negative
             slidePower = 0;
-        } else
-            if (motorSlide.getCurrentPosition() >= 0 && slidePower > 0) {
+        } else if (motorSlide.getCurrentPosition() >= 0 && slidePower > 0) {
             // Prevent the motor from moving further positive
             slidePower = 0;
         }
         motorSlide.setPower(slidePower);
 
-        if (gamepad2.start) {
-            if (!lastControllerStateX) {
-                altSwingMode = !altSwingMode;
-                lastControllerStateX = true;
-            }
-        } else {
-            lastControllerStateX = false;
+        // Swing
+        // swing 0 to -113
+        swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
+
+        // Adjust target based on position limits
+        if (swingTarget < -130) {
+            // Prevent the motor from moving further negative
+            swingTarget = -130;
+        } else if (swingTarget > 1) {
+            // Prevent the motor from moving further positive
+            swingTarget = 1;
         }
-
-        if (altSwingMode) {
-            // Swing
-            // swing 0 to -113
-            swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
-
-            // Adjust target based on position limits
-            if (swingTarget < -130) {
-                // Prevent the motor from moving further negative
-                swingTarget = -129;
-            } else
-            if (swingTarget > 1) {
-                // Prevent the motor from moving further positive
-                swingTarget = 0;
-            }
-            if (gamepad2.y) {
-                swingTarget = -11;
-            }
-            motorSwing.setTargetPosition((int)swingTarget);
-        } else {
-            // Normal mode
-            if (gamepad2.dpad_down) {
-                swingTarget = -11;
-            } else if (gamepad2.dpad_up) {
-                swingTarget = -130;
-
-            }
-            motorSwing.setTargetPosition((int)swingTarget);
-        }
-
 
         motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorSwing.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
+        motorSwing.setTargetPosition(swingTarget);
         motorSwing.setPower(1);
 
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
