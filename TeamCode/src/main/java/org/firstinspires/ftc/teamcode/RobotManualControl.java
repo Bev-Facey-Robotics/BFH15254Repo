@@ -9,41 +9,41 @@ import com.qualcomm.robotcore.hardware.CRServo;
 
 import java.util.concurrent.TimeUnit;
 
-@TeleOp(name = "Robot Manual Drive (mod)", group = "Concept")
+@TeleOp(name = "Robot Manual Drive (mod)", group = "Competition Ready")
 public class RobotManualControl extends OpMode {
     //region Hardware
     //region Drive Motors
-    private DcMotor motorFL = null; // Front Left
-    private DcMotor motorFR = null; // Front Right
-    private DcMotor motorBL = null; // Back Left
-    private DcMotor motorBR = null; // Back Right
+    public DcMotor motorFL = null; // Front Left
+    public DcMotor motorFR = null; // Front Right
+    public DcMotor motorBL = null; // Back Left
+    public DcMotor motorBR = null; // Back Right
     //endregion
 
     //region Slide
-    private DcMotor motorSlide = null;
-    private DcMotor motorSwing = null;
-    private Servo clawServo = null;
+    public DcMotor motorSlide = null;
+    public DcMotor motorSwing = null;
+    public Servo clawServo = null;
     //endregion
     //region Arm
     /**
      * Motor attached to the bot to move the arm containing the main arm mechanism.
      */
-    private DcMotor arm_BigHorizontal = null;
+    public DcMotor arm_BigHorizontal = null;
     /**
      * The first servo on the arm. Swivels the main scoop mechanism off the arm.
      */
-    private Servo arm_SmallHorizontal = null;
+    public Servo arm_SmallHorizontal = null;
     /**
      * The second servo on the arm. Moves the rest of the scoop up and down.
      */
-    private Servo arm_VerticalServo = null;
+    public Servo arm_VerticalServo = null;
     /**
      * The third servo on the arm. Controls the wheel to scoop the game pieces.
      */
-    private CRServo arm_Scoop = null;
+    public CRServo arm_Scoop = null;
 
-    private double armSmallHorizontal = 0.52;
-    private double armVertical = 0.57;
+    public double armSmallHorizontal = 0.52;
+    public double armVertical = 0.57;
     //endregion
     //endregion
 
@@ -55,8 +55,8 @@ public class RobotManualControl extends OpMode {
     private double yawPwr = 0;
 
     // Targets
-    private double swingTarget = -4;
-    private int armTarget = 0;
+    public double swingTarget = -4;
+    public int armTarget = 0;
     private boolean isClipped = false;
     private boolean altArmMode = false;
     private boolean lastControllerState = false;
@@ -70,37 +70,7 @@ public class RobotManualControl extends OpMode {
 //region Initialization
     @Override
     public void init() {
-        ConfigureHardware();
-        arm_SmallHorizontal.setPosition(0.8);
-        arm_VerticalServo.setPosition(0.5);
-        telemetry.addLine("Getting Calibration Data...");
-        telemetry.update();
-        arm_BigHorizontal.setPower(0.2);
-        motorSwing.setPower(0.2);
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        arm_SmallHorizontal.setPosition(0.52);
-        arm_VerticalServo.setPosition(0.57);
-        arm_BigHorizontal.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        armTarget = -127;
-        arm_BigHorizontal.setTargetPosition(armTarget);
-        arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        arm_BigHorizontal.setPower(0.2);
-
-        motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSwing.setTargetPosition(-4);
-        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        while (arm_BigHorizontal.isBusy()) {
-            telemetry.addLine("Calibrating Arm");
-            telemetry.addData("Position", arm_BigHorizontal.getCurrentPosition());
-            telemetry.update();
-        }
+        BotInitialization.InitializeRobot(this);
         telemetry.addLine("Ready to Start");
         telemetry.update();
 

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Robot Manual Drive (known good)", group = "Concept")
+@TeleOp(name = "Robot Manual Drive (known good)", group = "Competition Ready")
 public class RobotManualControlKnownGood extends OpMode {
     //region Hardware
     //region Drive Motors
