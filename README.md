@@ -1,19 +1,40 @@
-Hello, and welcome to Cyberflex's (FTC #15254) code repository! This is where we keep all of our code up to date while collaberating with the two coders on our team.
-The list here is by no means extensive, but a few things we've done and are working on
+# Facey Cyberflex
+## Team #15254
 
-    - A working auto using apriltags
-    
-    - Drivecode using vector math (Preloading was bored and wrote some because Java didn't have it natively supported)
-    
-    - Our engineering journal for judging presentation
-    
-    - Keeping our sponsers up to date on what we've been doing
-    
-    - Doing outreach and fundraising for the team
-    
+This repo is where we keep our robot code, assets, and some docs.
 
-Feel free to borrow our code if you simply want to take a look at how it was written or if you want to keep track of our current progress, take a look at our project board. This will show you all the current and past issues we've tackled and are working on
+## Currently implemented
 
-Thank you for visiting our Github page!
+### Code
+<details>
+<summary>Manual Mode</summary>
 
-- Team 15254
+- [x] Calibration
+- [x] Driving
+- [x] Slide
+- [ ] Swing - Implemented, buggy
+- [x] Arm (Doohikey)
+</details>
+
+<details>
+<summary>Auto Mode</summary>
+
+- [ ] Calibration
+- [x] April Tag detection
+- [ ] Odometer Position fallback
+- [ ] Auto Mode Drive
+- [ ] Aliance Determining
+- [ ] Doohicky (Arm)
+- [ ] Slide
+- [ ] Swing
+- [ ] Collection of Pieces
+</details>
+
+rest of readme todo
+
+## License
+Any code that belongs to FIRST comes from [FtcRobotController](https://github.com/FIRST-Tech-Challenge/FtcRobotController/) and is licensed under BSD-3-Clause-Clear
+![GitHub License](https://img.shields.io/github/license/Bev-Facey-Robotics/BFH15254Repo)
+Files that are licensed under this includes the FtcRobotController folder, and any code written by FIRST.
+
+Code written by us is currently unlicsened, and is going to be licensed later
