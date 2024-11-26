@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.os.Environment;
+import android.os.SystemClock;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,56 +10,21 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @TeleOp(name = "Robot Manual Drive (mod)", group = "Competition Ready")
-public class RobotManualControl extends OpMode {
+public class RobotManualControl extends DeepHorOpMode {
     //region Hardware
-    //region Drive Motors
-    public DcMotor motorFL = null; // Front Left
-    public DcMotor motorFR = null; // Front Right
-    public DcMotor motorBL = null; // Back Left
-    public DcMotor motorBR = null; // Back Right
-    //endregion
-
-    //region Slide
-    public DcMotor motorSlide = null;
-    public DcMotor motorSwing = null;
-    public Servo clawServo = null;
-    //endregion
-    //region Arm
-    /**
-     * Motor attached to the bot to move the arm containing the main arm mechanism.
-     */
-    public DcMotor arm_BigHorizontal = null;
-    /**
-     * The first servo on the arm. Swivels the main scoop mechanism off the arm.
-     */
-    public Servo arm_SmallHorizontal = null;
-    /**
-     * The second servo on the arm. Moves the rest of the scoop up and down.
-     */
-    public Servo arm_VerticalServo = null;
-    /**
-     * The third servo on the arm. Controls the wheel to scoop the game pieces.
-     */
-    public CRServo arm_Scoop = null;
 
     public double armSmallHorizontal = 0.52;
     public double armVertical = 0.57;
     //endregion
     //endregion
 
-    // Current Drive setting
-    // This is here so  I can be lazy and reuse some automode code
-    // TODO: Later implement this in a different class to practice DRY, and make some things easier
-    private double drivePwr = 0;
-    private double strafePwr = 0;
-    private double yawPwr = 0;
 
     // Targets
     public double swingTarget = -4;
-    public int armTarget = 0;
     private boolean isClipped = false;
     private boolean altArmMode = false;
     private boolean lastControllerState = false;
@@ -70,50 +38,28 @@ public class RobotManualControl extends OpMode {
 //region Initialization
     @Override
     public void init() {
+//        long bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime();
+//        long prevBootTime = 0;
+//
+//        try {
+//            prevBootTime = Long.parseLong(FileUtils.readFromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "AutoInitForManual.txt"));
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
         BotInitialization.InitializeRobot(this);
+        ConfigureHardware();
+
+//        if (bootTime > prevBootTime) {
+//            BotInitialization.InitializeRobot(this);
+//            try {
+//                FileUtils.writeToFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "AutoInitForManual.txt", "" + bootTime);
+//            } catch (IOException e) {
+//                //throw new RuntimeException(e);
+//            }
+//        }
+
         telemetry.addLine("Ready to Start");
         telemetry.update();
-
-
-    }
-
-    private void ConfigureHardware() {
-        //region Drive Motors
-        motorFL = hardwareMap.get(DcMotor.class, "leftFront");
-        motorFR = hardwareMap.get(DcMotor.class, "rightFront");
-        motorBL = hardwareMap.get(DcMotor.class, "leftBack");
-        motorBR = hardwareMap.get(DcMotor.class, "rightBack");
-
-        motorFL.setDirection(DcMotor.Direction.REVERSE);
-        motorBL.setDirection(DcMotor.Direction.REVERSE);
-        motorFR.setDirection(DcMotor.Direction.FORWARD);
-        motorBR.setDirection(DcMotor.Direction.FORWARD);
-
-        //endregion
-
-        //region Slide
-        motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
-
-        motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        motorSwing = hardwareMap.get(DcMotor.class, "swing");
-        motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-        clawServo = hardwareMap.get(Servo.class, "claw");
-
-
-        //endregion
-
-        //region Arm Hardware
-        arm_BigHorizontal = hardwareMap.get(DcMotor.class, "bigHorizontal");
-        arm_SmallHorizontal = hardwareMap.get(Servo.class, "RotHori");
-        arm_VerticalServo = hardwareMap.get(Servo.class, "RotVert");
-        arm_Scoop = hardwareMap.get(CRServo.class, "Spinny");
-
-
-        //endregion
 
 
     }
@@ -139,7 +85,7 @@ public class RobotManualControl extends OpMode {
         double turn = Math.abs(gamepad1.right_stick_x) > deadzone ? -gamepad1.right_stick_x : 0;
 
         MoveRobot(drive, strafe, turn);
-        moveRobotInternal(speed);
+        UpdateMoveRobot(speed);
         //endregion
 
         boolean isSlowModeActive = !gamepad2.left_bumper;
@@ -233,7 +179,7 @@ public class RobotManualControl extends OpMode {
             lastControllerStateX = false;
         }
 
-        if (altSwingMode) {
+//        if (altSwingMode) {
             // Swing
             // swing 0 to -113
             swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
@@ -247,20 +193,16 @@ public class RobotManualControl extends OpMode {
                 // Prevent the motor from moving further positive
                 swingTarget = 0;
             }
-            if (gamepad2.y) {
-                swingTarget = -11;
-            }
-            motorSwing.setTargetPosition((int)swingTarget);
-        } else {
+//        } else {
             // Normal mode
-            if (gamepad2.dpad_down) {
+            if (gamepad2.dpad_left) {
                 swingTarget = -11;
-            } else if (gamepad2.dpad_up) {
+            } else if (gamepad2.dpad_right) {
                 swingTarget = -130;
 
             }
             motorSwing.setTargetPosition((int)swingTarget);
-        }
+//        }
 
 
         motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -289,36 +231,6 @@ public class RobotManualControl extends OpMode {
         telemetry.update();
     }
     //endregion
-    public void MoveRobot(double x, double y, double yaw) {
-        drivePwr = x;
-        strafePwr = y;
-        yawPwr = yaw;
-    }
 
-    private void moveRobotInternal(double speedLimit) {
-        // Calculate wheel powers.
-        double leftFrontPower    =   drivePwr -strafePwr -yawPwr;
-        double rightFrontPower   =   drivePwr +strafePwr +yawPwr;
-        double leftBackPower     =  -drivePwr -strafePwr +yawPwr;
-        double rightBackPower    =  -drivePwr +strafePwr -yawPwr;
-
-        // Normalize wheel powers to be less than 1.0
-        double max = (Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower)));
-        max = Math.max(max, Math.abs(leftBackPower));
-        max = Math.max(max, Math.abs(rightBackPower));
-
-        if (max > 1.0) {
-            leftFrontPower /= max;
-            rightFrontPower /= max;
-            leftBackPower /= max;
-            rightBackPower /= max;
-        }
-
-        // Send powers to the wheels.
-        motorFL.setPower(leftFrontPower*speedLimit);
-        motorFR.setPower(rightFrontPower*speedLimit);
-        motorBL.setPower(leftBackPower*speedLimit);
-        motorBR.setPower(rightBackPower*speedLimit);
-    }
 }
 
