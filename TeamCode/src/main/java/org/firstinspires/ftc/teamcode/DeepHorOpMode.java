@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public abstract class DeepHorOpMode extends OpMode {
     //region Hardware
     //region Drive Motors
-    DcMotor motorFL = null; // Front Left
+    public DcMotor motorFL = null; // Front Left
     public DcMotor motorFR = null; // Front Right
     public DcMotor motorBL = null; // Back Left
     public DcMotor motorBR = null; // Back Right
@@ -17,31 +17,31 @@ public abstract class DeepHorOpMode extends OpMode {
 
     //region Slide
     public DcMotor motorSlide = null;
-    public DcMotor motorSwing = null;
-    public Servo clawServo = null;
-    //endregion
-    //region Arm
-    /**
-     * Motor attached to the bot to move the arm containing the main arm mechanism.
-     */
-    public DcMotor arm_BigHorizontal = null;
-    /**
-     * The first servo on the arm. Swivels the main scoop mechanism off the arm.
-     */
-    public Servo arm_SmallHorizontal = null;
-    /**
-     * The second servo on the arm. Moves the rest of the scoop up and down.
-     */
-    public Servo arm_VerticalServo = null;
-    /**
-     * The third servo on the arm. Controls the wheel to scoop the game pieces.
-     */
-    public CRServo arm_Scoop = null;
-
-    public double armSmallHorizontal = 0.52;
-    public double armVertical = 0.57;
-
-    public int armTarget = 0;
+//    public DcMotor motorSwing = null;
+//    public Servo clawServo = null;
+//    //endregion
+//    //region Arm
+//    /**
+//     * Motor attached to the bot to move the arm containing the main arm mechanism.
+//     */
+//    public DcMotor arm_BigHorizontal = null;
+//    /**
+//     * The first servo on the arm. Swivels the main scoop mechanism off the arm.
+//     */
+//    public Servo arm_SmallHorizontal = null;
+//    /**
+//     * The second servo on the arm. Moves the rest of the scoop up and down.
+//     */
+//    public Servo arm_VerticalServo = null;
+//    /**
+//     * The third servo on the arm. Controls the wheel to scoop the game pieces.
+//     */
+//    public CRServo arm_Scoop = null;
+//
+//    public double armSmallHorizontal = 0.52;
+//    public double armVertical = 0.57;
+//
+//    public int armTarget = 0;
     //endregion
     //endregion
 
@@ -73,21 +73,21 @@ public abstract class DeepHorOpMode extends OpMode {
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
 
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        this.motorSwing = this.hardwareMap.get(DcMotor.class, "swing");
-        this.motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-        this.clawServo = this.hardwareMap.get(Servo.class, "claw");
+//
+//        this.motorSwing = this.hardwareMap.get(DcMotor.class, "swing");
+//        this.motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//
+//
+//        this.clawServo = this.hardwareMap.get(Servo.class, "claw");
 
 
         //endregion
 
         //region Arm Hardware
-        this.arm_BigHorizontal = this.hardwareMap.get(DcMotor.class, "bigHorizontal");
-        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
-        this.arm_VerticalServo = this.hardwareMap.get(Servo.class, "RotVert");
-        this.arm_Scoop = this.hardwareMap.get(CRServo.class, "Spinny");
+//        this.arm_BigHorizontal = this.hardwareMap.get(DcMotor.class, "bigHorizontal");
+//        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
+//        this.arm_VerticalServo = this.hardwareMap.get(Servo.class, "RotVert");
+//        this.arm_Scoop = this.hardwareMap.get(CRServo.class, "Spinny");
 
 
         //endregion

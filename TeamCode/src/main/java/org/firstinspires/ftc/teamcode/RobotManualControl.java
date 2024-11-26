@@ -25,10 +25,6 @@ public class RobotManualControl extends DeepHorOpMode {
 
     // Targets
     public double swingTarget = -4;
-    private boolean isClipped = false;
-    private boolean altArmMode = false;
-    private boolean lastControllerState = false;
-    private boolean lastControllerState2 = false;
     private boolean lastControllerStateX = false;
     private boolean altSwingMode = false;
 
@@ -46,8 +42,9 @@ public class RobotManualControl extends DeepHorOpMode {
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
 //        }
-        BotInitialization.InitializeRobot(this);
         ConfigureHardware();
+        BotInitialization.InitializeRobot(this);
+
 
 //        if (bootTime > prevBootTime) {
 //            BotInitialization.InitializeRobot(this);
@@ -92,65 +89,66 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Arm
         // -131 to -10
+//
+//
+//        if (gamepad2.back) {
+//            if (!lastControllerState2) {
+//                altArmMode = !altArmMode;
+//                lastControllerState2 = true;
+//            }
+//        } else {
+//            lastControllerState2 = false;
+//        }
+//
+//        if (altArmMode) {
+//            double armPower = gamepad2.left_stick_x * (isSlowModeActive ? 0.2 : 0.5);
+//            arm_BigHorizontal.setPower(armPower);
+//            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_USING_ENCODER ||
+//                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
+//
+//                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
+//        } else {
+//            if (gamepad2.left_stick_x != 0) {
+//                armTarget = (arm_BigHorizontal.getCurrentPosition() + (int) (gamepad2.left_stick_x * (isSlowModeActive ? 10 : 20)));
+//            }
+//            // Adjust target based on position limits
+//            if (armTarget <= -130) {
+//                // Prevent the motor from moving further negative
+//                armTarget = -125;
+//            } else if (armTarget >= -10) {
+//                // Prevent the motor from moving further positive
+//                armTarget = -15;
+//            }
+//
+//            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_TO_POSITION ||
+//                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
+//
+//                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//            }
+//            arm_BigHorizontal.setPower(1);
+//            arm_BigHorizontal.setTargetPosition(armTarget);
+//        }
+//
+//        armSmallHorizontal += -gamepad2.right_stick_x * (isSlowModeActive ? .01 : .03);
+//        armSmallHorizontal = Math.max(0.35, Math.min(0.85, armSmallHorizontal));
+//        arm_SmallHorizontal.setPosition(armSmallHorizontal);
+//
+//        armVertical += -gamepad2.right_stick_y * (isSlowModeActive ? .01 : .03);
+//        armVertical = Math.max(0.15, Math.min(0.75, armVertical));
+//        arm_VerticalServo.setPosition(armVertical);
 
-
-        if (gamepad2.back) {
-            if (!lastControllerState2) {
-                altArmMode = !altArmMode;
-                lastControllerState2 = true;
-            }
-        } else {
-            lastControllerState2 = false;
-        }
-
-        if (altArmMode) {
-            double armPower = gamepad2.left_stick_x * (isSlowModeActive ? 0.2 : 0.5);
-            arm_BigHorizontal.setPower(armPower);
-            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_USING_ENCODER ||
-                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
-
-                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-        } else {
-            if (gamepad2.left_stick_x != 0) {
-                armTarget = (arm_BigHorizontal.getCurrentPosition() + (int) (gamepad2.left_stick_x * (isSlowModeActive ? 10 : 20)));
-            }
-            // Adjust target based on position limits
-            if (armTarget <= -130) {
-                // Prevent the motor from moving further negative
-                armTarget = -125;
-            } else if (armTarget >= -10) {
-                // Prevent the motor from moving further positive
-                armTarget = -15;
-            }
-
-            if (arm_BigHorizontal.getMode() != DcMotor.RunMode.RUN_TO_POSITION ||
-                    arm_BigHorizontal.getZeroPowerBehavior() != DcMotor.ZeroPowerBehavior.BRAKE) {
-
-                arm_BigHorizontal.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-            arm_BigHorizontal.setPower(1);
-            arm_BigHorizontal.setTargetPosition(armTarget);
-        }
-
-        armSmallHorizontal += -gamepad2.right_stick_x * (isSlowModeActive ? .01 : .03);
-        armSmallHorizontal = Math.max(0.35, Math.min(0.85, armSmallHorizontal));
-        arm_SmallHorizontal.setPosition(armSmallHorizontal);
-
-        armVertical += -gamepad2.right_stick_y * (isSlowModeActive ? .01 : .03);
-        armVertical = Math.max(0.15, Math.min(0.75, armVertical));
-        arm_VerticalServo.setPosition(armVertical);
-
-        double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
-        arm_Scoop.setPower(armScoop);
-
-        // Arm telemetry
-        telemetry.addLine("Arm data");
-        telemetry.addLine("Big Horizontal " + arm_BigHorizontal.getCurrentPosition());
-        telemetry.addLine("Small Horizonal " + arm_SmallHorizontal.getPosition());
-        telemetry.addLine("Vertical " + arm_VerticalServo.getPosition());
+        // To be repurposed for new scoop on thingyamajing
+//        double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
+//        arm_Scoop.setPower(armScoop);
+//
+//        // Arm telemetry
+//        telemetry.addLine("Arm data");
+//        telemetry.addLine("Big Horizontal " + arm_BigHorizontal.getCurrentPosition());
+//        telemetry.addLine("Small Horizonal " + arm_SmallHorizontal.getPosition());
+//        telemetry.addLine("Vertical " + arm_VerticalServo.getPosition());
 
         //endregion
 
@@ -182,50 +180,40 @@ public class RobotManualControl extends DeepHorOpMode {
 //        if (altSwingMode) {
             // Swing
             // swing 0 to -113
-            swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
 
-            // Adjust target based on position limits
-            if (swingTarget < -130) {
-                // Prevent the motor from moving further negative
-                swingTarget = -129;
-            } else
-            if (swingTarget > 1) {
-                // Prevent the motor from moving further positive
-                swingTarget = 0;
-            }
-//        } else {
-            // Normal mode
-            if (gamepad2.dpad_left) {
-                swingTarget = -11;
-            } else if (gamepad2.dpad_right) {
-                swingTarget = -130;
+        // To be repurposed for new scoop on thingyamajing
+//        swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
+//
+//            // Adjust target based on position limits
+//            if (swingTarget < -130) {
+//                // Prevent the motor from moving further negative
+//                swingTarget = -129;
+//            } else
+//            if (swingTarget > 1) {
+//                // Prevent the motor from moving further positive
+//                swingTarget = 0;
+//            }
+////        } else {
+//            // Normal mode
+//            if (gamepad2.dpad_left) {
+//                swingTarget = -11;
+//            } else if (gamepad2.dpad_right) {
+//                swingTarget = -130;
+//
+//            }
+//            motorSwing.setTargetPosition((int)swingTarget);
+////        }
 
-            }
-            motorSwing.setTargetPosition((int)swingTarget);
-//        }
+//
+//        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        motorSwing.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//
+//        motorSwing.setPower(1);
+//
+//        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
+//        telemetry.addLine("Swing Target" + swingTarget);
+//        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
 
-
-        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorSwing.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-        motorSwing.setPower(1);
-
-        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
-        telemetry.addLine("Swing Target" + swingTarget);
-        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
-
-        // Clip
-
-        if (gamepad2.right_bumper) {
-            if (!lastControllerState) {
-                isClipped = !isClipped;
-                lastControllerState = true;
-            }
-        } else {
-            lastControllerState = false;
-        }
-
-        clawServo.setPosition(isClipped ? 1 : 0);
 
         //endregion
         telemetry.update();
