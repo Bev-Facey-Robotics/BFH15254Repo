@@ -62,8 +62,8 @@ import java.util.Base64;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "April Tag Auto Demo 1", group = "Concept")
-public class AprilTagAutoDemo1 extends LinearOpMode {
+@TeleOp(name = "Actual Automode debug", group = "Concept")
+public class AprilTagAutoDemo1 extends DeepHorOpMode {
 
     final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_STRAFE= 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
@@ -78,10 +78,6 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
     private PositionFinder positionFinder = new PositionFinder();
 
     // Hardware
-    private DcMotor leftFrontDrive   = null;  //  Used to control the left front drive wheel
-    private DcMotor rightFrontDrive  = null;  //  Used to control the right front drive wheel
-    private DcMotor leftBackDrive    = null;  //  Used to control the left back drive wheel
-    private DcMotor rightBackDrive   = null;  //  Used to control the right back drive wheel
     public IMU imu;
 
     // The threshold for
@@ -90,8 +86,8 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
 
     @SuppressLint("DefaultLocale")
     @Override
-    public void runOpMode() {
-        initializeHardware();
+    public void init() {
+        ConfigureHardware();
         // Let's get our position finder ready
         positionFinder.InitializePositionFinder(
                 hardwareMap.get(WebcamName.class, "Webcam 1"),
@@ -113,28 +109,31 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
         telemetry.update();
-        waitForStart();
-        while (opModeIsActive()) {
-            telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (cm)",
-                    positionFinder.x,
-                    positionFinder.y,
-                    positionFinder.yaw));
-            telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);
-            telemetry.addLine("IMU Yaw: " + positionFinder.imu.getRobotYawPitchRollAngles().getYaw());
-            telemetry.update(); // Push telemetry to the Driver Station.
+    }
 
-            if (gamepad1.right_bumper) { // TEMPORARY
-                // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
-                double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
-                double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
-                double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
-                moveRobot(drive,strafe,turn);
-            }
-            if (gamepad1.left_bumper) {
-                moveRobot(0,0,-positionFinder.yaw/30);
-            }
+    @SuppressLint("DefaultLocale")
+    @Override
+    public void loop() {
+        telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (cm)",
+                positionFinder.x,
+                positionFinder.y,
+                positionFinder.yaw));
+        telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);
+        telemetry.addLine("IMU Yaw: " + positionFinder.imu.getRobotYawPitchRollAngles().getYaw());
+        telemetry.update(); // Push telemetry to the Driver Station.
 
-            moveRobotInternal();
+        if (gamepad1.right_bumper) { // TEMPORARY
+            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
+            double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
+            double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
+            double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
+            moveRobot(drive,strafe,turn);
+        }
+        if (gamepad1.left_bumper) {
+            moveRobot(0,0,-positionFinder.yaw/30);
+        }
+
+        UpdateMoveRobot(1);
 //
 //            // Save CPU resources; can resume streaming when needed.
 //            if (gamepad1.dpad_down) {
@@ -142,15 +141,14 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
 //            } else if (gamepad1.dpad_up) {
 //                visionPortal.resumeStreaming();
 //            }
+    }
 
-            // Share the CPU.
-            sleep(20);
-        }
-
+    @Override
+    public void stop() {
         // Stop the opmode gracefully
         positionFinder.isOpmodeRunning = false;
         positionFinder.OnOpmodeStopped();
-    }   // end method runOpMode()
+    }
 
     private void moveBotTowardsCenter() {
         moveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);
@@ -213,23 +211,7 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
         imu.initialize((parameters));
     }
 
-    private void initializeHardware() {
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must match the names assigned during the robot configuration.
-        // step (using the FTC Robot Controller app on the phone).
-        leftFrontDrive  = hardwareMap.get(DcMotor.class, "leftFront");
-        rightFrontDrive = hardwareMap.get(DcMotor.class, "rightFront");
-        leftBackDrive  = hardwareMap.get(DcMotor.class, "leftBack");
-        rightBackDrive = hardwareMap.get(DcMotor.class, "rightBack");
 
-        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
-        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
-        leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
-        rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
-        rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
-    }
 
 //    /**
 //     * Add telemetry about AprilTag detections.
@@ -267,31 +249,7 @@ public class AprilTagAutoDemo1 extends LinearOpMode {
         strafePwr = y;
         yawPwr = yaw;
     }
-    public void moveRobotInternal() {
-        // Calculate wheel powers.
-        double leftFrontPower    =   drivePwr -strafePwr -yawPwr;
-        double rightFrontPower   =   drivePwr +strafePwr +yawPwr;
-        double leftBackPower     =  -drivePwr -strafePwr +yawPwr;
-        double rightBackPower    =  -drivePwr +strafePwr -yawPwr;
 
-        // Normalize wheel powers to be less than 1.0
-        double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
-        max = Math.max(max, Math.abs(leftBackPower));
-        max = Math.max(max, Math.abs(rightBackPower));
-
-        if (max > 1.0) {
-            leftFrontPower /= max;
-            rightFrontPower /= max;
-            leftBackPower /= max;
-            rightBackPower /= max;
-        }
-
-        // Send powers to the wheels.
-        leftFrontDrive.setPower(leftFrontPower);
-        rightFrontDrive.setPower(rightFrontPower);
-        leftBackDrive.setPower(leftBackPower);
-        rightBackDrive.setPower(rightBackPower);
-    }
     // MATH!!!!!
 
     // Method to compute the angle between current and target positions
