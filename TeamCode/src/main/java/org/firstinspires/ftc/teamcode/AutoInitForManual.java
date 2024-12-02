@@ -17,13 +17,7 @@ public class AutoInitForManual extends DeepHorOpMode {
         BotInitialization.InitializeRobot(this);
         telemetry.addLine("Ready to Start Manual");
 
-        long bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime();
-
-        try {
-            FileUtils.writeToFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "AutoInitForManual.txt", "" + bootTime);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        CrossOpModeData.isInitialized = true;
 
         telemetry.update();
     }

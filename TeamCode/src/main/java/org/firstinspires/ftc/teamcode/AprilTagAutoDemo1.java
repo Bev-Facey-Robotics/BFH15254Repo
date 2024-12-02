@@ -77,9 +77,6 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
     // Data relevent to getting our current pos
     private PositionFinder positionFinder = new PositionFinder();
 
-    // Hardware
-    public IMU imu;
-
     // The threshold for
     private static final double POSITION_THRESHOLD = 0.1;
     private static final double YAW_THRESHOLD = 0.01;
@@ -88,6 +85,10 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
     @Override
     public void init() {
         ConfigureHardware();
+        if (!CrossOpModeData.isInitialized) {
+            BotInitialization.InitializeRobot(this);
+            CrossOpModeData.isInitialized = true;
+        }
         // Let's get our position finder ready
         positionFinder.InitializePositionFinder(
                 hardwareMap.get(WebcamName.class, "Webcam 1"),
@@ -192,24 +193,7 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
         }
     }
 
-    private void initIMU() {
 
-        // Retrieve and initialize the IMU.
-        // This sample expects the IMU to be in a REV Hub and named "imu".
-        imu = hardwareMap.get(IMU.class, "imu");
-
-        IMU.Parameters parameters;
-
-        parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        // https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        );
-
-        imu.initialize((parameters));
-    }
 
 
 

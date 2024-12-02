@@ -34,9 +34,9 @@ public class BotInitialization {
 //        robot.arm_BigHorizontal.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 //        robot.arm_BigHorizontal.setPower(0.2);
 //
-//        robot.motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        robot.motorSwing.setTargetPosition(-4);
-//        robot.motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.arm_Vertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.arm_Vertical.setTargetPosition(-4);
+        robot.arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 //        while (robot.arm_BigHorizontal.isBusy()) {
 //            robot.telemetry.addLine("Calibrating Arm");

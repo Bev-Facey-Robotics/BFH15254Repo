@@ -1,19 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
-import android.os.Environment;
-import android.os.SystemClock;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
-@TeleOp(name = "Robot Manual Drive (mod)", group = "Competition Ready")
 public class RobotManualControl extends DeepHorOpMode {
     //region Hardware
 
@@ -24,7 +12,7 @@ public class RobotManualControl extends DeepHorOpMode {
 
 
     // Targets
-    public double swingTarget = -4;
+    public double verticalTarget = -4;
     private boolean lastControllerStateX = false;
     private boolean altSwingMode = false;
 
@@ -34,26 +22,11 @@ public class RobotManualControl extends DeepHorOpMode {
 //region Initialization
     @Override
     public void init() {
-//        long bootTime = System.currentTimeMillis() - SystemClock.elapsedRealtime();
-//        long prevBootTime = 0;
-//
-//        try {
-//            prevBootTime = Long.parseLong(FileUtils.readFromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "AutoInitForManual.txt"));
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
         ConfigureHardware();
-        BotInitialization.InitializeRobot(this);
-
-
-//        if (bootTime > prevBootTime) {
-//            BotInitialization.InitializeRobot(this);
-//            try {
-//                FileUtils.writeToFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "AutoInitForManual.txt", "" + bootTime);
-//            } catch (IOException e) {
-//                //throw new RuntimeException(e);
-//            }
-//        }
+        if (!CrossOpModeData.isInitialized) {
+            BotInitialization.InitializeRobot(this);
+            CrossOpModeData.isInitialized = true;
+        }
 
         telemetry.addLine("Ready to Start");
         telemetry.update();
@@ -140,9 +113,31 @@ public class RobotManualControl extends DeepHorOpMode {
 //        armVertical = Math.max(0.15, Math.min(0.75, armVertical));
 //        arm_VerticalServo.setPosition(armVertical);
 
+         double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
+         MoveArmScoop(armScoop);
+
         // To be repurposed for new scoop on thingyamajing
-//        double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
-//        arm_Scoop.setPower(armScoop);
+        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
+
+            // Adjust target based on position limits
+            if (verticalTarget < -130) {
+                // Prevent the motor from moving further negative
+                verticalTarget = -129;
+            } else
+            if (verticalTarget > 1) {
+                // Prevent the motor from moving further positive
+                verticalTarget = 0;
+            }
+//        } else {
+            // Normal mode
+            if (gamepad2.dpad_left) {
+                verticalTarget = -11;
+            } else if (gamepad2.dpad_right) {
+                verticalTarget = -130;
+
+            }
+            arm_Vertical.setTargetPosition((int) verticalTarget);
+
 //
 //        // Arm telemetry
 //        telemetry.addLine("Arm data");
@@ -157,16 +152,7 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Slide
         double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
-        // Adjust slidePower based on position limits
-        if (motorSlide.getCurrentPosition() <= -9240 && slidePower < 0) { // Limit is -8950
-            // Prevent the motor from moving further negative
-            slidePower = 0;
-        } else
-            if (motorSlide.getCurrentPosition() >= 0 && slidePower > 0) {
-            // Prevent the motor from moving further positive
-            slidePower = 0;
-        }
-        motorSlide.setPower(slidePower);
+        MoveSlidePwr(slidePower);
 
         if (gamepad2.start) {
             if (!lastControllerStateX) {
@@ -181,28 +167,7 @@ public class RobotManualControl extends DeepHorOpMode {
             // Swing
             // swing 0 to -113
 
-        // To be repurposed for new scoop on thingyamajing
-//        swingTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
-//
-//            // Adjust target based on position limits
-//            if (swingTarget < -130) {
-//                // Prevent the motor from moving further negative
-//                swingTarget = -129;
-//            } else
-//            if (swingTarget > 1) {
-//                // Prevent the motor from moving further positive
-//                swingTarget = 0;
-//            }
-////        } else {
-//            // Normal mode
-//            if (gamepad2.dpad_left) {
-//                swingTarget = -11;
-//            } else if (gamepad2.dpad_right) {
-//                swingTarget = -130;
-//
-//            }
-//            motorSwing.setTargetPosition((int)swingTarget);
-////        }
+
 
 //
 //        motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -216,6 +181,9 @@ public class RobotManualControl extends DeepHorOpMode {
 
 
         //endregion
+        telemetry.addLine("X Odometer: " + motorFR.getCurrentPosition());
+        telemetry.addLine("Y Odometer: " + motorFL.getCurrentPosition());
+
         telemetry.update();
     }
     //endregion
