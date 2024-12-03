@@ -53,32 +53,6 @@ public class PositionFinder {
      * to +/-90 degrees if it's vertical, or 180 degrees if it's upside-down.
      */
 
-    //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
-    //  applied to the drive motors to correct the error.
-    //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-    final double SPEED_GAIN  =  0.02  ;   //  Forward Speed Control "Gain". e.g. Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-    final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  e.g. Ramp up to 37% power at a 25 degree Yaw error.   (0.375 / 25.0)
-    final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  e.g. Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
-
-    // Properties for encoder position finder
-    static final double     COUNTS_PER_MOTOR_REV    = 8192 ;    // eg: Through Bore Encoder
-    static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // No External Gearing.
-    static final double     WHEEL_DIAMETER_CM   = 6.0 ;     // For figuring circumference
-    static final double     COUNTS_PER_CM         = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
-            (WHEEL_DIAMETER_CM * 3.1415);
-
-    // Our encoder wheel distances
-    private double xAxisEncoderPrevDistance = 0;
-    private double xAxisEncoderDistance = 0;
-    private double xAxisEncoderDelta = 0;
-
-    private double yAxisEncoderPrevDistance = 0;
-    private double yAxisEncoderDistance = 0;
-    private double yAxisEncoderDelta = 0;
-
-
-    public DcMotor xAxisEncoder;
-    public DcMotor yAxisEncoder;
 
 
 
@@ -111,10 +85,10 @@ public class PositionFinder {
     public IMU imu;
 
     // Some position stuff
-    final private Position cameraPosition = new Position(DistanceUnit.CM,
-            0, 0, 0, 0);
+    final private Position cameraPosition = new Position(DistanceUnit.INCH,
+            -7.5, -4, 11 + (double) 5 /12, 0);
     final private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
-            0, -90, 0, 0);
+            0, 0, 0, 0);
 
     // Hardware
     private WebcamName hwWebcam;
@@ -143,12 +117,10 @@ public class PositionFinder {
      * @param _camera The hardwareMap.get of our webcam
      * @param _imu The hardwareMap.get of our IMU
      */
-    public void InitializePositionFinder(WebcamName _camera, IMU _imu, DcMotor _xAxisEncoder, DcMotor _yAxisEncoder) {
-        xAxisEncoder = _xAxisEncoder;
-        yAxisEncoder = _yAxisEncoder;
+    public void InitializePositionFinder(WebcamName _camera, IMU _imu) {
         imu = _imu;
         hwWebcam = _camera;
-        initIMU();
+//        initIMU();
         initAprilTag();
     }
 
@@ -166,7 +138,7 @@ public class PositionFinder {
      */
     public void FindBotPosition() {
         while (isOpmodeRunning) {
-            boolean hasFoundAprilTag = processAprilTagData();
+            boolean hasFoundAprilTag = ProcessAprilTagData();
             if (!hasObtainedYawLock) {
                 aprilTag.setDecimation(1);
                 // At present moment we have unreliable yaw data, and auto will most likely be unable to start.
@@ -184,101 +156,31 @@ public class PositionFinder {
                 yaw = normalizeRotation(imu.getRobotYawPitchRollAngles().getYaw() - imuPosOffset);// Get our yaw
                 aprilTag.setDecimation(3);
             }
-            GetOdometerData();
-            if (!hasFoundAprilTag) {
-                // Looks like we need to do odometer stuff to find our current position
-                // This will not give us a perfect position, but it should be close enough where if we have a way to correct it after a bit (with april tags), we should be good.
-                GetPositionFromOdometer();
-            }
         }
     }
 
-    /**
-     * Gets Odometer Data from our encoders
-     * Includes distance travelled, distance travelled since last check, and delta of the distance travelled (all in cm)
-     */
-    private void GetOdometerData() {
-        // Make sure we set our previous distances
-        xAxisEncoderPrevDistance = xAxisEncoderDistance;
-        yAxisEncoderPrevDistance = yAxisEncoderDistance;
-
-        // Current Distances
-        xAxisEncoderDistance = GetOdometerDistanceTravelled(xAxisEncoder);
-        yAxisEncoderDistance = GetOdometerDistanceTravelled(yAxisEncoder);
-
-        // Deltas
-        xAxisEncoderDelta = xAxisEncoderDistance - xAxisEncoderPrevDistance;
-        yAxisEncoderDelta = yAxisEncoderDistance - yAxisEncoderPrevDistance;
-    }
-    /**
-     * Gets an odometer's distance travelled in cm
-     * @param encoder The encoder to get the distance from
-     * @return The distance travelled in cm
-     */
-    private double GetOdometerDistanceTravelled(DcMotor encoder) {
-        return encoder.getCurrentPosition() / COUNTS_PER_CM;
-    }
-
-    /**
-     * Get the position of the robot from the odometers.
-     * Used for filling in the void where we are missing AprilTag data.
-     */
-    private void GetPositionFromOdometer() {
-        // Convert yaw to radians
-        double radYaw = Math.toRadians(this.yaw + 180);
-        double radPrevYaw = Math.toRadians(this.prevYaw + 180);
-
-        // Calculate yaw difference for the turn (in radians)
-        double deltaYaw = radYaw - radPrevYaw;
-
-        // Calculate the midpoint yaw for more accurate movement calculation
-        double averageYaw = radYaw + deltaYaw / 2.0;
-
-        double deltaXGlobal, deltaYGlobal;
-
-        // Check if we're turning (deltaYaw != 0)
-        if (Math.abs(deltaYaw) > 1e-6) {
-            // Compute radius of turn (R) and arc length (L) based on wheel distances
-            double R = (xAxisEncoderDelta + yAxisEncoderDelta) / (2 * deltaYaw); // Radius of curvature
-            double arcLength = R * deltaYaw; // Total arc length of the movement
-
-            // Compute global X and Y displacements from arc movement
-            deltaXGlobal = arcLength * Math.cos(averageYaw);
-            deltaYGlobal = arcLength * Math.sin(averageYaw);
-
-            // Add strafe component (bottom wheel) to the global displacement
-            deltaXGlobal += yAxisEncoderDelta * Math.cos(averageYaw + Math.PI / 2);
-            deltaYGlobal += yAxisEncoderDelta * Math.sin(averageYaw + Math.PI / 2);
-        } else {
-            // No turning; approximate as straight-line movement
-            deltaXGlobal = xAxisEncoderDelta * Math.cos(radYaw) + yAxisEncoderDelta * Math.cos(radYaw + Math.PI / 2);
-            deltaYGlobal = xAxisEncoderDelta * Math.sin(radYaw) + yAxisEncoderDelta * Math.sin(radYaw + Math.PI / 2);
-        }
-
-        // Update the global position
-        this.x += deltaXGlobal;
-        this.y += deltaYGlobal;
-    }
-
-    private void initIMU() {
-
-        // Retrieve and initialize the IMU.
-        IMU.Parameters parameters;
-
-        parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        // https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
-                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        );
-
-        imu.initialize((parameters));
-    }
+//    /**
+//     * Initialize the IMU.
+//     */
+//    private void initIMU() {
+//
+//        // Retrieve and initialize the IMU.
+//        IMU.Parameters parameters;
+//
+//        parameters = new IMU.Parameters(
+//                new RevHubOrientationOnRobot(
+//                        // https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
+//                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+//                        RevHubOrientationOnRobot.UsbFacingDirection.UP
+//                )
+//        );
+//
+//        imu.initialize((parameters));
+//    }
     /**
      * Initialize the AprilTag processor.
      */
-    private void initAprilTag() {
+    public void initAprilTag() {
 
         // Create the AprilTag processor.
         aprilTag = new AprilTagProcessor.Builder()
@@ -347,7 +249,7 @@ public class PositionFinder {
     /**
      * This uses data we have from any april tags we have detected, and tries to calculate a position from it. It only calculates our yaw on first launch, because then our IMU can take over, which is waaaaay more accurate.
      */
-    private boolean processAprilTagData() {
+    public boolean ProcessAprilTagData() {
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
         List<Double> aprilsX = new ArrayList<>();
         List<Double> aprilsY = new ArrayList<>();
@@ -357,9 +259,9 @@ public class PositionFinder {
             // Get all estimated positions for our location
             aprilsX.add(detection.robotPose.getPosition().x);
             aprilsY.add(detection.robotPose.getPosition().y);
-            if (firstObtainedAprilYaw == 123456789) {
+//            if (firstObtainedAprilYaw == 123456789) {
                 aprilsYaw.add(detection.robotPose.getOrientation().getYaw());
-            }
+//            }
         }   // end for() loop
 
         // Calculate average location (so long as we actually have a position)
@@ -372,13 +274,13 @@ public class PositionFinder {
                     .stream()
                     .mapToDouble(a -> a)
                     .average();
-            if (firstObtainedAprilYaw == 123456789) {
+//            if (firstObtainedAprilYaw == 123456789) {
                 OptionalDouble averageYaw = aprilsYaw
                         .stream()
                         .mapToDouble(a -> a)
                         .average();
                 firstObtainedAprilYaw = averageYaw.isPresent() ? averageYaw.getAsDouble() : 0;
-            }
+//            }
 
             // The "if it's not present" check is just to get java to shut up.
             x = averageX.isPresent() ? averageX.getAsDouble() : 0;

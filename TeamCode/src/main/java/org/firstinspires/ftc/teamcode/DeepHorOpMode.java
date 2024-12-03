@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -39,6 +40,8 @@ public abstract class DeepHorOpMode extends OpMode {
      * The third servo on the arm. Controls the wheel to scoop the game pieces.
      */
     public CRServo arm_Scoop = null;
+
+//    private
 //
 //    public double armSmallHorizontal = 0.52;
 //    public double armVertical = 0.57;

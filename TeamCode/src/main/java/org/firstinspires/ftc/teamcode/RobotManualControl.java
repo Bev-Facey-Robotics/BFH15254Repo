@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@TeleOp(name = "Robot Manual Control", group = "Competition Ready")
 public class RobotManualControl extends DeepHorOpMode {
     //region Hardware
 

@@ -29,19 +29,17 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
-
 import android.annotation.SuppressLint;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-
-import java.util.Base64;
 
 /*
  * This OpMode illustrates the basics of AprilTag based localization.
@@ -62,20 +60,12 @@ import java.util.Base64;
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  */
-@TeleOp(name = "Actual Automode debug", group = "Concept")
-public class AprilTagAutoDemo1 extends DeepHorOpMode {
-
-    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the strafing speed to this max value (adjust for your robot)
-    final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
-
-    // Current Drive setting
-    private double drivePwr = 0;
-    private double strafePwr = 0;
-    private double yawPwr = 0;
+@TeleOp(name = "AutoMode", group = "Concept")
+public class AutoMode1 extends DeepHorOpMode {
 
     // Data relevent to getting our current pos
-    private PositionFinder positionFinder = new PositionFinder();
+    private PositionFinder positionFinder = new PositionFinder(); // This may be depricated later
+    private MecanumDrive mecanumDrive = null;
 
     // The threshold for
     private static final double POSITION_THRESHOLD = 0.1;
@@ -91,50 +81,54 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
         }
         // Let's get our position finder ready
         positionFinder.InitializePositionFinder(
-                hardwareMap.get(WebcamName.class, "Webcam 1"),
-                hardwareMap.get(IMU.class, "imu"),
-                hardwareMap.get(DcMotor.class, "rightFront"), // X axis encoder, hooked up to motor 1
-                hardwareMap.get(DcMotor.class, "leftFront")   // Y axis encoder, hooked up to motor 0
+                hardwareMap.get(WebcamName.class, "AprilTagCam"),
+                hardwareMap.get(IMU.class, "imu")
         );
-        // Multithreading at it's finest
-        Thread positionFinderThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                positionFinder.FindBotPosition();
-            }
-        });
-        positionFinderThread.start();
+
+        boolean hasFoundAprilTag = false;
+
+        while (!hasFoundAprilTag) {
+            hasFoundAprilTag = positionFinder.ProcessAprilTagData();
+            telemetry.addLine("Looking for April Tag");
+            telemetry.update();
+        }
+
+        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+        mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
 
-        // Wait for the DS start button to be touched.
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch START to start OpMode");
+        telemetry.addLine("Ready to rumble!");
         telemetry.update();
+//        // Wait for the DS start button to be touched.
+//        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
+//        telemetry.addData(">", "Touch START to start OpMode");
+//        telemetry.update();
     }
 
     @SuppressLint("DefaultLocale")
     @Override
     public void loop() {
-        telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (cm)",
-                positionFinder.x,
-                positionFinder.y,
-                positionFinder.yaw));
-        telemetry.addLine("Yaw offset: " + positionFinder.imuPosOffset);
-        telemetry.addLine("IMU Yaw: " + positionFinder.imu.getRobotYawPitchRollAngles().getYaw());
+
+
+        telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
+                mecanumDrive.pose.position.x,
+                mecanumDrive.pose.position.y,
+                mecanumDrive.pose.heading.toDouble()
+        ));
         telemetry.update(); // Push telemetry to the Driver Station.
 
-        if (gamepad1.right_bumper) { // TEMPORARY
-            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
-            double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
-            double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
-            double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
-            moveRobot(drive,strafe,turn);
-        }
-        if (gamepad1.left_bumper) {
-            moveRobot(0,0,-positionFinder.yaw/30);
-        }
-
-        UpdateMoveRobot(1);
+//        if (gamepad1.right_bumper) { // TEMPORARY
+//            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
+//            double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
+//            double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
+//            double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
+//            MoveRobot(drive,strafe,turn);
+//        }
+//        if (gamepad1.left_bumper) {
+//            MoveRobot(0,0,-positionFinder.yaw/30);
+//        }
+//
+//        UpdateMoveRobot(1);
 //
 //            // Save CPU resources; can resume streaming when needed.
 //            if (gamepad1.dpad_down) {
@@ -142,6 +136,17 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
 //            } else if (gamepad1.dpad_up) {
 //                visionPortal.resumeStreaming();
 //            }
+
+        Actions.runBlocking(
+            mecanumDrive.actionBuilder(new Pose2d(0, 0, 0))
+                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
+                        .splineTo(new Vector2d(0, 60), Math.PI)
+                        .build());
+
+//        Actions.runBlocking(
+//                mecanumDrive.actionBuilder(mecanumDrive.pose)
+//                        .splineTo(new Vector2d(0, 0), Math.PI)
+//                        .build());
     }
 
     @Override
@@ -152,7 +157,7 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
     }
 
     private void moveBotTowardsCenter() {
-        moveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);
+        MoveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);
     }
 
     private void moveBotToLocation(double targetX, double targetY, double targetYaw) {
@@ -169,7 +174,7 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
             // Adjust yaw based on the angle difference
             double yaw = angleDifference / Math.PI;  // Normalize the yaw to the range [-1, 1]
 
-            moveRobot(drive, strafe, yaw);
+            MoveRobot(drive, strafe, yaw);
 
 /*
             // Simulate robot movement, update the current position
@@ -186,7 +191,7 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
         // Step 3: Adjust final yaw to match the target yaw
         double finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
         while (Math.abs(finalYawDifference) > YAW_THRESHOLD) {
-            moveRobot(0, 0, finalYawDifference / Math.PI);  // Only rotate
+            MoveRobot(0, 0, finalYawDifference / Math.PI);  // Only rotate
 
 //            currentYaw += (finalYawDifference / Math.PI) * 0.1;  // Simulate yaw rotation
             finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
@@ -228,11 +233,6 @@ public class AprilTagAutoDemo1 extends DeepHorOpMode {
 //        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
 //
 //    }   // end method telemetryAprilTag()
-    public void moveRobot(double x, double y, double yaw) {
-        drivePwr = x;
-        strafePwr = y;
-        yawPwr = yaw;
-    }
 
     // MATH!!!!!
 
