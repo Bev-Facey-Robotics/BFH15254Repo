@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
-public abstract class DeepHorOpMode extends OpMode {
+public abstract class DeepHorOpMode extends LinearOpMode {
     //region Hardware
     //region Drive Motors
     public DcMotor motorFL = null; // Front Left

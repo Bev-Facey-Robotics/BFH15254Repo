@@ -30,6 +30,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
+import android.icu.util.Calendar;
+
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -73,7 +75,7 @@ public class AutoMode1 extends DeepHorOpMode {
 
     @SuppressLint("DefaultLocale")
     @Override
-    public void init() {
+    public void runOpMode() {
         ConfigureHardware();
         if (!CrossOpModeData.isInitialized) {
             BotInitialization.InitializeRobot(this);
@@ -103,20 +105,27 @@ public class AutoMode1 extends DeepHorOpMode {
 //        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
 //        telemetry.addData(">", "Touch START to start OpMode");
 //        telemetry.update();
-    }
-
-    @SuppressLint("DefaultLocale")
-    @Override
-    public void loop() {
 
 
-        telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)",
-                mecanumDrive.pose.position.x,
-                mecanumDrive.pose.position.y,
-                mecanumDrive.pose.heading.toDouble()
-        ));
-        telemetry.update(); // Push telemetry to the Driver Station.
 
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+
+
+
+
+            telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch). %s",
+                    mecanumDrive.pose.position.x,
+                    mecanumDrive.pose.position.y,
+                    mecanumDrive.pose.heading.toDouble(),
+                    Calendar.getInstance().getTime()
+            ));
+            telemetry.update();
+
+        }
 //        if (gamepad1.right_bumper) { // TEMPORARY
 //            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
 //            double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
@@ -137,24 +146,21 @@ public class AutoMode1 extends DeepHorOpMode {
 //                visionPortal.resumeStreaming();
 //            }
 
-        Actions.runBlocking(
-            mecanumDrive.actionBuilder(new Pose2d(0, 0, 0))
-                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
-                        .splineTo(new Vector2d(0, 60), Math.PI)
-                        .build());
+//        Actions.runBlocking(
+//                mecanumDrive.actionBuilder(new Pose2d(0, 0, 0))
+//                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
+//                        .splineTo(new Vector2d(0, 60), Math.PI)
+//                        .build());
 
 //        Actions.runBlocking(
 //                mecanumDrive.actionBuilder(mecanumDrive.pose)
 //                        .splineTo(new Vector2d(0, 0), Math.PI)
 //                        .build());
-    }
-
-    @Override
-    public void stop() {
-        // Stop the opmode gracefully
         positionFinder.isOpmodeRunning = false;
         positionFinder.OnOpmodeStopped();
     }
+
+
 
     private void moveBotTowardsCenter() {
         MoveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);

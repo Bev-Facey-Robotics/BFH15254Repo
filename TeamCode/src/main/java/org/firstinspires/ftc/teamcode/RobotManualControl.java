@@ -20,9 +20,17 @@ public class RobotManualControl extends DeepHorOpMode {
     // Bot Config
     double deadzone = 0.1;
 
-//region Initialization
     @Override
-    public void init() {
+    public void runOpMode() {
+        initOpMode();
+        waitForStart();
+        while (opModeIsActive()) {
+            loopOpMode();
+        }
+    }
+
+//region Initialization
+    public void initOpMode() {
         ConfigureHardware();
         if (!CrossOpModeData.isInitialized) {
             BotInitialization.InitializeRobot(this);
@@ -37,8 +45,7 @@ public class RobotManualControl extends DeepHorOpMode {
     //endregion
 
     //region Primary Loop
-    @Override
-    public void loop() {
+    public void loopOpMode() {
         //region Drive
         double speed = 1.0;
         if (gamepad1.left_trigger > 0.15) {

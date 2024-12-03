@@ -12,7 +12,7 @@ import java.io.IOException;
 @Autonomous(name = "Initialize Manual", group = "Competition Ready")
 public class AutoInitForManual extends DeepHorOpMode {
     @Override
-    public void init() {
+    public void runOpMode() {
         ConfigureHardware();
         BotInitialization.InitializeRobot(this);
         telemetry.addLine("Ready to Start Manual");
@@ -21,9 +21,4 @@ public class AutoInitForManual extends DeepHorOpMode {
 
         telemetry.update();
     }
-    @Override
-    public void loop() {
-
-    }
-
 }
