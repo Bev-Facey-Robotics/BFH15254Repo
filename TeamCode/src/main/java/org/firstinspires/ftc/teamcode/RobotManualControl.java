@@ -183,7 +183,7 @@ public class RobotManualControl extends DeepHorOpMode {
 //
 //        motorSwing.setPower(1);
 //
-//        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
+        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
 //        telemetry.addLine("Swing Target" + swingTarget);
 //        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
 

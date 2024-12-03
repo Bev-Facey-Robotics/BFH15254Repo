@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
 public abstract class DeepHorOpMode extends LinearOpMode {
@@ -49,6 +50,10 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 //    public int armTarget = 0;
     //endregion
 
+    public TouchSensor slideLimit1 = null;
+    public TouchSensor slideLimit2 = null;
+
+
     public IMU imu = null;
 
     //endregion
@@ -79,6 +84,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
         //region Slide
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
+        this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
+        this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
 
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //
@@ -130,7 +137,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     public void MoveSlidePwr(double power) {
         // Adjust slidePower based on position limits
-        if (motorSlide.getCurrentPosition() <= -9240 && power < 0) { // Limit is -8950
+        if (motorSlide.getCurrentPosition() <= -10800 && power < 0) { // Limit is -8950
             // Prevent the motor from moving further negative
             power = 0;
         } else
