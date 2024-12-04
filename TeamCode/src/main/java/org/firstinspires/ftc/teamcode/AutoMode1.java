@@ -33,7 +33,10 @@ import android.annotation.SuppressLint;
 import android.icu.util.Calendar;
 
 
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -107,9 +110,30 @@ public class AutoMode1 extends DeepHorOpMode {
 //        telemetry.update();
 
 
+        TrajectoryActionBuilder Center = mecanumDrive.actionBuilder(initialPose)
+                //.splineTo(new Vector2d(0, 0), 0);
+                .lineToX(0)
+                .lineToY(0);
+
+
+        Action trajectoryActionChosen = Center.build();
 
 
         waitForStart();
+        new Thread(() -> {
+            while (opModeIsActive()) {
+                mecanumDrive.updatePoseEstimate();
+                telemetry.addData("x", mecanumDrive.pose.position.x);
+                telemetry.addData("y", mecanumDrive.pose.position.y);
+                telemetry.addData("Heading", mecanumDrive.pose.heading.toDouble());
+                telemetry.update();
+                try {
+                    Thread.sleep(100); // Update every 100ms
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }).start();
 
         while (opModeIsActive()) {
 
@@ -121,136 +145,116 @@ public class AutoMode1 extends DeepHorOpMode {
 //                    Calendar.getInstance().getTime()
 //            ));
 
-            telemetry.addData("X-Position", mecanumDrive.pose.position.x);
-            telemetry.update();
+            Actions.runBlocking(
+                    new SequentialAction(
+                            trajectoryActionChosen
 
+                    )
+            );
         }
-//        if (gamepad1.right_bumper) { // TEMPORARY
-//            // drive using manual POV Joystick mode.  Slow things down to make the robot more controlable.
-//            double drive  = -gamepad1.left_stick_y  / 2.0;  // Reduce drive rate to 50%.
-//            double strafe = -gamepad1.left_stick_x  / 2.0;  // Reduce strafe rate to 50%.
-//            double turn   = -gamepad1.right_stick_x / 3.0;  // Reduce turn rate to 33%.
-//            MoveRobot(drive,strafe,turn);
+
+
+
+
+
+
+
+
+
+        if (isStopRequested()) return;
+    }
+
+
+//    private void moveBotTowardsCenter() {
+//        MoveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);
+//    }
+//
+//    private void moveBotToLocation(double targetX, double targetY, double targetYaw) {
+//        // Step 1: Align the robot to face the target (Yaw)
+//        double targetAngle = calculateAngle(positionFinder.x, positionFinder.y, targetX, targetY);
+//        double angleDifference = normalizeAngle(targetAngle - positionFinder.yaw);
+//
+//        // Step 2: Move towards the target x, y
+//        double distance = Math.sqrt(Math.pow(targetX - positionFinder.x, 2) + Math.pow(targetY - positionFinder.y, 2));
+//        while (distance > POSITION_THRESHOLD) {
+//            double drive = Math.cos(angleDifference);  // Forward/backward movement
+//            double strafe = Math.sin(angleDifference);  // Left/right strafe movement
+//
+//            // Adjust yaw based on the angle difference
+//            double yaw = angleDifference / Math.PI;  // Normalize the yaw to the range [-1, 1]
+//
+//            MoveRobot(drive, strafe, yaw);
+//
+///*
+//            // Simulate robot movement, update the current position
+//            currentX += Math.cos(currentYaw) * 0.1 * drive;  // Simulating movement forward/backward
+//            currentY += Math.sin(currentYaw) * 0.1 * drive;  // Simulating movement forward/backward
+//            currentYaw += yaw * 0.1;  // Simulating yaw change
+//*/
+//
+//            // Recalculate distance and angle after movement
+//            distance = Math.sqrt(Math.pow(targetX - positionFinder.x, 2) + Math.pow(targetY - positionFinder.y, 2));
+//            angleDifference = normalizeAngle(targetAngle - positionFinder.yaw);
 //        }
-//        if (gamepad1.left_bumper) {
-//            MoveRobot(0,0,-positionFinder.yaw/30);
+//
+//        // Step 3: Adjust final yaw to match the target yaw
+//        double finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
+//        while (Math.abs(finalYawDifference) > YAW_THRESHOLD) {
+//            MoveRobot(0, 0, finalYawDifference / Math.PI);  // Only rotate
+//
+////            currentYaw += (finalYawDifference / Math.PI) * 0.1;  // Simulate yaw rotation
+//            finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
 //        }
+//    }
 //
-//        UpdateMoveRobot(1);
 //
-//            // Save CPU resources; can resume streaming when needed.
-//            if (gamepad1.dpad_down) {
-//                visionPortal.stopStreaming();
-//            } else if (gamepad1.dpad_up) {
-//                visionPortal.resumeStreaming();
-//            }
-
-//        Actions.runBlocking(
-//                mecanumDrive.actionBuilder(new Pose2d(0, 0, 0))
-//                        .splineTo(new Vector2d(30, 30), Math.PI / 2)
-//                        .splineTo(new Vector2d(0, 60), Math.PI)
-//                        .build());
-
-//        Actions.runBlocking(
-//                mecanumDrive.actionBuilder(mecanumDrive.pose)
-//                        .splineTo(new Vector2d(0, 0), Math.PI)
-//                        .build());
-        positionFinder.isOpmodeRunning = false;
-        positionFinder.OnOpmodeStopped();
-    }
-
-
-
-    private void moveBotTowardsCenter() {
-        MoveRobot(-positionFinder.x/3, -positionFinder.y/3, 0);
-    }
-
-    private void moveBotToLocation(double targetX, double targetY, double targetYaw) {
-        // Step 1: Align the robot to face the target (Yaw)
-        double targetAngle = calculateAngle(positionFinder.x, positionFinder.y, targetX, targetY);
-        double angleDifference = normalizeAngle(targetAngle - positionFinder.yaw);
-
-        // Step 2: Move towards the target x, y
-        double distance = Math.sqrt(Math.pow(targetX - positionFinder.x, 2) + Math.pow(targetY - positionFinder.y, 2));
-        while (distance > POSITION_THRESHOLD) {
-            double drive = Math.cos(angleDifference);  // Forward/backward movement
-            double strafe = Math.sin(angleDifference);  // Left/right strafe movement
-
-            // Adjust yaw based on the angle difference
-            double yaw = angleDifference / Math.PI;  // Normalize the yaw to the range [-1, 1]
-
-            MoveRobot(drive, strafe, yaw);
-
-/*
-            // Simulate robot movement, update the current position
-            currentX += Math.cos(currentYaw) * 0.1 * drive;  // Simulating movement forward/backward
-            currentY += Math.sin(currentYaw) * 0.1 * drive;  // Simulating movement forward/backward
-            currentYaw += yaw * 0.1;  // Simulating yaw change
-*/
-
-            // Recalculate distance and angle after movement
-            distance = Math.sqrt(Math.pow(targetX - positionFinder.x, 2) + Math.pow(targetY - positionFinder.y, 2));
-            angleDifference = normalizeAngle(targetAngle - positionFinder.yaw);
-        }
-
-        // Step 3: Adjust final yaw to match the target yaw
-        double finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
-        while (Math.abs(finalYawDifference) > YAW_THRESHOLD) {
-            MoveRobot(0, 0, finalYawDifference / Math.PI);  // Only rotate
-
-//            currentYaw += (finalYawDifference / Math.PI) * 0.1;  // Simulate yaw rotation
-            finalYawDifference = normalizeAngle(targetYaw - positionFinder.yaw);
-        }
-    }
-
-
-
-
-
-//    /**
-//     * Add telemetry about AprilTag detections.
-//     */
-//    private void telemetryAprilTag() {
 //
-//        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-//        telemetry.addData("# AprilTags Detected", currentDetections.size());
 //
-//        // Step through the list of detections and display info for each one.
-//        for (AprilTagDetection detection : currentDetections) {
-//            if (detection.metadata != null) {
-//                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
-//                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (cm)",
-//                        detection.robotPose.getPosition().x,
-//                        detection.robotPose.getPosition().y,
-//                        detection.robotPose.getPosition().z));
-//                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
-//                        detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
-//                        detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
-//                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
-//            } else {
-//                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
-//                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
-//            }
-//        }   // end for() loop
 //
-//        // Add "key" information to telemetry
-//        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
-//        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
+////    /**
+////     * Add telemetry about AprilTag detections.
+////     */
+////    private void telemetryAprilTag() {
+////
+////        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+////        telemetry.addData("# AprilTags Detected", currentDetections.size());
+////
+////        // Step through the list of detections and display info for each one.
+////        for (AprilTagDetection detection : currentDetections) {
+////            if (detection.metadata != null) {
+////                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+////                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (cm)",
+////                        detection.robotPose.getPosition().x,
+////                        detection.robotPose.getPosition().y,
+////                        detection.robotPose.getPosition().z));
+////                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)",
+////                        detection.robotPose.getOrientation().getPitch(AngleUnit.DEGREES),
+////                        detection.robotPose.getOrientation().getRoll(AngleUnit.DEGREES),
+////                        detection.robotPose.getOrientation().getYaw(AngleUnit.DEGREES)));
+////            } else {
+////                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+////                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+////            }
+////        }   // end for() loop
+////
+////        // Add "key" information to telemetry
+////        telemetry.addLine("\nkey:\nXYZ = X (Right), Y (Forward), Z (Up) dist.");
+////        telemetry.addLine("PRY = Pitch, Roll & Yaw (XYZ Rotation)");
+////
+////    }   // end method telemetryAprilTag()
 //
-//    }   // end method telemetryAprilTag()
-
-    // MATH!!!!!
-
-    // Method to compute the angle between current and target positions
-    private double calculateAngle(double currentX, double currentY, double targetX, double targetY) {
-        return Math.atan2(targetY - currentY, targetX - currentX);
-    }
-
-    // Method to normalize angle between -PI and PI
-    private double normalizeAngle(double angle) {
-        while (angle > Math.PI) angle -= 2 * Math.PI;
-        while (angle < -Math.PI) angle += 2 * Math.PI;
-        return angle;
-    }
+//    // MATH!!!!!
+//
+//    // Method to compute the angle between current and target positions
+//    private double calculateAngle(double currentX, double currentY, double targetX, double targetY) {
+//        return Math.atan2(targetY - currentY, targetX - currentX);
+//    }
+//
+//    // Method to normalize angle between -PI and PI
+//    private double normalizeAngle(double angle) {
+//        while (angle > Math.PI) angle -= 2 * Math.PI;
+//        while (angle < -Math.PI) angle += 2 * Math.PI;
+//        return angle;
+//    }
 
 }   // end class
