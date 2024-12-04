@@ -114,15 +114,14 @@ public class AutoMode1 extends DeepHorOpMode {
         while (opModeIsActive()) {
 
 
+//            telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch). %s",
+//                    mecanumDrive.pose.position.x,
+//                    mecanumDrive.pose.position.y,
+//                    mecanumDrive.pose.heading.toDouble(),
+//                    Calendar.getInstance().getTime()
+//            ));
 
-
-
-            telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch). %s",
-                    mecanumDrive.pose.position.x,
-                    mecanumDrive.pose.position.y,
-                    mecanumDrive.pose.heading.toDouble(),
-                    Calendar.getInstance().getTime()
-            ));
+            telemetry.addData("X-Position", mecanumDrive.pose.position.x);
             telemetry.update();
 
         }
