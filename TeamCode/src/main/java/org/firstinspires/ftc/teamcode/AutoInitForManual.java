@@ -13,7 +13,7 @@ import java.io.IOException;
 public class AutoInitForManual extends DeepHorOpMode {
     @Override
     public void runOpMode() {
-        ConfigureHardware();
+        ConfigureHardware(true);
         BotInitialization.InitializeRobot(this);
         telemetry.addLine("Ready to Start Manual");
 

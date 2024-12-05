@@ -79,7 +79,7 @@ public class AutoMode1 extends DeepHorOpMode {
     @SuppressLint("DefaultLocale")
     @Override
     public void runOpMode() {
-        ConfigureHardware();
+        ConfigureHardware(false);
         if (!CrossOpModeData.isInitialized) {
             BotInitialization.InitializeRobot(this);
             CrossOpModeData.isInitialized = true;
@@ -92,18 +92,35 @@ public class AutoMode1 extends DeepHorOpMode {
 
         boolean hasFoundAprilTag = false;
 
-        while (!hasFoundAprilTag) {
+        while (!hasFoundAprilTag && !isStopRequested()) {
             hasFoundAprilTag = positionFinder.ProcessAprilTagData();
             telemetry.addLine("Looking for April Tag");
             telemetry.update();
         }
 
+        if (isStopRequested()) {
+            return;
+        }
+
+        while (!isStarted() && !isStopRequested()) {
+//            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
+            positionFinder.ProcessAprilTagData();
+            telemetry.addData("Position", "X: %f, Y: %f", positionFinder.x, positionFinder.y);
+            telemetry.addData("Yaw", "Yaw: %f", positionFinder.firstObtainedAprilYaw);
+            telemetry.update();
+        }
+        telemetry.addLine("Ready to rumble!");
+        telemetry.update();
+
         Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+        //Pose2d initialPose = new Pose2d(0,0,0);
+
+        waitForStart();
+
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
 
-        telemetry.addLine("Ready to rumble!");
-        telemetry.update();
+
 //        // Wait for the DS start button to be touched.
 //        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
 //        telemetry.addData(">", "Touch START to start OpMode");
@@ -111,15 +128,21 @@ public class AutoMode1 extends DeepHorOpMode {
 
 
         TrajectoryActionBuilder Center = mecanumDrive.actionBuilder(initialPose)
-                //.splineTo(new Vector2d(0, 0), 0);
-                .lineToX(0)
-                .lineToY(0);
+//                .lineToX(0)
+//                .waitSeconds(2)
+//                .lineToYSplineHeading(0, Math.toRadians(0));
+
+
+//                .lineToY(0);
+//                .splineTo(new Vector2d(30, 30), Math.PI / 2)
+//                .waitSeconds(2)
+                .splineTo(new Vector2d(0, 0), Math.toRadians(0));
 
 
         Action trajectoryActionChosen = Center.build();
 
 
-        waitForStart();
+
         new Thread(() -> {
             while (opModeIsActive()) {
                 mecanumDrive.updatePoseEstimate();
@@ -135,9 +158,6 @@ public class AutoMode1 extends DeepHorOpMode {
             }
         }).start();
 
-        while (opModeIsActive()) {
-
-
 //            telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch). %s",
 //                    mecanumDrive.pose.position.x,
 //                    mecanumDrive.pose.position.y,
@@ -151,10 +171,12 @@ public class AutoMode1 extends DeepHorOpMode {
 
                     )
             );
-        }
 
 
 
+            while (opModeIsActive()) {
+
+            }
 
 
 

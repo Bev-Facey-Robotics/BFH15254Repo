@@ -67,19 +67,20 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     //endregion
 
-    public void ConfigureHardware() {
+    public void ConfigureHardware(boolean initDriveMotors) {
         //region Drive Motors
 
-        this.motorFL = this.hardwareMap.get(DcMotor.class, "leftFront");
-        this.motorFR = this.hardwareMap.get(DcMotor.class, "rightFront");
-        this.motorBL = this.hardwareMap.get(DcMotor.class, "leftBack");
-        this.motorBR = this.hardwareMap.get(DcMotor.class, "rightBack");
+        if (initDriveMotors) {
+            this.motorFL = this.hardwareMap.get(DcMotor.class, "leftFront");
+            this.motorFR = this.hardwareMap.get(DcMotor.class, "rightFront");
+            this.motorBL = this.hardwareMap.get(DcMotor.class, "leftBack");
+            this.motorBR = this.hardwareMap.get(DcMotor.class, "rightBack");
 
-        this.motorFL.setDirection(DcMotor.Direction.REVERSE);
-        this.motorBL.setDirection(DcMotor.Direction.REVERSE);
-        this.motorFR.setDirection(DcMotor.Direction.FORWARD);
-        this.motorBR.setDirection(DcMotor.Direction.FORWARD);
-
+            this.motorFL.setDirection(DcMotor.Direction.REVERSE);
+            this.motorBL.setDirection(DcMotor.Direction.REVERSE);
+            this.motorFR.setDirection(DcMotor.Direction.FORWARD);
+            this.motorBR.setDirection(DcMotor.Direction.FORWARD);
+        }
         //endregion
 
         //region Slide

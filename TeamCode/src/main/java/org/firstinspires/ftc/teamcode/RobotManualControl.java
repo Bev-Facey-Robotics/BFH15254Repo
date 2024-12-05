@@ -31,7 +31,7 @@ public class RobotManualControl extends DeepHorOpMode {
 
 //region Initialization
     public void initOpMode() {
-        ConfigureHardware();
+        ConfigureHardware(true);
         if (!CrossOpModeData.isInitialized) {
             BotInitialization.InitializeRobot(this);
             CrossOpModeData.isInitialized = true;
