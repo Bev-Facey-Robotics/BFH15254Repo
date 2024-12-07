@@ -39,6 +39,7 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Trajectory;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TrajectoryBuilder;
+import com.acmerobotics.roadrunner.TrajectoryBuilderParams;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -99,7 +100,22 @@ public class AutonomousTestingLand extends DeepHorOpMode {
                 hardwareMap.get(IMU.class, "imu")
         );
 
+//        new Thread(() -> {
+//                positionFinder.FindBotPosition();
+//            try {
+//                Thread.sleep(100); // Update every 100ms
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//        }).start();
+
+
         boolean hasFoundAprilTag = false;
+
+        Pose2d centerPose = new Pose2d(0.0, 0.0, 0.0);
+
+        //Find Robot Contstraints
+        //TrajectoryBuilderParams contstraints = new TrajectoryBuilderParams();
 
         while (!hasFoundAprilTag) {
             hasFoundAprilTag = positionFinder.ProcessAprilTagData();
@@ -107,14 +123,18 @@ public class AutonomousTestingLand extends DeepHorOpMode {
             telemetry.update();
         }
 
-        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+        //Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+
+        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(0));
+
+        //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(0));
         MecanumDrive drivetrain = new MecanumDrive(hardwareMap, initialPose);
 
         if (hasFoundAprilTag) {
             telemetry.addLine("Ready to rumble!");
             telemetry.addData("aprilTagX", positionFinder.x);
             telemetry.addData("AprilTagY", positionFinder.y);
-            telemetry.addData("AprilTagHeading", positionFinder.yaw);
+            telemetry.addData("AprilTagHeading", positionFinder.firstObtainedAprilYaw);
             telemetry.update();
 
         } else {
@@ -122,28 +142,12 @@ public class AutonomousTestingLand extends DeepHorOpMode {
             }
 
 
-
-
-
-//        // Wait for the DS start button to be touched.
-//        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-//        telemetry.addData(">", "Touch START to start OpMode");
-//        telemetry.update();
-
-        waitForStart();
-
-
-        //Stop the robot when we want it to stop.
-        if (isStopRequested()) return;
-
-
-        //Multithread Telemetry
         new Thread(() -> {
             while (opModeIsActive()) {
                 mecanumDrive.updatePoseEstimate();
                 telemetry.addData("x", mecanumDrive.pose.position.x);
                 telemetry.addData("y", mecanumDrive.pose.position.y);
-                telemetry.addData("Heading", mecanumDrive.pose.heading.toDouble());
+                telemetry.addData("Heading", mecanumDrive.pose.heading);
                 telemetry.update();
                 try {
                     Thread.sleep(100); // Update every 100ms
@@ -154,17 +158,63 @@ public class AutonomousTestingLand extends DeepHorOpMode {
         }).start();
 
 
+//        // Wait for the DS start button to be touched.
+//        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
+//        telemetry.addData(">", "Touch START to start OpMode");
+//        telemetry.update();
+
+
+
+
+
         //TrajectoryShit
-        Actions.runBlocking(
-                drivetrain.actionBuilder(new Pose2d(0,0,0))
-                        .lineToX(32)
-                        .waitSeconds(5)
-                        .lineToY(32)
-                        .waitSeconds(5)
-                        .turnTo(Math.toRadians(120))
-                        .build());
+            TrajectoryActionBuilder TestTraj = drivetrain.actionBuilder(initialPose)
+                    .turnTo(180)
+                            .splineToLinearHeading(centerPose, Math.toRadians(0));
 
 
+        waitForStart();
+
+        sleep(5000);
+        Actions.runBlocking(TestTraj.build());
+
+
+
+        //Multithread Telemetry
+
+        while (opModeIsActive()) {
+
+            telemetry.update();
+
+
+
+
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+//        Actions.runBlocking(
+//                drivetrain.actionBuilder(new Pose2d(0,0,0))
+//                        .lineToX(32)
+//                        .waitSeconds(5)
+//                        .lineToY(32)
+//                        .waitSeconds(5)
+//                        .turnTo(Math.toRadians(120))
+//                        .build());
+
+        //TrajectoryBuilder testTraj = new TrajectoryBuilder(new Pose2d(0.0,0.0,0.0));
 
         telemetry.addLine("Roadrunner trajectory finished, Program executed succesfully");
         telemetry.update();

@@ -86,9 +86,9 @@ public class PositionFinder {
 
     // Some position stuff
     final private Position cameraPosition = new Position(DistanceUnit.INCH,
-            -7.5, -4, 11 + (double) 5 /12, 0);
+            -6.5, -6, -4.5, 0);
     final private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
-            0, 0, 0, 0);
+            0, -90, 0, 0);
 
     // Hardware
     private WebcamName hwWebcam;
