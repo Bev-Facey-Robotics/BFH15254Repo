@@ -112,10 +112,10 @@ public class AutonomousTestingLand extends DeepHorOpMode {
 
         boolean hasFoundAprilTag = false;
 
-        Pose2d centerPose = new Pose2d(0.0, 0.0, 0.0);
+        //Used for testing purposes
+        //Pose2d centerPose = new Pose2d(0.0, 0.0, 0.0);
 
-        //Find Robot Contstraints
-        //TrajectoryBuilderParams contstraints = new TrajectoryBuilderParams();
+
 
         while (!hasFoundAprilTag) {
             hasFoundAprilTag = positionFinder.ProcessAprilTagData();
@@ -128,6 +128,8 @@ public class AutonomousTestingLand extends DeepHorOpMode {
         Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(0));
 
         //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(0));
+
+
         MecanumDrive drivetrain = new MecanumDrive(hardwareMap, initialPose);
 
         if (hasFoundAprilTag) {
@@ -169,8 +171,14 @@ public class AutonomousTestingLand extends DeepHorOpMode {
 
         //TrajectoryShit
             TrajectoryActionBuilder TestTraj = drivetrain.actionBuilder(initialPose)
+                    .setReversed(false)
                     .turnTo(180)
-                            .splineToLinearHeading(centerPose, Math.toRadians(0));
+                    .splineTo(new Vector2d(0,0), Math.toRadians(240))
+                    .waitSeconds(5)
+                    .strafeTo(new Vector2d(5,5));
+
+
+
 
 
         waitForStart();
