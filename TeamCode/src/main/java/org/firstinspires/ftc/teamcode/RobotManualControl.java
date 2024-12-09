@@ -124,27 +124,37 @@ public class RobotManualControl extends DeepHorOpMode {
          double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
          MoveArmScoop(armScoop);
 
+         if (gamepad2.x) {
+             arm_Vertical.setTargetPosition(5);
+             arm_Vertical.setPower(0.1);
+         }
+         if (gamepad2.y) {
+             arm_Vertical.setTargetPosition(40);
+             arm_Vertical.setPower(0.1);
+         }
+
+
         // To be repurposed for new scoop on thingyamajing
-        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
-
-            // Adjust target based on position limits
-            if (verticalTarget < -130) {
-                // Prevent the motor from moving further negative
-                verticalTarget = -129;
-            } else
-            if (verticalTarget > 1) {
-                // Prevent the motor from moving further positive
-                verticalTarget = 0;
-            }
-//        } else {
-            // Normal mode
-            if (gamepad2.dpad_left) {
-                verticalTarget = -11;
-            } else if (gamepad2.dpad_right) {
-                verticalTarget = -130;
-
-            }
-            arm_Vertical.setTargetPosition((int) verticalTarget);
+//        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
+//
+//            // Adjust target based on position limits
+//            if (verticalTarget < -130) {
+//                // Prevent the motor from moving further negative
+//                verticalTarget = -129;
+//            } else
+//            if (verticalTarget > 1) {
+//                // Prevent the motor from moving further positive
+//                verticalTarget = 0;
+//            }
+////        } else {
+//            // Normal mode
+//            if (gamepad2.dpad_left) {
+//                verticalTarget = -11;
+//            } else if (gamepad2.dpad_right) {
+//                verticalTarget = -130;
+//
+//            }
+//            arm_Vertical.setTargetPosition((int) verticalTarget);
 
 //
 //        // Arm telemetry
@@ -191,6 +201,7 @@ public class RobotManualControl extends DeepHorOpMode {
         //endregion
         telemetry.addLine("X Odometer: " + motorFR.getCurrentPosition());
         telemetry.addLine("Y Odometer: " + motorFL.getCurrentPosition());
+        telemetry.addLine("Arm Vertical: " + arm_Vertical.getCurrentPosition());
 
         telemetry.update();
     }

@@ -30,7 +30,6 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.annotation.SuppressLint;
-import android.icu.util.Calendar;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -39,34 +38,11 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
-/*
- * This OpMode illustrates the basics of AprilTag based localization.
- *
- * For an introduction to AprilTags, see the FTC-DOCS link below:
- * https://ftc-docs.firstinspires.org/en/latest/apriltag/vision_portal/apriltag_intro/apriltag-intro.html
- *
- * In this sample, any visible tag ID will be detected and displayed, but only tags that are included in the default
- * "TagLibrary" will be used to compute the robot's location and orientation.  This default TagLibrary contains
- * the current Season's AprilTags and a small set of "test Tags" in the high number range.
- *
- * When an AprilTag in the TagLibrary is detected, the SDK provides location and orientation of the robot, relative to the field origin.
- * This information is provided in the "robotPose" member of the returned "detection".
- *
- * To learn about the Field Coordinate System that is defined for FTC (and used by this OpMode), see the FTC-DOCS link below:
- * https://ftc-docs.firstinspires.org/en/latest/game_specific_resources/field_coordinate_system/field-coordinate-system.html
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
- */
-@TeleOp(name = "AutoMode", group = "Concept")
-public class AutoMode1 extends DeepHorOpMode {
+public class PrimaryAutoModeClass extends DeepHorOpMode {
 
     // Data relevent to getting our current pos
     private PositionFinder positionFinder = new PositionFinder(); // This may be depricated later
@@ -102,17 +78,18 @@ public class AutoMode1 extends DeepHorOpMode {
             return;
         }
 
-        while (!isStarted() && !isStopRequested()) {
+        while (opModeInInit()) {
 //            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
             positionFinder.ProcessAprilTagData();
-            telemetry.addData("Position", "X: %f, Y: %f", positionFinder.x, positionFinder.y);
-            telemetry.addData("Yaw", "Yaw: %f", positionFinder.firstObtainedAprilYaw);
+            telemetry.addLine("Ready to rumble!");
+            telemetry.addData("April Tag Position", "X: %f, Y: %f", positionFinder.x, positionFinder.y);
+            telemetry.addData("April Tag Yaw", "Yaw: %f", positionFinder.firstObtainedAprilYaw);
             telemetry.update();
         }
-        telemetry.addLine("Ready to rumble!");
-        telemetry.update();
 
         Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+
+        // for debugging
         //Pose2d initialPose = new Pose2d(0,0,0);
 
         waitForStart();
@@ -136,7 +113,7 @@ public class AutoMode1 extends DeepHorOpMode {
 //                .lineToY(0);
 //                .splineTo(new Vector2d(30, 30), Math.PI / 2)
 //                .waitSeconds(2)
-                .splineTo(new Vector2d(0, 0), Math.toRadians(0));
+                .splineTo(new Vector2d(20, 20), Math.toRadians(0));
 
 
         Action trajectoryActionChosen = Center.build();
@@ -171,19 +148,6 @@ public class AutoMode1 extends DeepHorOpMode {
 
                     )
             );
-
-
-
-            while (opModeIsActive()) {
-
-            }
-
-
-
-
-
-
-        if (isStopRequested()) return;
     }
 
 
