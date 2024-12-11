@@ -105,15 +105,7 @@ public class PrimaryAutoModeClass extends DeepHorOpMode {
 
 
         TrajectoryActionBuilder Center = mecanumDrive.actionBuilder(initialPose)
-//                .lineToX(0)
-//                .waitSeconds(2)
-//                .lineToYSplineHeading(0, Math.toRadians(0));
-
-
-//                .lineToY(0);
-//                .splineTo(new Vector2d(30, 30), Math.PI / 2)
-//                .waitSeconds(2)
-                .splineTo(new Vector2d(20, 20), Math.toRadians(0));
+                .splineTo(new Vector2d(56.33, -65.37), Math.toRadians(4.14));
 
 
         Action trajectoryActionChosen = Center.build();
