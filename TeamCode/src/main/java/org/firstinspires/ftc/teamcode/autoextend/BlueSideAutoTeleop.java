@@ -6,6 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.BlueSideAuto;
 import org.firstinspires.ftc.teamcode.PrimaryAutoModeClass;
 
-@TeleOp(name="Primary Auto Mode", group = "Competition Ready")
+@TeleOp(name="BlueSideDebugging", group = "Competition Ready")
 public class BlueSideAutoTeleop extends BlueSideAuto {
 }
