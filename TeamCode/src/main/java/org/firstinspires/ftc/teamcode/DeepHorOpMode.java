@@ -21,7 +21,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     //region Slide
     public DcMotor motorSlide = null;
-//    public DcMotor motorSwing = null;
+    public DcMotor motorSwing = null;
 //    public Servo clawServo = null;
 //    //endregion
 //    //region Arm
@@ -42,17 +42,22 @@ public abstract class DeepHorOpMode extends LinearOpMode {
      */
     public CRServo arm_Scoop = null;
 
+    public Servo topBucketServo = null;
+
 //    private
 //
 //    public double armSmallHorizontal = 0.52;
 //    public double armVertical = 0.57;
 //
 //    public int armTarget = 0;
+    double bucketTargetPosition = 0;
+
     //endregion
 
     public TouchSensor slideLimit1 = null;
     public TouchSensor slideLimit2 = null;
 
+    public boolean isBucketBalencingEnabled = false;
 
     public IMU imu = null;
 
@@ -87,14 +92,10 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
         this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
         this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
-
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//        this.motorSwing = this.hardwareMap.get(DcMotor.class, "swing");
-//        this.motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//
-//        this.clawServo = this.hardwareMap.get(Servo.class, "claw");
+        this.motorSwing = this.hardwareMap.get(DcMotor.class, "swing");
+        this.motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.topBucketServo = this.hardwareMap.get(Servo.class, "SlideServo");
 
 
         //endregion
@@ -149,23 +150,33 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         motorSlide.setPower(power);
 
     }
-    public void InitializeIMU() {
 
-        // Retrieve and initialize the IMU.
-        // This sample expects the IMU to be in a REV Hub and named "imu".
-        imu = hardwareMap.get(IMU.class, "imu");
+    public void StartBucketSync() {
+        isBucketBalencingEnabled = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isBucketBalencingEnabled && opModeIsActive()) {
+                    UpdateBucketPosition();
+                    try {
+                        Thread.sleep(20);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }).start();
+    }
 
-        IMU.Parameters parameters;
+    public void UpdateBucketPosition() {
+        // When the swing is at -11, the bucket should be at 0.237
+        // When the swing is at -130, the bucket should be at 0.811
+        double swingPosition = motorSwing.getCurrentPosition();
+        double bucketPosition;
 
-        parameters = new IMU.Parameters(
-                new RevHubOrientationOnRobot(
-                        // https://ftc-docs.firstinspires.org/en/latest/programming_resources/imu/imu.html
-                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                        RevHubOrientationOnRobot.UsbFacingDirection.UP
-                )
-        );
+        bucketPosition = 0.237 + ((swingPosition + 11) * (0.811 - 0.237) / (-130 + 11));
 
-        imu.initialize((parameters));
+        topBucketServo.setPosition(bucketPosition + bucketTargetPosition);
     }
 
     public void UpdateMoveRobot(double speedLimit) {
