@@ -5,6 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.RedSideAuto;
 
-@TeleOp(name="Primary Auto Mode", group = "Competition Ready")
+@TeleOp(name="RedSideDeugging", group = "Competition Ready")
 public class RedSideAutoTeleop extends RedSideAuto {
 }

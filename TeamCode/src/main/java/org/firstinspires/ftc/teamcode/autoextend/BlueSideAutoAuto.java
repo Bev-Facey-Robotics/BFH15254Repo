@@ -5,6 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.BlueSideAuto;
 import org.firstinspires.ftc.teamcode.PrimaryAutoModeClass;
 
-@Autonomous(name="Primary Auto Mode", group = "Competition Ready")
+@Autonomous(name="BlueSideAuto", group = "Competition Ready")
 public class BlueSideAutoAuto extends BlueSideAuto {
 }
