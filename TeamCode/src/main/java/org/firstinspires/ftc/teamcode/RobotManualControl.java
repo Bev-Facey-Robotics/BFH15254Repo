@@ -126,11 +126,11 @@ public class RobotManualControl extends DeepHorOpMode {
 
         if (gamepad2.x) {
             arm_Vertical.setTargetPosition(5);
-            arm_Vertical.setPower(1);
+            arm_Vertical.setPower(0.1);
         }
         if (gamepad2.y) {
-            arm_Vertical.setTargetPosition(255);
-            arm_Vertical.setPower(1);
+            arm_Vertical.setTargetPosition(306);
+            arm_Vertical.setPower(0.1);
         }
 
 //        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
