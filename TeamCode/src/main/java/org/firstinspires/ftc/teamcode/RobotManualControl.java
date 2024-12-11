@@ -20,6 +20,7 @@ public class RobotManualControl extends DeepHorOpMode {
     // Bot Config
     double deadzone = 0.1;
 
+
     @Override
     public void runOpMode() {
         initOpMode();
@@ -54,7 +55,6 @@ public class RobotManualControl extends DeepHorOpMode {
         if (gamepad1.right_trigger > 0.15) {
             speed = 0.25;
         }
-
 
 
         // Apply deadzone to joystick inputs
@@ -121,42 +121,54 @@ public class RobotManualControl extends DeepHorOpMode {
 //        armVertical = Math.max(0.15, Math.min(0.75, armVertical));
 //        arm_VerticalServo.setPosition(armVertical);
 
-         double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
-         MoveArmScoop(armScoop);
+        double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
+        MoveArmScoop(armScoop);
 
-         if (gamepad2.x) {
-             arm_Vertical.setTargetPosition(5);
-             arm_Vertical.setPower(0.1);
-         }
-         if (gamepad2.y) {
-             arm_Vertical.setTargetPosition(40);
-             arm_Vertical.setPower(0.1);
-         }
+        if (gamepad2.x) {
+            arm_Vertical.setTargetPosition(5);
+            arm_Vertical.setPower(1);
+        }
+        if (gamepad2.y) {
+            arm_Vertical.setTargetPosition(255);
+            arm_Vertical.setPower(1);
+        }
 
-
-        // To be repurposed for new scoop on thingyamajing
 //        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
-//
-//            // Adjust target based on position limits
-//            if (verticalTarget < -130) {
-//                // Prevent the motor from moving further negative
-//                verticalTarget = -129;
-//            } else
-//            if (verticalTarget > 1) {
-//                // Prevent the motor from moving further positive
-//                verticalTarget = 0;
-//            }
-////        } else {
-//            // Normal mode
-//            if (gamepad2.dpad_left) {
-//                verticalTarget = -11;
-//            } else if (gamepad2.dpad_right) {
-//                verticalTarget = -130;
-//
-//            }
-//            arm_Vertical.setTargetPosition((int) verticalTarget);
 
-//
+//        // Adjust target based on position limits
+//        if (verticalTarget < -130) {
+//            // Prevent the motor from moving further negative
+//            verticalTarget = -129;
+//        } else if (verticalTarget > 1) {
+//            // Prevent the motor from moving further positive
+//            verticalTarget = 0;
+//        }
+////        } else {
+//        // Normal mode
+        if (gamepad2.dpad_left) {
+            verticalTarget = -11;
+        } else if (gamepad2.dpad_right) {
+            verticalTarget = -130;
+        }
+        motorSwing.setTargetPosition((int) verticalTarget);
+        motorSwing.setPower(0.5);
+
+        // Sync bucket position
+//        bucketTargetPosition += (gamepad2.right_stick_y * (isSlowModeActive ? 0.01 : 0.03));
+//        topBucketServo.setPosition(bucketTargetPosition);
+        bucketTargetPosition = -0.1;
+        if (gamepad2.right_bumper) {
+            bucketTargetPosition = 0.2;
+        }
+        if (gamepad2.left_bumper) {
+            bucketTargetPosition = 0;
+        }
+
+        if (!isBucketBalencingEnabled) {
+            StartBucketSync();
+        }
+
+
 //        // Arm telemetry
 //        telemetry.addLine("Arm data");
 //        telemetry.addLine("Big Horizontal " + arm_BigHorizontal.getCurrentPosition());
@@ -195,8 +207,10 @@ public class RobotManualControl extends DeepHorOpMode {
 //
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
 //        telemetry.addLine("Swing Target" + swingTarget);
-//        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
+        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
 
+        telemetry.addLine("Top Bucket Position (servo) " + topBucketServo.getPosition());
+        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
 
         //endregion
         telemetry.addLine("X Odometer: " + motorFR.getCurrentPosition());
