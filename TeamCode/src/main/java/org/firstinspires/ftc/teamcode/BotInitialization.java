@@ -10,23 +10,7 @@ public class BotInitialization {
         RunInitialization(robot);
     }
     private static void RunInitialization(DeepHorOpMode robot) {
-        if (robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed()) {
-            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.motorSlide.setPower(1);
-            while (!(robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed())) {
-                robot.telemetry.addLine("Calibrating Slide");
-                robot.telemetry.addData("Position", robot.motorSlide.getCurrentPosition());
-                robot.telemetry.addData("Limit 1", robot.slideLimit1.isPressed());
-                robot.telemetry.addData("Limit 2", robot.slideLimit2.isPressed());
-                robot.telemetry.update();
-            }
-            robot.motorSlide.setPower(0);
-            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+
         robot.arm_Vertical.setPower(-0.8);
         robot.motorSwing.setPower(0.2);
         try {
@@ -45,7 +29,23 @@ public class BotInitialization {
         robot.motorSwing.setTargetPosition(0);
         robot.motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-
+        if (robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed()) {
+            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        } else {
+            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            robot.motorSlide.setPower(1);
+            while (!(robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed())) {
+                robot.telemetry.addLine("Calibrating Slide");
+                robot.telemetry.addData("Position", robot.motorSlide.getCurrentPosition());
+                robot.telemetry.addData("Limit 1", robot.slideLimit1.isPressed());
+                robot.telemetry.addData("Limit 2", robot.slideLimit2.isPressed());
+                robot.telemetry.update();
+            }
+            robot.motorSlide.setPower(0);
+            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
 
 //        robot.arm_SmallHorizontal.setPosition(0.8);
 //        robot.arm_VerticalServo.setPosition(0.5);

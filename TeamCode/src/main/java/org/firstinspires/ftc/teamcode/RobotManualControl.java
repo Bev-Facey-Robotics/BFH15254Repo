@@ -129,9 +129,20 @@ public class RobotManualControl extends DeepHorOpMode {
             arm_Vertical.setPower(0.1);
         }
         if (gamepad2.y) {
-            arm_Vertical.setTargetPosition(306);
+            arm_Vertical.setTargetPosition(255);
             arm_Vertical.setPower(0.1);
         }
+
+        if (arm_Vertical.getTargetPosition() == 5) {
+            if (arm_Vertical.getCurrentPosition() < 30) {
+                arm_Vertical.setPower(0);
+            } else {
+                arm_Vertical.setPower(0.1);
+            }
+        }
+
+        // auto transfer shit
+        // slide should be at -1480
 
 //        verticalTarget += ((gamepad2.dpad_down ? 1 : 0) - (gamepad2.dpad_up ? 1 : 0)) * (isSlowModeActive ? 1 : 3);
 
@@ -145,9 +156,9 @@ public class RobotManualControl extends DeepHorOpMode {
 //        }
 ////        } else {
 //        // Normal mode
-        if (gamepad2.dpad_left) {
+        if (gamepad2.dpad_down) {
             verticalTarget = -11;
-        } else if (gamepad2.dpad_right) {
+        } else if (gamepad2.dpad_up) {
             verticalTarget = -130;
         }
         motorSwing.setTargetPosition((int) verticalTarget);

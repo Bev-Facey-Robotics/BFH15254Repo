@@ -104,7 +104,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         this.arm_Vertical = this.hardwareMap.get(DcMotor.class, "ArmVertical");
 //        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
 //        this.arm_VerticalServo = this.hardwareMap.get(Servo.class, "RotVert");
-        this.arm_Scoop = this.hardwareMap.get(CRServo.class, "Spinny");
+        this.arm_Scoop = this.hardwareMap.get(CRServo.class, "FrontCombine");
 
 
         //endregion
