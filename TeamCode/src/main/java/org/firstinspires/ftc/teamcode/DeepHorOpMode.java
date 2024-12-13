@@ -61,6 +61,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     public IMU imu = null;
 
+    public boolean AssistRunning = false;
+
     //endregion
 
     //region Drive
@@ -102,6 +104,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
         //region Arm Hardware
         this.arm_Vertical = this.hardwareMap.get(DcMotor.class, "ArmVertical");
+        this.arm_Vertical.setTargetPosition(255);
         this.arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 //        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
@@ -136,7 +139,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     public void MoveSlidePos(double position) {
         motorSlide.setTargetPosition((int) position);
         motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motorSlide.setPower(0.5);
+        motorSlide.setPower(1);
     }
 
     public void MoveSlidePwr(double power) {
@@ -205,5 +208,82 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         motorFR.setPower(rightFrontPower*speedLimit);
         motorBL.setPower(leftBackPower*speedLimit);
         motorBR.setPower(rightBackPower*speedLimit);
+    }
+
+    public void StartPieceAssist() {
+        AssistRunning = true;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                PieceAssist();
+            }
+        }).start();
+    }
+    public void StopPieceAssist() {
+        AssistRunning = false;
+        motorSlide.setPower(0);
+        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+    }
+
+    public void PieceAssist() {
+        // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
+        bucketTargetPosition = -0.1;
+        MoveSlidePos(-1480);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        // wait for slide to move down
+        while (motorSlide.isBusy()) {
+            telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
+            telemetry.update();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        arm_Vertical.setTargetPosition(255);
+        arm_Vertical.setPower(0.3);
+        while (arm_Vertical.isBusy()) {
+            telemetry.addData("Arm Position", arm_Vertical.getCurrentPosition());
+            telemetry.update();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        MoveArmScoop(1);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        MoveArmScoop(0);
+        arm_Vertical.setPower(0.1);
+        arm_Vertical.setTargetPosition(5);
+
+        // Move slide to the top
+        MoveSlidePos(-10800);
+        while (motorSlide.isBusy()) {
+            telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
+            telemetry.update();
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        // dump the piece in the basket
+        bucketTargetPosition = 0.2;
+        try {
+            Thread.sleep(4000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
