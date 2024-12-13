@@ -11,7 +11,10 @@ public class BotInitialization {
     }
     private static void RunInitialization(DeepHorOpMode robot) {
 
+        robot.arm_Vertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.arm_Vertical.setPower(-0.8);
+
+        robot.motorSwing.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.motorSwing.setPower(0.2);
         try {
             Thread.sleep(3000);

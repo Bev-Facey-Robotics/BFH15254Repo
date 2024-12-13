@@ -92,6 +92,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
         //region Slide
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
+        this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
         this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -105,6 +106,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         //region Arm Hardware
         this.arm_Vertical = this.hardwareMap.get(DcMotor.class, "ArmVertical");
         this.arm_Vertical.setTargetPosition(255);
+        this.arm_Vertical.setPower(0);
         this.arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 //        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
