@@ -87,10 +87,10 @@ public class RedSideAuto extends DeepHorOpMode {
             telemetry.update();
         }
 
-        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+        //Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
 
         // for debugging
-        //Pose2d initialPose = new Pose2d(0,0,0);
+        Pose2d initialPose = new Pose2d(0,0,Math.toRadians(positionFinder.firstObtainedAprilYaw));
 
         waitForStart();
 
@@ -105,7 +105,9 @@ public class RedSideAuto extends DeepHorOpMode {
 
 
         TrajectoryActionBuilder parkingRun = mecanumDrive.actionBuilder(initialPose)
-                .splineToConstantHeading(new Vector2d(48.27, -60.43), Math.toRadians(81.16));
+                .splineTo(new Vector2d(33.74, -47.38), Math.toRadians(18.36))
+                .splineTo(new Vector2d(52.28, -62.51), Math.toRadians(-39.21));
+
 
 
 
