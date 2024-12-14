@@ -20,6 +20,8 @@ public class RobotManualControl extends DeepHorOpMode {
     // Bot Config
     double deadzone = 0.1;
 
+    private boolean isBackheld = false;
+
 
     @Override
     public void runOpMode() {
@@ -190,6 +192,18 @@ public class RobotManualControl extends DeepHorOpMode {
 
 
 
+        if (gamepad2.back) {
+            if (!isBackheld) {
+                isBackheld = true;
+                if (AssistRunning) {
+                    StopPieceAssist();
+                } else {
+                    StartPieceAssist();
+                }
+            }
+        } else {
+            isBackheld = false;
+        }
 
         //region Slide
         double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;

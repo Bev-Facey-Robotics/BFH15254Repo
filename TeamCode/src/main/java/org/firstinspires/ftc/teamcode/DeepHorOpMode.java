@@ -61,7 +61,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     public IMU imu = null;
 
-    public boolean AssistRunning = false;
+    public volatile boolean AssistRunning = false;
+    private Thread pieceAssistThread;
 
     //endregion
 
@@ -212,80 +213,78 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         motorBR.setPower(rightBackPower*speedLimit);
     }
 
+    public void StopPieceAssist() {
+        if (!AssistRunning) {
+            return;
+        }
+        AssistRunning = false;
+        if (pieceAssistThread != null) {
+            pieceAssistThread.interrupt();
+        }
+        motorSlide.setPower(0);
+        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
     public void StartPieceAssist() {
+        if (AssistRunning) {
+            return;
+        }
         AssistRunning = true;
-        new Thread(new Runnable() {
+        pieceAssistThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 PieceAssist();
             }
-        }).start();
-    }
-    public void StopPieceAssist() {
-        AssistRunning = false;
-        motorSlide.setPower(0);
-        motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+        });
+        pieceAssistThread.start();
     }
 
     public void PieceAssist() {
-        // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
-        bucketTargetPosition = -0.1;
-        MoveSlidePos(-1480);
         try {
+            // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
+            bucketTargetPosition = -0.1;
+            MoveSlidePos(-1480);
             Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        // wait for slide to move down
-        while (motorSlide.isBusy()) {
-            telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
-            telemetry.update();
-            try {
+            // wait for slide to move down
+            while (motorSlide.isBusy() && AssistRunning) {
+                telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
+                telemetry.update();
                 Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
-        }
-        arm_Vertical.setTargetPosition(255);
-        arm_Vertical.setPower(0.3);
-        while (arm_Vertical.isBusy()) {
-            telemetry.addData("Arm Position", arm_Vertical.getCurrentPosition());
-            telemetry.update();
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+            if (!AssistRunning) return;
 
-        MoveArmScoop(1);
-        try {
+            arm_Vertical.setTargetPosition(255);
+            arm_Vertical.setPower(0.3);
+            while (arm_Vertical.isBusy() && AssistRunning) {
+                telemetry.addData("Arm Position", arm_Vertical.getCurrentPosition());
+                telemetry.update();
+                Thread.sleep(20);
+            }
+            if (!AssistRunning) return;
+
+            MoveArmScoop(1);
             Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        MoveArmScoop(0);
-        arm_Vertical.setPower(0.1);
-        arm_Vertical.setTargetPosition(5);
+            if (!AssistRunning) return;
 
-        // Move slide to the top
-        MoveSlidePos(-10800);
-        while (motorSlide.isBusy()) {
-            telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
-            telemetry.update();
-            try {
+            MoveArmScoop(0);
+            arm_Vertical.setPower(0.1);
+            arm_Vertical.setTargetPosition(5);
+
+            // Move slide to the top
+            MoveSlidePos(-10800);
+            while (motorSlide.isBusy() && AssistRunning) {
+                telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
+                telemetry.update();
                 Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
-        }
-        // dump the piece in the basket
-        bucketTargetPosition = 0.2;
-        try {
+            if (!AssistRunning) return;
+
+            // dump the piece in the basket
+            bucketTargetPosition = 0.2;
             Thread.sleep(4000);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            // Handle the interruption
+            Thread.currentThread().interrupt();
         }
     }
 }
