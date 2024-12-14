@@ -142,7 +142,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 //        this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
         // Swing
         this.stage2Swing = this.hardwareMap.get(DcMotor.class, "swing");
-        this.stage2Swing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //bucket
         this.stage2Bucket = this.hardwareMap.get(Servo.class, "SlideServo");
@@ -320,8 +320,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     public void PieceAssist() {
         try {
             // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
-            bucketTargetPosition = -0.1;
-            MoveSlidePos(-1480);
+            bucketTargetPosition = 0.05;
+            MoveSlidePos(-1821);
             Thread.sleep(2000);
             // wait for slide to move down
             while (motorSlide.isBusy() && AssistRunning) {
@@ -347,6 +347,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             MoveArmScoop(0);
             stage1Arm.setPower(0.1);
             stage1Arm.setTargetPosition(5);
+            bucketTargetPosition = -0.1;
+            Thread.sleep(500);
 
             // Move slide to the top
             MoveSlidePos(-10800);
@@ -357,12 +359,31 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             }
             if (!AssistRunning) return;
 
+            // Move the swing to correct
+            stage2Swing.setTargetPosition(-130);
+            stage2Swing.setPower(0.5);
+            Thread.sleep(7000);
+
+            if (!AssistRunning) return;
+
             // dump the piece in the basket
             bucketTargetPosition = 0.2;
-            Thread.sleep(4000);
+            Thread.sleep(3000);
+
+            stage2Swing.setTargetPosition(-130);
+            stage2Swing.setPower(0.3);
+            while (stage2Swing.isBusy() && AssistRunning) {
+                telemetry.addData("Arm Position", stage2Swing.getCurrentPosition());
+                telemetry.update();
+                Thread.sleep(20);
+            }
+
+            AssistRunning = false;
+
         } catch (InterruptedException e) {
             // Handle the interruption
-            Thread.currentThread().interrupt();
+            AssistRunning = false;
+            return;
         }
     }
     //endregion

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "Robot Manual Control", group = "Competition Ready")
 public class RobotManualControl extends DeepHorOpMode {
@@ -106,16 +107,17 @@ public class RobotManualControl extends DeepHorOpMode {
             } else if (gamepad2.dpad_up) {
                 verticalTarget = -130;
             }
+            stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             stage2Swing.setTargetPosition((int) verticalTarget);
             stage2Swing.setPower(0.5);
 
             // Second stage bucket
             bucketTargetPosition = -0.1;
             if (gamepad2.right_bumper) {
-                bucketTargetPosition = 0.2;
+                bucketTargetPosition = 0.25;
             }
             if (gamepad2.left_bumper) {
-                bucketTargetPosition = 0;
+                bucketTargetPosition = 0.05;
             }
 
 
@@ -125,22 +127,21 @@ public class RobotManualControl extends DeepHorOpMode {
             StartBucketSync();
         }
 
-//        stage2Bucket.setPosition(gamepad2.left_stick_y);
         //endregion
 
         //region Arm Assist
-//        if (gamepad2.share) {
-//            if (!isBackheld) {
-//                isBackheld = true;
-//                if (AssistRunning) {
-//                    StopPieceAssist();
-//                } else {
-//                    StartPieceAssist();
-//                }
-//            }
-//        } else {
-//            isBackheld = false;
-//        }
+        if (gamepad2.share || gamepad2.back) {
+            if (!isBackheld) {
+                isBackheld = true;
+                if (AssistRunning) {
+                    StopPieceAssist();
+                } else {
+                    StartPieceAssist();
+                }
+            }
+        } else {
+            isBackheld = false;
+        }
         //endregion
 
         //endregion
@@ -148,7 +149,7 @@ public class RobotManualControl extends DeepHorOpMode {
         //region Telemetry
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
         telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
-
+        telemetry.addData("Assist", AssistRunning);
 //        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
 //        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
 
