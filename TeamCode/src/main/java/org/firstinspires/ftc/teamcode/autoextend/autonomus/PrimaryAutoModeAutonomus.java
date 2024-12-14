@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.autoextend;
+package org.firstinspires.ftc.teamcode.autoextend.autonomus;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 

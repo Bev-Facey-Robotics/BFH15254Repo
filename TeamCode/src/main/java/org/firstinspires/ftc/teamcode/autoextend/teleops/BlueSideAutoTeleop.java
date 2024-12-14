@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.autoextend;
+package org.firstinspires.ftc.teamcode.autoextend.teleops;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.BlueSideAuto;

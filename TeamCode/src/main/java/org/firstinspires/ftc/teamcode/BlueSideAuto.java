@@ -32,20 +32,15 @@ package org.firstinspires.ftc.teamcode;
 import android.annotation.SuppressLint;
 
 
-import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.hardware.IMU;
-
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
 public class BlueSideAuto extends DeepHorOpMode {
 
     // Data relevent to getting our current pos
-    private PositionFinder positionFinder = new PositionFinder(); // This may be depricated later
+    private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder(); // This may be depricated later
     private MecanumDrive mecanumDrive = null;
 
     // The threshold for
@@ -61,7 +56,7 @@ public class BlueSideAuto extends DeepHorOpMode {
             CrossOpModeData.isInitialized = true;
         }
         // Let's get our position finder ready
-        positionFinder.InitializePositionFinder(
+        aprilTagPosFinder.Initialize(
                 hardwareMap.get(com.qualcomm.robotcore.hardware.HardwareMap.class, "AprilTagCam"),
                 hardwareMap.get(org.firstinspires.ftc.robotcore.external.Telemetry.class, "imu")
         );
@@ -69,7 +64,7 @@ public class BlueSideAuto extends DeepHorOpMode {
         boolean hasFoundAprilTag = false;
 
         while (!hasFoundAprilTag && !isStopRequested()) {
-            hasFoundAprilTag = positionFinder.ProcessAprilTagData();
+            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
             telemetry.addLine("Looking for April Tag");
             telemetry.update();
         }
@@ -80,14 +75,14 @@ public class BlueSideAuto extends DeepHorOpMode {
 
         while (opModeInInit()) {
 //            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
-            positionFinder.ProcessAprilTagData();
+            aprilTagPosFinder.ProcessAprilTagData();
             telemetry.addLine("Ready to rumble!");
-            telemetry.addData("April Tag Position", "X: %f, Y: %f", positionFinder.x, positionFinder.y);
-            telemetry.addData("April Tag Yaw", "Yaw: %f", positionFinder.yaw);
+            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
+            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
             telemetry.update();
         }
 
-        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.yaw));
+        Pose2d initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
 
         // for debugging
         //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(positionFinder.firstObtainedAprilYaw));

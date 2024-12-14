@@ -1,124 +1,102 @@
-//package org.firstinspires.ftc.teamcode;
-//
-//import android.graphics.drawable.GradientDrawable;
-//
-//import com.qualcomm.hardware.bosch.BNO055IMU;
-//import com.qualcomm.robotcore.hardware.HardwareDevice;
-//import com.qualcomm.robotcore.hardware.HardwareMap;
-//
-//
-//import org.firstinspires.ftc.robotcore.external.Telemetry;
-//import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-//import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-//import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-//import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-//import org.openftc.easyopencv.OpenCvCamera;
-//import org.openftc.easyopencv.OpenCvCameraFactory;
-//import org.openftc.easyopencv.OpenCvCameraRotation;
-//import org.openftc.easyopencv.OpenCvPipeline;
-//
-//import java.util.List;
-//
-//public class PositionFinder {
-//
-//    private AprilTagProcessor aprilTagProcessor;
-//    private OpenCvCamera camera;
-//    private Telemetry telemetry;
-//    private BNO055IMU imu;
-//
-//    // AprilTag detection results
-//    public int aprilTagId = -1;
-//    public double x = 0;
-//    public double y = 0;
-//    public double yaw = 0;
-//
-//    public void InitializePositionFinder(HardwareMap hardwareMap, Telemetry telemetry) {
-//        this.telemetry = telemetry;
-//
-//        imu = hardwareMap.get(BNO055IMU.class, "imu");
-//
-//        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-//
-//        imu.initialize(parameters);
-//
-//        // Initialize AprilTag processor
-//        aprilTagProcessor = new AprilTagProcessor.Builder()
-//                .build();
-//
-//        // Initialize camera
-//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-//                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-//
-//        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "AprilTagCam"), cameraMonitorViewId);
-//        //camera = OpenCvCameraFactory.createWebcam(hardwareMap.get(WebcamName.class, "AprilTagCam"), cameraMonitorViewId);
-//        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
-//            @Override
-//            public void onOpened() {
-//                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
-//                camera.setPipeline((OpenCvPipeline) camera);
-//            }
-//
-//            @Override
-//            public void onError(int errorCode) {
-//                telemetry.addData("Camera Error", errorCode);
-//                telemetry.update();
-//            }
-//        });
-//    }
-//
-//    public boolean ProcessAprilTagData() {
-//
-//
-//
-//
-//
-//        // Get the latest AprilTag detection
-//        AprilTagDetection detection = aprilTagProcessor.getFreshDetections();
-//
-//
-//        if (!detection.size > 0) {
-//            // Access the first detection using index 0
-//            AprilTagDetection detection1 = detection.get(0);
-//
-//            // Use the detection object as needed
-//            telemetry.addData("Detected Tag ID", detection.id);
-//            telemetry.update();
-//        } else {
-//            // Handle the case where no detections are available
-//            telemetry.addData("Status", "No AprilTag detections found");
-//            telemetry.update();
-//        }
-//
-//        //imu shit
-//        Orientation angles = imu.getAngularOrientation();
-//        double IMUYaw = angles.firstAngle;
-//
-//        // Check if an AprilTag was detected
-//        if (detection != null) {
-//            aprilTagId = detection.id;
-//            x = detection.robotPose.getPosition().x;
-//            y = detection.robotPose.getPosition().y;
-//            // Adjust yaw as needed (e.g., apply offset or coordinate transformation)
-//            yaw = detection.robotPose.getOrientation().getYaw(); // Assuming yaw is in radians
-//
-//            // Get the latest AprilTag detection
-//
-//            // Update telemetry
-//            telemetry.addData("AprilTag ID", aprilTagId);
-//            telemetry.addData("AprilTag X", x);
-//            telemetry.addData("AprilTag Y", y);
-//            telemetry.addData("AprilTag Yaw", yaw);
-//            telemetry.update();
-//
-//            return true; // AprilTag found
-//        } else {
-//            return false; // AprilTag not found
-//        }
-//    }
-//
-//}
-//
-//
+package org.firstinspires.ftc.teamcode;
+
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
+
+import java.util.ArrayList;
+
+public class AprilTagPosFinder {
+
+    private AprilTagProcessor aprilTagProcessor;
+    private OpenCvCamera camera; // why?
+    private Telemetry telemetry;
+
+    // AprilTag detection results
+    public int aprilTagId = -1;
+    public double x = 0;
+    public double y = 0;
+    public double yaw = 0;
+
+    public void Initialize(HardwareMap hardwareMap, Telemetry telemetry) {
+        this.telemetry = telemetry;
+
+        // Initialize AprilTag processor
+        aprilTagProcessor = new AprilTagProcessor.Builder()
+                .build();
+
+        //region Camera
+        // Initialize camera
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                "cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "AprilTagCam"), cameraMonitorViewId);
+        //camera = OpenCvCameraFactory.createWebcam(hardwareMap.get(WebcamName.class, "AprilTagCam"), cameraMonitorViewId);
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override
+            public void onOpened() {
+                camera.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+                camera.setPipeline((OpenCvPipeline) camera);
+            }
+
+            @Override
+            public void onError(int errorCode) {
+                telemetry.addData("Camera Error", errorCode);
+                telemetry.update();
+            }
+        });
+        //endregion
+    }
+
+    public boolean ProcessAprilTagData() {
+        // Get the latest AprilTag detections
+        ArrayList<AprilTagDetection> detection = aprilTagProcessor.getDetections();
+
+
+        if (!detection.isEmpty()) {
+            // TODO: Multitag localization
+
+            // Access the first detection using index 0
+            AprilTagDetection detection1 = detection.get(0);
+
+            // Use the detection object as needed
+            aprilTagId = detection1.id;
+            telemetry.addData("Detected Tag ID", aprilTagId);
+
+            // Positions
+            x = detection1.robotPose.getPosition().x;
+            y = detection1.robotPose.getPosition().y;
+            // Adjust yaw as needed (e.g., apply offset or coordinate transformation)
+            // TODO: Is this (yaw) relivate to the tag, or the field?
+            yaw = detection1.robotPose.getOrientation().getYaw(); // Assuming yaw is in radians
+
+            // Update telemetry
+            telemetry.addData("AprilTag ID", aprilTagId);
+            telemetry.addData("AprilTag X", x);
+            telemetry.addData("AprilTag Y", y);
+            telemetry.addData("AprilTag Yaw", yaw);
+            telemetry.update();
+
+            return true; // AprilTag found
+        } else {
+            // Handle the case where no detections are available
+            telemetry.addData("Status", "No AprilTag detections found");
+            telemetry.update();
+            return false;
+        }
+    }
+
+}
+
+
 //
 //
 //

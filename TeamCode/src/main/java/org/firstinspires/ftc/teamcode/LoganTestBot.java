@@ -6,8 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Vector;
 
-@TeleOp(name = "Logan's Terrible Bot", group = "testing")
-
+@TeleOp(name = "EM: Drive Only", group = "Emergancy")
 public class LoganTestBot extends OpMode {
 
     private DcMotor motorFL = null; // Front Left
@@ -106,7 +105,7 @@ public class LoganTestBot extends OpMode {
 
     @Override
     public void loop() {
-        //DriveRobotWithController();
-        motorSlide.setPower(gamepad1.left_stick_x);
+        DriveRobotWithController();
+//        motorSlide.setPower(gamepad1.left_stick_x);
     }
 }
