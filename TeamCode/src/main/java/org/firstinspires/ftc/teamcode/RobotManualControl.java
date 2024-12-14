@@ -67,7 +67,7 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Collection Arm / First Stage
 
-        if (AssistRunning) {
+        if (!AssistRunning) {
             // Scoop
             double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
             MoveArmScoop(armScoop);
@@ -95,7 +95,8 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Slide / Second Stage
         // Slide
-        if (AssistRunning) {
+
+        if (!AssistRunning) {
             double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
             MoveSlidePwr(slidePower);
 
@@ -117,26 +118,29 @@ public class RobotManualControl extends DeepHorOpMode {
                 bucketTargetPosition = 0;
             }
 
-            // Bucket syncing (since this moves!)
-            if (!stage2BucketSync) {
-                StartBucketSync();
-            }
+
         }
+        // Bucket syncing (since this moves!)
+        if (!stage2BucketSync) {
+            StartBucketSync();
+        }
+
+//        stage2Bucket.setPosition(gamepad2.left_stick_y);
         //endregion
 
         //region Arm Assist
-        if (gamepad2.back) {
-            if (!isBackheld) {
-                isBackheld = true;
-                if (AssistRunning) {
-                    StopPieceAssist();
-                } else {
-                    StartPieceAssist();
-                }
-            }
-        } else {
-            isBackheld = false;
-        }
+//        if (gamepad2.share) {
+//            if (!isBackheld) {
+//                isBackheld = true;
+//                if (AssistRunning) {
+//                    StopPieceAssist();
+//                } else {
+//                    StartPieceAssist();
+//                }
+//            }
+//        } else {
+//            isBackheld = false;
+//        }
         //endregion
 
         //endregion
@@ -145,12 +149,9 @@ public class RobotManualControl extends DeepHorOpMode {
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
         telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
 
-        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
-        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
+//        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
+//        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
 
-
-        telemetry.addLine("X Odometer: " + motorFR.getCurrentPosition());
-        telemetry.addLine("Y Odometer: " + motorFL.getCurrentPosition());
         telemetry.addLine("Arm Vertical: " + stage1Arm.getCurrentPosition());
 
         telemetry.update();

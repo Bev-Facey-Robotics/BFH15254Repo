@@ -66,8 +66,6 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     public Servo stage2Bucket = null;
     // end of second stage hw
     //endregion
-
-    public IMU imu = null;
     //endregion
 
     //region Bucket Sync
@@ -104,6 +102,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     private double yawPwr = 0;
 
     //endregion
+
+    private Thread bucketsync;
     //endregion
 
     public void ConfigureHardware(boolean initDriveMotors) {
@@ -143,6 +143,9 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         // Swing
         this.stage2Swing = this.hardwareMap.get(DcMotor.class, "swing");
         this.stage2Swing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        //bucket
+        this.stage2Bucket = this.hardwareMap.get(Servo.class, "SlideServo");
         //endregion
     }
 
@@ -197,14 +200,17 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     //region Bucket Sync
     /**
      * Starts the thread to move the bucket to be aligned with the bucketTargetPosition.
-     *  0 is level
+     *  0 is level`
      * -1 is up
      *  1 is down
      *  Going above 0.5 will most likely not go fully to the desired position.
      */
     public void StartBucketSync() {
+        if (stage2BucketSync){
+            return;
+        }
         stage2BucketSync = true;
-        new Thread(new Runnable() {
+        bucketsync = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (stage2BucketSync && opModeIsActive()) {
@@ -216,7 +222,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
                     }
                 }
             }
-        }).start();
+        });
+        bucketsync.start();
     }
 
     /**

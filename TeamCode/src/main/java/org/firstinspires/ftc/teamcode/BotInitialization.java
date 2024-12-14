@@ -46,8 +46,10 @@ public class BotInitialization {
 
         // The slide initialization must be done at the end to avoid conflicts with the arms.
         //region Slide
+        robot.motorSlide.setPower(0);
         robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.motorSlide.setTargetPosition(0);
+        robot.motorSlide.setPower(0);
         robot.motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // The following is for our slide. Currently our limit switch detection code is

@@ -106,6 +106,8 @@ public class LoganTestBot extends OpMode {
     @Override
     public void loop() {
         DriveRobotWithController();
-//        motorSlide.setPower(gamepad1.left_stick_x);
+
+        motorSlide.setPower(gamepad2.right_trigger + -gamepad2.left_trigger);
+
     }
 }
