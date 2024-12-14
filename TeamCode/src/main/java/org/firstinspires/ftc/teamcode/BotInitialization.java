@@ -11,7 +11,7 @@ public class BotInitialization {
     }
     private static void RunInitialization(DeepHorOpMode robot) {
 
-        robot.arm_Vertical.setPower(-0.8);
+        robot.arm_Vertical.setPower(-0.3);
         robot.motorSwing.setPower(0.2);
         try {
             Thread.sleep(3000);
@@ -29,22 +29,30 @@ public class BotInitialization {
         robot.motorSwing.setTargetPosition(0);
         robot.motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        if (robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed()) {
-            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        } else {
-            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            robot.motorSlide.setPower(1);
-            while (!(robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed())) {
-                robot.telemetry.addLine("Calibrating Slide");
-                robot.telemetry.addData("Position", robot.motorSlide.getCurrentPosition());
-                robot.telemetry.addData("Limit 1", robot.slideLimit1.isPressed());
-                robot.telemetry.addData("Limit 2", robot.slideLimit2.isPressed());
-                robot.telemetry.update();
-            }
+        //slide
+        robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorSlide.setTargetPosition(0);
+        robot.motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+//        if (robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed()) {
+//            robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        } else {
+//            robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//            robot.motorSlide.setPower(1);
+//            while (!(robot.slideLimit1.isPressed() || robot.slideLimit2.isPressed())) {
+//                robot.telemetry.addLine("Calibrating Slide");
+//                robot.telemetry.addData("Position", robot.motorSlide.getCurrentPosition());
+//                robot.telemetry.addData("Limit 1", robot.slideLimit1.isPressed());
+//                robot.telemetry.addData("Limit 2", robot.slideLimit2.isPressed());
+//                robot.telemetry.update();
+//            }
             robot.motorSlide.setPower(0);
             robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        robot.telemetry.addLine("Ready to Start");
+        robot.telemetry.update();
         }
 
 //        robot.arm_SmallHorizontal.setPosition(0.8);
@@ -67,7 +75,8 @@ public class BotInitialization {
 //            robot.telemetry.addData("Position", robot.arm_BigHorizontal.getCurrentPosition());
 //            robot.telemetry.update();
 //        }
-        robot.telemetry.addLine("Ready to Start");
-        robot.telemetry.update();
+
+
+
     }
-}
+

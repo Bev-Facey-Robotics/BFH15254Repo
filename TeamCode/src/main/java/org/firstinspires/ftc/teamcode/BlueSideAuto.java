@@ -62,8 +62,8 @@ public class BlueSideAuto extends DeepHorOpMode {
         }
         // Let's get our position finder ready
         positionFinder.InitializePositionFinder(
-                hardwareMap.get(WebcamName.class, "AprilTagCam"),
-                hardwareMap.get(IMU.class, "imu")
+                hardwareMap.get(com.qualcomm.robotcore.hardware.HardwareMap.class, "AprilTagCam"),
+                hardwareMap.get(org.firstinspires.ftc.robotcore.external.Telemetry.class, "imu")
         );
 
         boolean hasFoundAprilTag = false;
@@ -83,14 +83,14 @@ public class BlueSideAuto extends DeepHorOpMode {
             positionFinder.ProcessAprilTagData();
             telemetry.addLine("Ready to rumble!");
             telemetry.addData("April Tag Position", "X: %f, Y: %f", positionFinder.x, positionFinder.y);
-            telemetry.addData("April Tag Yaw", "Yaw: %f", positionFinder.firstObtainedAprilYaw);
+            telemetry.addData("April Tag Yaw", "Yaw: %f", positionFinder.yaw);
             telemetry.update();
         }
 
-        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.firstObtainedAprilYaw));
+        Pose2d initialPose = new Pose2d(positionFinder.x, positionFinder.y, Math.toRadians(positionFinder.yaw));
 
         // for debugging
-        //Pose2d initialPose = new Pose2d(0,0,0);
+        //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(positionFinder.firstObtainedAprilYaw));
 
         waitForStart();
 
@@ -105,7 +105,9 @@ public class BlueSideAuto extends DeepHorOpMode {
 
 
         TrajectoryActionBuilder parkingRun = mecanumDrive.actionBuilder(initialPose)
-                .splineToConstantHeading(new Vector2d(48.27, -60.43), Math.toRadians(81.16));
+                .splineTo(new Vector2d(33.74, -47.38), Math.toRadians(18.36))
+                .splineTo(new Vector2d(52.28, -62.51), Math.toRadians(-39.21));
+
 
 
 
