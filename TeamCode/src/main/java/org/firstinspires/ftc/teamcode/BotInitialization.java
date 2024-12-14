@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
 
 public class BotInitialization {
 
@@ -11,27 +9,27 @@ public class BotInitialization {
     }
     private static void RunInitialization(DeepHorOpMode robot) {
 
-        robot.arm_Vertical.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.arm_Vertical.setPower(-0.8);
+        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.stage1Arm.setPower(-0.8);
 
-        robot.motorSwing.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.arm_Vertical.setPower(-0.3);
-        robot.motorSwing.setPower(0.2);
+        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.stage1Arm.setPower(-0.3);
+        robot.stage2Swing.setPower(0.2);
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         // vertical arm
-        robot.arm_Vertical.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.arm_Vertical.setPower(0);
-        robot.arm_Vertical.setTargetPosition(0);
-        robot.arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.stage1Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.stage1Arm.setPower(0);
+        robot.stage1Arm.setTargetPosition(0);
+        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         // swing
-        robot.motorSwing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.motorSwing.setPower(0);
-        robot.motorSwing.setTargetPosition(0);
-        robot.motorSwing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.stage2Swing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.stage2Swing.setPower(0);
+        robot.stage2Swing.setTargetPosition(0);
+        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //slide
         robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

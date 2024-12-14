@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -11,6 +9,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 
 public abstract class DeepHorOpMode extends LinearOpMode {
+    //region Variables
     //region Hardware
     //region Drive Motors
     public DcMotor motorFL = null; // Front Left
@@ -19,51 +18,82 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     public DcMotor motorBR = null; // Back Right
     //endregion
 
-    //region Slide
-    public DcMotor motorSlide = null;
-    public DcMotor motorSwing = null;
-//    public Servo clawServo = null;
-//    //endregion
-//    //region Arm
-//    /**
-//     * Motor attached to the bot to move the arm containing the main arm mechanism.
-//     */
-    public DcMotor arm_Vertical = null;
-//    /**
-//     * The first servo on the arm. Swivels the main scoop mechanism off the arm.
-//     */
-    public Servo arm_Pivot = null;
-//    /**
-//     * The second servo on the arm. Moves the rest of the scoop up and down.
-//     */
-//    public Servo arm_VerticalServo = null;
+    //region First Stage
     /**
-     * The third servo on the arm. Controls the wheel to scoop the game pieces.
+     * Motor attached to the bot to move the arm containing the main arm mechanism.
      */
-    public CRServo arm_Scoop = null;
-
-    public Servo topBucketServo = null;
-
-//    private
-//
-//    public double armSmallHorizontal = 0.52;
-//    public double armVertical = 0.57;
-//
-//    public int armTarget = 0;
-    double bucketTargetPosition = 0;
-
+    public DcMotor stage1Arm = null;
+    /**
+     * The servo that scoops up game pieces from the floor into the first stage basket
+     */
+    public CRServo stage1Scoop = null;
+    // end of first stage hw
     //endregion
 
-    public TouchSensor slideLimit1 = null;
-    public TouchSensor slideLimit2 = null;
+    //region Second Stage
+    /**
+     * Motor attached to the bot to move the slide containing the second stage mechanism.
+     */
+    public DcMotor motorSlide = null;
 
-    public boolean isBucketBalencingEnabled = false;
+    //region Limit Switches
+    /**
+     * Slide limit switches to prevent the slide from going too far.
+     * These are used at the beginning of the match to calibrate the slide before the match starts.
+     * TODO: Figure out which limit switch is which
+     */
+    public TouchSensor slideLimit1 = null;
+
+    /**
+     * Slide limit switches to prevent the slide from going too far.
+     * These are used at the beginning of the match to calibrate the slide before the match starts.
+     * TODO: Figure out which limit switch is which
+     */
+    public TouchSensor slideLimit2 = null;
+    //endregion
+
+    /**
+     * The arm that brings the second stage bucket up to the baskets for scoring.
+     */
+    public DcMotor stage2Swing = null;
+
+    /**
+     * The servo that holds the second stage bucket.
+     * This serves multiple purposes
+     * 1. Preventing the piece from falling out as we bring it up to the basket
+     * 2. Drops the piece into the basket
+     */
+    public Servo stage2Bucket = null;
+    // end of second stage hw
+    //endregion
 
     public IMU imu = null;
+    //endregion
 
+    //region Bucket Sync
+    /**
+     * The relative location of the bucket.
+     * 0 is level (straight facing the wall
+     * -0.5 is full up
+     * 0.5 is full down
+     * This goes from -0.5 to +0.5.
+     */
+    public double bucketTargetPosition = 0;
+    /**
+     * Whether bucket sync is on
+     */
+    public boolean stage2BucketSync = false;
+    //endregion
+
+    //region Piece Assist
+    /**
+     * The current state of piece assist. If true, the robot is currently running piece assist.
+     */
     public volatile boolean AssistRunning = false;
+    /**
+     * The thread that Piece Assist is running in.
+     */
     private Thread pieceAssistThread;
-
     //endregion
 
     //region Drive
@@ -73,6 +103,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     private double strafePwr = 0;
     private double yawPwr = 0;
 
+    //endregion
     //endregion
 
     public void ConfigureHardware(boolean initDriveMotors) {
@@ -91,63 +122,67 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         }
         //endregion
 
-        //region Slide
+        //region First Stage
+        // Arm
+        this.stage1Arm = this.hardwareMap.get(DcMotor.class, "ArmVertical");
+        this.stage1Arm.setTargetPosition(255);
+        this.stage1Arm.setPower(0);
+        this.stage1Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // Scoop
+        this.stage1Scoop = this.hardwareMap.get(CRServo.class, "FrontCombine");
+        //endregion
+
+        //region Slide / Second Stage
+        // Slide
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
-        this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
-        this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.motorSwing = this.hardwareMap.get(DcMotor.class, "swing");
-        this.motorSwing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.topBucketServo = this.hardwareMap.get(Servo.class, "SlideServo");
-
-
+        // The limit switches
+        // TODO: Make limit switches respect FIRST high restrictions.
+//        this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
+//        this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
+        // Swing
+        this.stage2Swing = this.hardwareMap.get(DcMotor.class, "swing");
+        this.stage2Swing.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //endregion
-
-        //region Arm Hardware
-        this.arm_Vertical = this.hardwareMap.get(DcMotor.class, "ArmVertical");
-        this.arm_Vertical.setTargetPosition(255);
-        this.arm_Vertical.setPower(0);
-        this.arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-//        this.arm_SmallHorizontal = this.hardwareMap.get(Servo.class, "RotHori");
-//        this.arm_VerticalServo = this.hardwareMap.get(Servo.class, "RotVert");
-        this.arm_Scoop = this.hardwareMap.get(CRServo.class, "FrontCombine");
-
-
-        //endregion
-
     }
 
-    public void MoveRobot(double x, double y, double yaw) {
-        drivePwr = x;
-        strafePwr = y;
-        yawPwr = yaw;
-    }
 
     public void MoveArmScoop(double power) {
-        arm_Scoop.setPower(power);
+        stage1Scoop.setPower(power);
     }
 
-    public void MoveArmPivot(double position) {
-        arm_Pivot.setPosition(position);
-    }
-
+    /**
+     * DO NOT USE
+     * This method has not been updated to work properly, and using is at your own risk!
+     * @param position Position to move the arm
+     */
     public void MoveVerticalArm(double position) {
-        arm_Vertical.setTargetPosition((int) position);
-        arm_Vertical.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        arm_Vertical.setPower(0.5);
+        stage1Arm.setTargetPosition((int) position);
+        stage1Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        stage1Arm.setPower(0.5);
     }
 
+    //region Slide
+    /**
+     * Moves the slide from the second stage to a specific position.
+     * <p>
+     * WARNING: There is no limits on where the slide can go. Please be careful.
+     * @param position The position to move the slide to. Should be from 0 to -10800.
+     */
     public void MoveSlidePos(double position) {
         motorSlide.setTargetPosition((int) position);
         motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motorSlide.setPower(1);
     }
 
+    /**
+     * Moves the slide by providing a power to run the motor.
+     * This does have limits. You can travel from -10800 (top) to 0 (bottom).
+     * @param power
+     */
     public void MoveSlidePwr(double power) {
         // Adjust slidePower based on position limits
-        if (motorSlide.getCurrentPosition() <= -10800 && power < 0) { // Limit is -8950
+        if (motorSlide.getCurrentPosition() <= -10800 && power < 0) {
             // Prevent the motor from moving further negative
             power = 0;
         } else
@@ -156,15 +191,23 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             power = 0;
         }
         motorSlide.setPower(power);
-
     }
+    //endregion
 
+    //region Bucket Sync
+    /**
+     * Starts the thread to move the bucket to be aligned with the bucketTargetPosition.
+     *  0 is level
+     * -1 is up
+     *  1 is down
+     *  Going above 0.5 will most likely not go fully to the desired position.
+     */
     public void StartBucketSync() {
-        isBucketBalencingEnabled = true;
+        stage2BucketSync = true;
         new Thread(new Runnable() {
             @Override
             public void run() {
-                while (isBucketBalencingEnabled && opModeIsActive()) {
+                while (stage2BucketSync && opModeIsActive()) {
                     UpdateBucketPosition();
                     try {
                         Thread.sleep(20);
@@ -176,17 +219,43 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         }).start();
     }
 
-    public void UpdateBucketPosition() {
+    /**
+     * Internal function for bucket sync.
+     * This function should not be called directly.
+     * To run a bucket sync, use StartBucketSync.
+     */
+    private void UpdateBucketPosition() {
         // When the swing is at -11, the bucket should be at 0.237
         // When the swing is at -130, the bucket should be at 0.811
-        double swingPosition = motorSwing.getCurrentPosition();
+        double swingPosition = stage2Swing.getCurrentPosition();
         double bucketPosition;
 
         bucketPosition = 0.237 + ((swingPosition + 11) * (0.811 - 0.237) / (-130 + 11));
 
-        topBucketServo.setPosition(bucketPosition + bucketTargetPosition);
+        stage2Bucket.setPosition(bucketPosition + bucketTargetPosition);
+    }
+    //endregion
+
+    //region Drive
+    /**
+     * Tells the robot to move thru power values
+     * This should not be used when roadrunner is active
+     * This function does not move the bot itself. You must call UpdateMoveRobot to actually preform the actions specified.
+     * @param drivePwr The power value to move the robot forward/backward. Positive is forward, negative is backward.
+     * @param strafePwr The power value to move the robot left/right. Positive is right, negative is left.
+     * @param turnPwr The power value to turn the robot. Positive is right, negative is left.
+     */
+    public void MoveRobot(double drivePwr, double strafePwr, double turnPwr) {
+        this.drivePwr = drivePwr;
+        this.strafePwr = strafePwr;
+        yawPwr = turnPwr;
     }
 
+    /**
+     * This executes the movement of the robot previously set.
+     * This should not be used when roadrunner is active
+     * @param speedLimit How fast the robot should run. 1 is full speed, 0.5 is half speed, etc.
+     */
     public void UpdateMoveRobot(double speedLimit) {
         // Calculate wheel powers.
         double leftFrontPower    =   drivePwr -strafePwr -yawPwr;
@@ -212,7 +281,9 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         motorBL.setPower(leftBackPower*speedLimit);
         motorBR.setPower(rightBackPower*speedLimit);
     }
+    //endregion
 
+    //region Piece Assist
     public void StopPieceAssist() {
         if (!AssistRunning) {
             return;
@@ -253,10 +324,10 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             }
             if (!AssistRunning) return;
 
-            arm_Vertical.setTargetPosition(255);
-            arm_Vertical.setPower(0.3);
-            while (arm_Vertical.isBusy() && AssistRunning) {
-                telemetry.addData("Arm Position", arm_Vertical.getCurrentPosition());
+            stage1Arm.setTargetPosition(255);
+            stage1Arm.setPower(0.3);
+            while (stage1Arm.isBusy() && AssistRunning) {
+                telemetry.addData("Arm Position", stage1Arm.getCurrentPosition());
                 telemetry.update();
                 Thread.sleep(20);
             }
@@ -267,8 +338,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             if (!AssistRunning) return;
 
             MoveArmScoop(0);
-            arm_Vertical.setPower(0.1);
-            arm_Vertical.setTargetPosition(5);
+            stage1Arm.setPower(0.1);
+            stage1Arm.setTargetPosition(5);
 
             // Move slide to the top
             MoveSlidePos(-10800);
@@ -287,4 +358,5 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             Thread.currentThread().interrupt();
         }
     }
+    //endregion
 }

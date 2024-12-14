@@ -67,56 +67,60 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Collection Arm / First Stage
 
-        // Scoop
-        double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
-        MoveArmScoop(armScoop);
+        if (AssistRunning) {
+            // Scoop
+            double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
+            MoveArmScoop(armScoop);
 
-        // First stage bucket
-        if (gamepad2.x) {
-            arm_Vertical.setTargetPosition(5);
-            arm_Vertical.setPower(0.1);
-        }
-        if (gamepad2.y) {
-            arm_Vertical.setTargetPosition(255);
-            arm_Vertical.setPower(0.3);
-        }
+            // First stage bucket
+            if (gamepad2.x) {
+                stage1Arm.setTargetPosition(5);
+                stage1Arm.setPower(0.1);
+            }
+            if (gamepad2.y) {
+                stage1Arm.setTargetPosition(255);
+                stage1Arm.setPower(0.3);
+            }
 
-        // First stage bucket power control
-        if (arm_Vertical.getTargetPosition() == 5) {
-            if (arm_Vertical.getCurrentPosition() < 30) {
-                arm_Vertical.setPower(0);
-            } else {
-                arm_Vertical.setPower(0.1);
+            // First stage bucket power control
+            if (stage1Arm.getTargetPosition() == 5) {
+                if (stage1Arm.getCurrentPosition() < 30) {
+                    stage1Arm.setPower(0);
+                } else {
+                    stage1Arm.setPower(0.1);
+                }
             }
         }
         //endregion
 
         //region Slide / Second Stage
         // Slide
-        double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
-        MoveSlidePwr(slidePower);
+        if (AssistRunning) {
+            double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
+            MoveSlidePwr(slidePower);
 
-        // Second stage arm
-        if (gamepad2.dpad_down) {
-            verticalTarget = -11;
-        } else if (gamepad2.dpad_up) {
-            verticalTarget = -130;
-        }
-        motorSwing.setTargetPosition((int) verticalTarget);
-        motorSwing.setPower(0.5);
+            // Second stage arm
+            if (gamepad2.dpad_down) {
+                verticalTarget = -11;
+            } else if (gamepad2.dpad_up) {
+                verticalTarget = -130;
+            }
+            stage2Swing.setTargetPosition((int) verticalTarget);
+            stage2Swing.setPower(0.5);
 
-        // Second stage bucket
-        bucketTargetPosition = -0.1;
-        if (gamepad2.right_bumper) {
-            bucketTargetPosition = 0.2;
-        }
-        if (gamepad2.left_bumper) {
-            bucketTargetPosition = 0;
-        }
+            // Second stage bucket
+            bucketTargetPosition = -0.1;
+            if (gamepad2.right_bumper) {
+                bucketTargetPosition = 0.2;
+            }
+            if (gamepad2.left_bumper) {
+                bucketTargetPosition = 0;
+            }
 
-        // Bucket syncing (since this moves!)
-        if (!isBucketBalencingEnabled) {
-            StartBucketSync();
+            // Bucket syncing (since this moves!)
+            if (!stage2BucketSync) {
+                StartBucketSync();
+            }
         }
         //endregion
 
@@ -139,15 +143,15 @@ public class RobotManualControl extends DeepHorOpMode {
 
         //region Telemetry
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
-        telemetry.addLine("Swing Position " + motorSwing.getCurrentPosition());
+        telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
 
-        telemetry.addLine("Top Bucket Position (servo) " + topBucketServo.getPosition());
+        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
         telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
 
 
         telemetry.addLine("X Odometer: " + motorFR.getCurrentPosition());
         telemetry.addLine("Y Odometer: " + motorFL.getCurrentPosition());
-        telemetry.addLine("Arm Vertical: " + arm_Vertical.getCurrentPosition());
+        telemetry.addLine("Arm Vertical: " + stage1Arm.getCurrentPosition());
 
         telemetry.update();
         //endregion
