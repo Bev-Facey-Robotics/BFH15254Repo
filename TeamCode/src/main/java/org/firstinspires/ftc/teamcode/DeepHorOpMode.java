@@ -135,6 +135,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
         //region Slide / Second Stage
         // Slide
         this.motorSlide = this.hardwareMap.get(DcMotor.class, "slideMotor");
+        this.motorSlide.setTargetPosition(0);
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         // The limit switches
         // TODO: Make limit switches respect FIRST high restrictions.
@@ -142,6 +143,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 //        this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
         // Swing
         this.stage2Swing = this.hardwareMap.get(DcMotor.class, "swing");
+        this.stage2Swing.setTargetPosition(0);
         this.stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //bucket
