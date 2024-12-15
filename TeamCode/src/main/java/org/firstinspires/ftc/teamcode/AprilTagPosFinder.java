@@ -58,7 +58,7 @@ public class AprilTagPosFinder {
 
         //region AprilTag Builder
         aprilTagProcessor = new AprilTagProcessor.Builder()
-                .setDrawAxes(false)
+                .setDrawAxes(true)
                 .setDrawCubeProjection(false)
                 .setDrawTagOutline(true)
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
@@ -84,7 +84,7 @@ public class AprilTagPosFinder {
         //builder.enableLiveView(true);
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
-        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        builder.setStreamFormat(VisionPortal.StreamFormat.MJPEG);
 
         // Choose whether or not LiveView stops if no processors are enabled.
         // If set "true", monitor shows solid orange screen if no processors enabled.

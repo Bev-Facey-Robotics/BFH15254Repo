@@ -79,12 +79,9 @@ public class RedSideAuto extends DeepHorOpMode {
         }
 
         while (opModeInInit()) {
-//            telemetry.addData("April Tag Found", "ID: %d", TagPosFinder.firstObtainedAprilTagID);
+//
             TagPosFinder.ProcessAprilTagData();
-            telemetry.addLine("Ready to rumble!");
-            telemetry.addData("April Tag Position", "X: %f, Y: %f", TagPosFinder.x, TagPosFinder.y);
-            telemetry.addData("April Tag Yaw", "Yaw: %f", TagPosFinder.yaw);
-            telemetry.update();
+
         }
 
         Pose2d initialPose = new Pose2d(TagPosFinder.x, TagPosFinder.y, Math.toRadians(TagPosFinder.yaw));
@@ -117,10 +114,10 @@ public class RedSideAuto extends DeepHorOpMode {
         new Thread(() -> {
             while (opModeIsActive()) {
                 mecanumDrive.updatePoseEstimate();
-                telemetry.addData("x", mecanumDrive.pose.position.x);
-                telemetry.addData("y", mecanumDrive.pose.position.y);
-                telemetry.addData("Heading", mecanumDrive.pose.heading.toDouble());
-                telemetry.update();
+//                telemetry.addData("x", mecanumDrive.pose.position.x);
+//                telemetry.addData("y", mecanumDrive.pose.position.y);
+//                telemetry.addData("Heading", mecanumDrive.pose.heading.toDouble());
+//                telemetry.update();
                 try {
                     Thread.sleep(100);
                     telemetry.update();

@@ -82,9 +82,9 @@ public abstract class MainAuto extends DeepHorOpMode {
         while (opModeInInit()) {
 //            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
             aprilTagPosFinder.ProcessAprilTagData();
-            telemetry.addLine("Ready to rumble!");
-            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
-            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
+//            telemetry.addLine("Ready to rumble!");
+//            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
+//            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
             telemetry.update();
         }
 
