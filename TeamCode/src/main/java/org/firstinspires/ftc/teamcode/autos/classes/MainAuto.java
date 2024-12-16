@@ -32,15 +32,22 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class MainAuto extends DeepHorOpMode {
 
@@ -128,5 +135,60 @@ public abstract class MainAuto extends DeepHorOpMode {
     }
 
     public abstract TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose);
+    public Slide Slideup;
+
+    //Trying out actions
+
+    public class Slide {
+        private DcMotor motorSlide;
+
+        public Slide(HardwareMap hardwareMap) {
+            motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
+
+        }
+
+        public class SlideUp implements Action {
+
+            private Boolean initalized = false;
+
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                while (initalized) {
+                    if (motorSlide.getCurrentPosition() < -10000); {
+                        motorSlide.setPower(0);
+                    }
+
+
+                }
+
+
+
+                if (!initalized) {
+                    motorSlide.setPower(0.3);
+                    initalized = true;
+                }
+
+                double vel = motorSlide.getPower();
+                packet.put("Slide Power", vel);
+                return vel < 0.4;
+            }
+
+            public Action slideUp() {
+                return new SlideUp();
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
 
 }   // end class
