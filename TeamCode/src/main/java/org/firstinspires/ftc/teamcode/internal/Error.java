@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.internal;
 
+import org.firstinspires.ftc.teamcode.actions.ActionElement;
+
 public class Error {
     public int code;
     public String message;
@@ -8,6 +10,7 @@ public class Error {
 
     // Type specifics
     public HardwareElement hw = null;
+    public ActionElement action = null;
 
     public Error (HardwareElement hw, int code, String message, Exception e) {
         hw.isBroken = true;
@@ -16,6 +19,15 @@ public class Error {
         this.type = ErrorTypes.HARDWARE_ERROR;
         this.exception = e;
         this.hw = hw;
+        TelemetryManager.instance.AddError(this);
+    }
+
+    public Error (ActionElement action, int code, String message, Exception e) {
+        this.message = message;
+        this.code = code;
+        this.type = ErrorTypes.HARDWARE_ERROR;
+        this.exception = e;
+        this.action = action;
         TelemetryManager.instance.AddError(this);
     }
 

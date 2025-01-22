@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.actions;
 
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
 
-public class ActionElement {
-    public HardwareElement[] allocatedHardware;
+import java.util.ArrayList;
+import java.util.List;
 
-    public void getHardware( hardwareType) {
+public abstract class ActionElement {
+    public abstract void run();
 }

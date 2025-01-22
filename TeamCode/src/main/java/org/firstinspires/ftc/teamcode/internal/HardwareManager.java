@@ -2,41 +2,132 @@ package org.firstinspires.ftc.teamcode.internal;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.actions.ActionElement;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class HardwareManager {
     public static List<HardwareElement> hardwareElements = new ArrayList<HardwareElement>();
+    public static HashMap<HardwareElement, ActionElement> HardwareReserves = new HashMap<HardwareElement, ActionElement>();
     private static volatile boolean opModeActive = false;
+    private static CountDownLatch calibrationLatch;
 
-    public static void init_array(HardwareElement[] hardwareElements, HardwareMap hardwareMap) {
-        for (HardwareElement hardwareElement : hardwareElements) {
-            try {
-                hardwareElement.init(hardwareMap);
-            } catch (Exception e) {
-                hardwareElement.isBroken = true;
-            }
+    //region Initalization & Calibration
+    public static Error init(HardwareElement hw, HardwareMap hardwareMap) {
+        if (getElementByClassName(hw.getClass().getSimpleName()) != null) {
+            return new Error(hw, 104, "Hardware element already exists: " + hw.getClass().getSimpleName(), null);
         }
-    }
-
-    public static void init(HardwareElement hw, HardwareMap hardwareMap) {
         try {
             hw.init(hardwareMap);
+            hw.isInitialized = true;
+            hardwareElements.add(hw);
+            return null;
         } catch (Exception e) {
-            hw.isBroken = true;
+            return new Error(hw, 103, "An error occurred while initializing hardware", e);
         }
     }
 
-    public static void calibrate_array(HardwareElement[] hardwareElements) {
+    public static Error init_array(HardwareElement[] elementsToInit, HardwareMap hardwareMap) {
         for (HardwareElement hardwareElement : hardwareElements) {
-            try {
-                hardwareElement.calibrate();
-            } catch (Exception e) {
-                hardwareElement.isBroken = true;
+            Error result = init(hardwareElement, hardwareMap);
+            if (result != null) {
+                return result; // there's probably a better way to do this.
             }
         }
+        return null;
     }
+
+    public static Error calibrate(HardwareElement hw) {
+        if (!hw.isInitialized) {
+            return new Error(hw, 201, "Could not calibrate hardware element: " + hw.getClass().getSimpleName() + ". Hardware is not initialized.", null);
+        }
+        try {
+            hw.calibrate();
+            hw.isCalibrated = true;
+            return null;
+        } catch (Exception e) {
+            return new Error(hw, 202, "An error occurred while calibrating hardware", e);
+        }
+    }
+
+    public static Error calibrate_async(HardwareElement hw) {
+        if (!hw.isInitialized) {
+            return new Error(hw, 201, "Could not calibrate hardware element: " + hw.getClass().getSimpleName() + ". Hardware is not initialized.", null);
+        }
+        calibrationLatch = new CountDownLatch(hardwareElements.size());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    hw.calibrate();
+                    hw.isCalibrated = true;
+                } catch (Exception e) {
+                    new Error(hw, 202, "An error occurred while calibrating hardware", e);
+                } finally {
+                    calibrationLatch.countDown();
+                }
+            }
+        }).start();
+        return null;
+    }
+
+    public static void waitForCalibrations() throws InterruptedException {
+        if (calibrationLatch != null) {
+            calibrationLatch.await();
+        }
+    }
+
+    //endregion
+
+    /**
+     * Get a hardware element by its class name.
+     * WARNING: This does no checks to see if the device is working.
+     * @param className The class name of the hardware element.
+     * @return The hardware element, or null if not found.
+     */
+    private static HardwareElement getElementByClassName(String className) {
+        for (HardwareElement hardwareElement : hardwareElements) {
+            if (hardwareElement.getClass().getSimpleName().equals(className)) {
+                return hardwareElement;
+            }
+        }
+        return null; // Return null if no matching element is found
+    }
+
+    /**
+     * Reserves a piece of hardware for actions.
+     * This will prevent other actions from using the hardware.
+     * @param className The class name of the hardware element.
+     * @return The hardware element, or an error if not found.
+     */
+    public static HardwareElement ReserveHardware(ActionElement action, String className) {
+        HardwareElement hw = getElementByClassName(className);
+        if (hw == null) {
+            new Error(action,203, "Could not reserve hardware element: " + className + ". Could not find hardware.", null);
+            return null; // TODO: Throw an actual error
+        }
+        if (!hw.isInitialized) {
+            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is not initialized.", null);
+            return null;
+        }
+        if (hw.isBroken) {
+            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is broken.", null);
+            return null;
+        }
+        if (hw.isReserved) {
+            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is already reserved by another action.", null);
+            return null;
+        }
+        hw.isReserved = true;
+        HardwareReserves.put(hw, action);
+        return hw;
+    }
+
+    //region OpMode Lifecycle
 
     public static void onOpModeStart() {
         opModeActive = true;
@@ -52,7 +143,7 @@ public class HardwareManager {
                                         hardwareElement.update();
                                         Thread.sleep(2);
                                     } catch (Exception e) {
-                                        new Error(hardwareElement, 2, "An error in hardware update thread", e);
+                                        new Error(hardwareElement, 102, "An error in hardware update thread", e);
                                         return;
                                     }
                                 }
@@ -76,4 +167,5 @@ public class HardwareManager {
             hardwareElement.stop();
         }
     }
+    //endregion
 }
