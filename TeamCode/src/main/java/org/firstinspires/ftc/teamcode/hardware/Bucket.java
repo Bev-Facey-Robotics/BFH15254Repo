@@ -24,7 +24,7 @@ public class Bucket extends HardwareElement {
 
     public void calibrate() {
         this.arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        this.arm.setPower(-0.3);
+        this.arm.setPower(0.2);
         try {
             Thread.sleep(3000);
         } catch (InterruptedException e) {
