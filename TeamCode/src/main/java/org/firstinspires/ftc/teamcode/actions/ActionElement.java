@@ -7,4 +7,6 @@ import java.util.List;
 
 public abstract class ActionElement {
     public abstract void run();
+
+    public Thread runThread = null;
 }

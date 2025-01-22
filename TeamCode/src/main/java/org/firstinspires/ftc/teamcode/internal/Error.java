@@ -20,6 +20,7 @@ public class Error {
         this.exception = e;
         this.hw = hw;
         TelemetryManager.instance.AddError(this);
+        HardwareManager.GracefullyFailHardware(hw);
     }
 
     public Error (ActionElement action, int code, String message, Exception e) {
@@ -29,6 +30,7 @@ public class Error {
         this.exception = e;
         this.action = action;
         TelemetryManager.instance.AddError(this);
+        HardwareManager.StopAction(action);
     }
 
     public Error (int code, String message, ErrorTypes type, Exception e) {
