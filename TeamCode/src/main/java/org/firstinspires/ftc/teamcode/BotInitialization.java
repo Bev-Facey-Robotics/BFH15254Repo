@@ -44,7 +44,6 @@ public class BotInitialization {
         // The slide initialization must be done at the end to avoid conflicts with the arms.
         //region Slide
 
-
         // The following is for our slide. Currently our limit switch detection code is
         // commented out due to us having to remove it for height restrictions. When
         // re-enabling, uncomment this block of code, and the hardware that can be found
