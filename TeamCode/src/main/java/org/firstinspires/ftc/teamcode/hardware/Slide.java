@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.teamcode.internal.HardwareElement;
+
 /**
  * The mechanism that brings game pieces from the first stage bucket, up to the top basket
  */
@@ -56,9 +58,9 @@ public class Slide extends HardwareElement {
     public void self_test() {
     }
 
-    public void update() {
-        // Later, detection if the slide is about to kill itself should be added.
-    }
+//    public void update() {
+//        // Later, detection if the slide is about to kill itself should be added.
+//    }
 
     /**
      * Move the slide mechanism with a given power. This does have limits enabled by default.

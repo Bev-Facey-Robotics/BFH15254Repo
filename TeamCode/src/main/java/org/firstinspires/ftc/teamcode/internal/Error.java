@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.internal;
 
-import org.firstinspires.ftc.teamcode.hardware.HardwareElement;
-
 public class Error {
     public int code;
     public String message;

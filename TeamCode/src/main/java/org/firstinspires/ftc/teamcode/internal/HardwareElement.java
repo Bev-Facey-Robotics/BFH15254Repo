@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.hardware;
+package org.firstinspires.ftc.teamcode.internal;
 
-import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public abstract class HardwareElement {
@@ -8,6 +7,8 @@ public abstract class HardwareElement {
     public boolean isInitialized = false;
     public boolean isCalibrated = false;
     public boolean isBroken = false;
+
+    public Thread updateThread = null;
 
     /**
      * Use this to initialize your hardware devices and prepare to run the op mode.
@@ -30,7 +31,9 @@ public abstract class HardwareElement {
      * This runs in it's own thread, so don't be too conserved about using too much time.
      * If an error occurs, it will disable this bit of hardware.
      */
-    public abstract void update();
+    public void update() {
+        // Default implementation does nothing
+    }
 
     /**
      * If a hardware problem occurs, or when we are stopping the robot, this function will be called.

@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.internal.HardwareElement;
+
 /**
  * This collects game pieces from the floor.
  * This is part of the first stage.
@@ -58,10 +60,6 @@ public class Collector extends HardwareElement {
     }
 
     public void self_test() {
-
-    }
-
-    public void update() {
 
     }
 

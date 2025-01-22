@@ -66,7 +66,11 @@ public class TelemetryManager {
                     }
                     telemetry.addLine("Error code: " + err.code); // todo make dis better. Include the ErrorType somehow with this.
                     telemetry.addLine(err.message);
-                    telemetry.addData("Exception Details: ", err.exception);
+                    if (err.exception != null) {
+                        telemetry.addLine();
+                        telemetry.addLine("Exception Details: ");
+                        telemetry.addLine(err.exception.getMessage());
+                    }
                     telemetry.addLine();
                 }
             }

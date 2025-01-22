@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.internal.HardwareElement;
+
 public class Bucket extends HardwareElement {
     public DcMotor arm = null;
     public Servo bucket = null;
