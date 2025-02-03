@@ -39,8 +39,9 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
-public class RedSideAuto extends DeepHorOpMode {
+public class RedSideAuto extends BaseOpMode {
 
     // Data relevent to getting our current pos
     private AprilTagPosFinder TagPosFinder = new AprilTagPosFinder(); // This may be depricated later

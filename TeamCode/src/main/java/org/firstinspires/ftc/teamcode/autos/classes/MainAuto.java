@@ -39,10 +39,10 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
-import org.firstinspires.ftc.teamcode.DeepHorOpMode;
+import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-public abstract class MainAuto extends DeepHorOpMode {
+public abstract class MainAuto extends BaseOpMode {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();

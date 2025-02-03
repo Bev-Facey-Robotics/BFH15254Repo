@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.internal;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.lang.reflect.Method;
@@ -20,6 +21,7 @@ public class HardwareManager {
     private static volatile boolean opModeActive = false;
     private static CountDownLatch calibrationLatch;
     public static HardwareMap hardwareMap;
+    public static OpMode opMode = null;
 
     //region Initalization & Calibration
     public static Error init(HardwareElement hw, HardwareMap hardwareMap) {
@@ -161,6 +163,8 @@ public class HardwareManager {
             stoppedActions.add(action);
             actionHardwareMap.put(action, reservedHardware);
         }
+
+        checkAndRestartActions();
     }
 
 //    // Call this method when hardware is released

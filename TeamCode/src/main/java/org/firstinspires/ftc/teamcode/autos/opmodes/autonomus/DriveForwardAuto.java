@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
-import org.firstinspires.ftc.teamcode.DeepHorOpMode;
+import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
 @Autonomous(name="the most basic auto mode", group = "Competition Ready")
-public class DriveForwardAuto extends DeepHorOpMode {
+public class DriveForwardAuto extends BaseOpMode {
     @Override
     public void runOpMode() {
         //region Hardware Initialization
