@@ -4,14 +4,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.CountDownLatch;
 
 public class HardwareManager {
-    public static List<HardwareElement> hardwareElements = new ArrayList<HardwareElement>();
-    public static List<ActionElement> runningActionElements = new ArrayList<ActionElement>();
-    public static HashMap<HardwareElement, ActionElement> HardwareReserves = new HashMap<HardwareElement, ActionElement>();
+    public static List<HardwareElement> hardwareElements = new ArrayList<>();
+    public static List<ActionElement> runningActionElements = new ArrayList<>();
+    public static HashMap<HardwareElement, ActionElement> HardwareReserves = new HashMap<>();
+    private static List<ActionElement> stoppedActions = new ArrayList<>();
+    private static HashMap<ActionElement, List<HardwareElement>> actionHardwareMap = new HashMap<>();
+
     private static volatile boolean opModeActive = false;
     private static CountDownLatch calibrationLatch;
     public static HardwareMap hardwareMap;
@@ -121,15 +126,12 @@ public class HardwareManager {
     public static void StartAction(ActionElement action) {
         // Run the action in a seperate thread (with a try-catch)
         runningActionElements.add(action);
-        action.runThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    action.run();
-                    FinishAction(action);
-                } catch (Exception e) {
-                    new Error(action, 204, "An error occurred while running action", e);
-                }
+        action.runThread = new Thread(() -> {
+            try {
+                action.run();
+                FinishAction(action);
+            } catch (Exception e) {
+                new Error(action, 204, "An error occurred while running action", e);
             }
         });
         action.runThread.start();
@@ -144,12 +146,49 @@ public class HardwareManager {
         runningActionElements.remove(action);
         action.runThread = null;
 
-        // Release all hardware elements reserved by this action
+        List<HardwareElement> reservedHardware = new ArrayList<>();
         for (HardwareElement hardwareElement : HardwareReserves.keySet()) {
             if (HardwareReserves.get(hardwareElement) == action) {
+                reservedHardware.add(hardwareElement);
                 init(hardwareElement, hardwareMap);
                 hardwareElement.isReserved = false;
+                hardwareElement.reservedWithPriority = -1;
                 HardwareReserves.remove(hardwareElement);
+            }
+        }
+
+        if (action.autoRestart) {
+            stoppedActions.add(action);
+            actionHardwareMap.put(action, reservedHardware);
+        }
+    }
+
+//    // Call this method when hardware is released
+//    private static void releaseHardware(HardwareElement hardwareElement) {
+//        hardwareElement.isReserved = false;
+//        hardwareElement.reservedWithPriority = -1;
+//        HardwareReserves.remove(hardwareElement);
+//        checkAndRestartActions();
+//    }
+
+    private static void checkAndRestartActions() {
+        PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.priority));
+        actionQueue.addAll(stoppedActions);
+
+        while (!actionQueue.isEmpty()) {
+            ActionElement action = actionQueue.poll();
+            List<HardwareElement> reservedHardware = actionHardwareMap.get(action);
+            boolean allAvailable = true;
+            for (HardwareElement hardwareElement : reservedHardware) {
+                if (hardwareElement.isReserved) {
+                    allAvailable = false;
+                    break;
+                }
+            }
+            if (allAvailable) {
+                StartAction(action);
+                stoppedActions.remove(action);
+                actionHardwareMap.remove(action);
             }
         }
     }
@@ -171,23 +210,26 @@ public class HardwareManager {
      */
     public static HardwareElement ReserveHardware(ActionElement action, String className) {
         HardwareElement hw = getElementByClassName(className);
-        if (hw == null) {
-            new Error(action,203, "Could not reserve hardware element: " + className + ". Could not find hardware.", null);
-            return null; // TODO: Throw an actual error
-        }
-        if (!hw.isInitialized) {
-            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is not initialized.", null);
-            return null;
-        }
-        if (hw.isBroken) {
-            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is broken.", null);
+        if (hw == null || !hw.isInitialized || hw.isBroken) {
+            new Error(action, 203, "Could not reserve hardware element: " + className, null);
             return null;
         }
         if (hw.isReserved) {
-            new Error(action,203, "Could not reserve hardware element: " + className + ". Hardware is already reserved by another action.", null);
-            return null;
+            if (action.priority >= hw.reservedWithPriority) {
+                ActionElement actionToRelease = HardwareReserves.get(hw);
+                if (actionToRelease != null) {
+                    StopAction(actionToRelease);
+                } else {
+                    new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                    return null;
+                }
+            } else {
+                new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                return null;
+            }
         }
         hw.isReserved = true;
+        hw.reservedWithPriority = action.priority;
         HardwareReserves.put(hw, action);
         return hw;
     }

@@ -7,6 +7,7 @@ public abstract class HardwareElement {
     public boolean isInitialized = false;
     public boolean isCalibrated = false;
     public boolean isBroken = false;
+    public int reservedWithPriority = -1;
 
     public Thread updateThread = null;
 
