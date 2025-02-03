@@ -136,66 +136,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
 
     public void PieceAssist() {
         try {
-            // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
-            bucketTargetPosition = 0.05;
-            MoveSlidePos(-1821);
-            Thread.sleep(2000);
-            // wait for slide to move down
-            while (motorSlide.isBusy() && AssistRunning) {
-                telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
-                telemetry.update();
-                Thread.sleep(20);
-            }
-            if (!AssistRunning) return;
 
-            stage1Arm.setTargetPosition(255);
-            stage1Arm.setPower(0.3);
-            while (stage1Arm.isBusy() && AssistRunning) {
-                telemetry.addData("Arm Position", stage1Arm.getCurrentPosition());
-                telemetry.update();
-                Thread.sleep(20);
-            }
-            if (!AssistRunning) return;
-
-            MoveArmScoop(1);
-            Thread.sleep(3000);
-            if (!AssistRunning) return;
-
-            MoveArmScoop(0);
-            stage1Arm.setPower(0.1);
-            stage1Arm.setTargetPosition(5);
-            Thread.sleep(500);
-            bucketTargetPosition = -0.1;
-
-            // Move slide to the top
-            MoveSlidePos(-10800);
-            while (motorSlide.isBusy() && AssistRunning) {
-                telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
-                telemetry.update();
-                Thread.sleep(20);
-            }
-            if (!AssistRunning) return;
-
-            // Move the swing to correct
-            stage2Swing.setTargetPosition(-130);
-            stage2Swing.setPower(0.5);
-            Thread.sleep(7000);
-
-            if (!AssistRunning) return;
-
-            // dump the piece in the basket
-            bucketTargetPosition = 0.2;
-            Thread.sleep(3000);
-
-            stage2Swing.setTargetPosition(-130);
-            stage2Swing.setPower(0.3);
-            while (stage2Swing.isBusy() && AssistRunning) {
-                telemetry.addData("Arm Position", stage2Swing.getCurrentPosition());
-                telemetry.update();
-                Thread.sleep(20);
-            }
-
-            AssistRunning = false;
 
         } catch (InterruptedException e) {
             // Handle the interruption

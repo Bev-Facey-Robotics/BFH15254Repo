@@ -7,6 +7,7 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.BuildConfig;
 import org.firstinspires.ftc.teamcode.R;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,9 +18,10 @@ import java.util.Random;
 public class TelemetryManager {
     public static TelemetryManager instance = null;
 
-    public Telemetry telemetry;
+    final private Telemetry telemetry;
     final private String randomMessage;
     private List<Error> errors = new ArrayList<>();
+    private List<FunctionToLog> functionsToLog = new ArrayList<>();
 
     public TelemetryManager(Telemetry telemetry, Context context) {
         instance = this;
@@ -76,6 +78,17 @@ public class TelemetryManager {
             }
             //endregion
 
+            //region Logging
+            for (FunctionToLog variable : functionsToLog) {
+                try {
+                    Object dataToLog = variable.value.getValue();
+                    telemetry.addData(variable.name, dataToLog);
+                } catch (Exception e) {
+                    RemoveFunctionFromLogging(variable.name);
+                }
+
+            }
+            //endregion
 
             telemetry.update();
             try {
@@ -97,5 +110,22 @@ public class TelemetryManager {
     public void ClearAllErrors() {
         errors.clear();
     }
-}
 
+    public void AddFunctionToLogging(String name,LoggingFunction function) {
+        functionsToLog.add(new FunctionToLog(name, function));
+
+    }
+    public void RemoveFunctionFromLogging(String name) {
+        for (FunctionToLog variable : functionsToLog) {
+            if (variable.name.equals(name)) {
+                functionsToLog.remove(variable);
+                return;
+            }
+        }
+
+    }
+
+    public void ClearAllFunctionsFromLogging() {
+        functionsToLog.clear();
+    }
+}
