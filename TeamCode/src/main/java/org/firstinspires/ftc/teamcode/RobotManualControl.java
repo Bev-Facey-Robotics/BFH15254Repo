@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.actions.AutoPieceDelivery;
 import org.firstinspires.ftc.teamcode.actions.manual.ManualBucket;
 import org.firstinspires.ftc.teamcode.actions.manual.ManualCollector;
 import org.firstinspires.ftc.teamcode.actions.manual.ManualDrive;
@@ -28,6 +29,9 @@ public class RobotManualControl extends BaseOpMode {
     private final ManualDrive AC_Drive = new ManualDrive();
     private final ManualSlide AC_Slide = new ManualSlide();
 
+    private final AutoPieceDelivery AC_PieceDelivery = new AutoPieceDelivery();
+
+    private boolean isShareButtonPressed = false;
 
     @Override
     public void initializeHardware() {
@@ -59,8 +63,15 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.StartAction(AC_Slide);
         HardwareManager.StartAction(AC_Collector);
         HardwareManager.StartAction(AC_Bucket);
+
         while (opModeIsActive()) {
             try {
+                if (gamepad1.share && !isShareButtonPressed) {
+                    isShareButtonPressed = true;
+                    HardwareManager.StartAction(AC_PieceDelivery);
+                } else if (!gamepad1.share) {
+                    isShareButtonPressed = false;
+                }
                 Thread.sleep(20);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

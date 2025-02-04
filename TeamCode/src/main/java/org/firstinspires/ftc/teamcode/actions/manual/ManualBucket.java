@@ -33,4 +33,12 @@ public class ManualBucket extends ActionElement {
             }
         }
     }
+    @Override
+    public boolean isAutoRestart() {
+        return true;
+    }
+    @Override
+    public int getPriority() {
+        return 1;
+    }
 }

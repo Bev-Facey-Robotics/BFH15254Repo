@@ -33,6 +33,13 @@ public class ManualCollector extends ActionElement {
             }
             Thread.sleep(20);
         }
-
+    }
+    @Override
+    public boolean isAutoRestart() {
+        return true;
+    }
+    @Override
+    public int getPriority() {
+        return 1;
     }
 }

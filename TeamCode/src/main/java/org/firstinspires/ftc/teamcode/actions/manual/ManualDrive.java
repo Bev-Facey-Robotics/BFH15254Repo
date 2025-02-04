@@ -35,4 +35,12 @@ public class ManualDrive extends ActionElement {
         }
 
     }
+    @Override
+    public boolean isAutoRestart() {
+        return true;
+    }
+    @Override
+    public int getPriority() {
+        return 1;
+    }
 }

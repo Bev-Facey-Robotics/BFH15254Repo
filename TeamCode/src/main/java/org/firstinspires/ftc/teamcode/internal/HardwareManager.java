@@ -164,7 +164,7 @@ public class HardwareManager {
             }
         }
 
-        if (action.autoRestart) {
+        if (action.isAutoRestart()) {
             stoppedActions.add(action);
             actionHardwareMap.put(action, reservedHardware);
         }
@@ -181,7 +181,7 @@ public class HardwareManager {
 //    }
 
     private static void checkAndRestartActions() {
-        PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.priority));
+        PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.getPriority()));
         actionQueue.addAll(stoppedActions);
 
         while (!actionQueue.isEmpty()) {
@@ -224,7 +224,7 @@ public class HardwareManager {
             return null;
         }
         if (hw.isReserved) {
-            if (action.priority >= hw.reservedWithPriority) {
+            if (action.getPriority() >= hw.reservedWithPriority) {
                 ActionElement actionToRelease = HardwareReserves.get(hw);
                 if (actionToRelease != null) {
                     StopAction(actionToRelease);
@@ -238,7 +238,7 @@ public class HardwareManager {
             }
         }
         hw.isReserved = true;
-        hw.reservedWithPriority = action.priority;
+        hw.reservedWithPriority = action.getPriority();
         HardwareReserves.put(hw, action);
         return hw;
     }

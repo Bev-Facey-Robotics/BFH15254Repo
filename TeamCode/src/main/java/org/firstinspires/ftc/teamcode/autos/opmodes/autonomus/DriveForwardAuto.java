@@ -1,40 +1,61 @@
-//package org.firstinspires.ftc.teamcode.autos.opmodes.autonomus;
-//
-//import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-//import com.qualcomm.robotcore.util.ElapsedTime;
-//
-//import org.firstinspires.ftc.teamcode.BotInitialization;
-//import org.firstinspires.ftc.teamcode.CrossOpModeData;
-//import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
-//
-//@Autonomous(name="the most basic auto mode", group = "Competition Ready")
-//public class DriveForwardAuto extends BaseOpMode {
-//    @Override
-//    public void runOpMode() {
-//        //region Hardware Initialization
-//        ConfigureHardware(true);
-//        if (!CrossOpModeData.isInitialized) {
-//            BotInitialization.InitializeRobot(this);
-//            CrossOpModeData.isInitialized = true;
-//        }
-//        //endregion
-//
-//        stage1Arm.setTargetPosition(255);
-//        stage1Arm.setPower(0.3);
-//
-//        waitForStart();
-//
-//        ElapsedTime runtime = new ElapsedTime();
-//        MoveRobot(1, 0, 0);
-//
-//        while (opModeIsActive() && runtime.seconds() < 1.0) {
-//            UpdateMoveRobot(0.5);
-//            telemetry.addData("Status", "Running");
-//            telemetry.addData("Time", runtime.seconds());
-//            telemetry.update();
-//        }
-//
-//        // Stop the robot after 3 seconds
-//        MoveRobot(0, 0, 0);
-//    }
-//}
+package org.firstinspires.ftc.teamcode.autos.opmodes.autonomus;
+
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+
+import org.firstinspires.ftc.teamcode.actions.DriveForward;
+import org.firstinspires.ftc.teamcode.hardware.Bucket;
+import org.firstinspires.ftc.teamcode.hardware.Collector;
+import org.firstinspires.ftc.teamcode.hardware.Drive;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
+import org.firstinspires.ftc.teamcode.internal.HardwareManager;
+
+/**
+ * This drives the robot forwards for 1 second to get into the zone for some points.
+ * This also acts as a basic calibrator.
+ */
+@Autonomous(name="the most basic auto mode", group = "Competition Ready")
+public class DriveForwardAuto extends BaseOpMode {
+    private final Bucket HW_Bucket = new Bucket();
+    private final Collector HW_Collector = new Collector();
+    private final Drive HW_Drive = new Drive();
+    private final Slide HW_Slide = new Slide();
+
+    @Override
+    public void initializeHardware() {
+        // Initialize the hardware
+        HardwareManager.init(HW_Bucket, hardwareMap);
+        HardwareManager.init(HW_Collector, hardwareMap);
+        HardwareManager.init(HW_Drive, hardwareMap);
+        HardwareManager.init(HW_Slide, hardwareMap);
+    }
+
+    @Override
+    public void calibrateHardware() {
+        // Calibrate the bare minimum hardware hardware
+        HardwareManager.calibrate(HW_Drive);
+    }
+
+    @Override
+    public void main() {
+        // Drive forward for 1 second
+        DriveForward driveForward = new DriveForward();
+        HardwareManager.StartAction(driveForward);
+        try {
+            Thread.sleep(3000); // TODO: This should be replaced with an actual wait for the action to finish.
+        } catch (InterruptedException e) {
+            return;
+        }
+    }
+
+    private void calibrateRest() {
+        HardwareManager.calibrate_async(HW_Bucket);
+        HardwareManager.calibrate_async(HW_Collector);
+        try {
+            HardwareManager.waitForCalibrations();
+        } catch (InterruptedException e) {
+            return;
+        }
+        HardwareManager.calibrate(HW_Slide);
+    }
+}

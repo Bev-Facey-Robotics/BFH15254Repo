@@ -67,4 +67,12 @@ public class AutoPieceDelivery extends ActionElement {
             Thread.sleep(20);
         }
     }
+    @Override
+    public boolean isAutoRestart() {
+        return false;
+    }
+    @Override
+    public int getPriority() {
+        return 9;
+    }
 }
