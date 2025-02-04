@@ -16,9 +16,9 @@ public class ManualBucket extends ActionElement {
 
         while (true) {
             if (HardwareManager.opMode.gamepad2.dpad_down) {
-                bucket.bucketTargetPosition = -11;
+                verticalTarget = -11;
             } else if (HardwareManager.opMode.gamepad2.dpad_up) {
-                bucket.bucketTargetPosition = -130;
+                verticalTarget= -130;
             }
 
             bucket.MoveArmToPosition(verticalTarget, 0.5);

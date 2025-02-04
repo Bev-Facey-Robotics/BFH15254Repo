@@ -46,7 +46,7 @@ public class RobotManualControl extends BaseOpMode {
         try {
             HardwareManager.waitForCalibrations();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            return;
         }
         HardwareManager.calibrate(HW_Slide);
         // unsure if this is needed with my lib, but better safe than sorry.
@@ -56,6 +56,9 @@ public class RobotManualControl extends BaseOpMode {
     @Override
     public void main() {
         HardwareManager.StartAction(AC_Drive);
+        HardwareManager.StartAction(AC_Slide);
+        HardwareManager.StartAction(AC_Collector);
+        HardwareManager.StartAction(AC_Bucket);
         while (opModeIsActive()) {
             try {
                 Thread.sleep(20);

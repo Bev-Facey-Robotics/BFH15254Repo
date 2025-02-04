@@ -4,15 +4,34 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 
 public abstract class BaseOpMode extends LinearOpMode {
-    public TelemetryManager telemetryManager = new TelemetryManager(telemetry, hardwareMap.appContext);
+    public TelemetryManager telemetryManager = null;
 
     public void runOpMode() {
+        telemetryManager = new TelemetryManager(telemetry, hardwareMap.appContext);
+        telemetryManager.StartTelemetryLoop();
         HardwareManager.opMode = this;
+        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
+        telemetryManager.ModifyMessagesLogged("Robot Status", "Initializing Hardware");
         initializeHardware();
+        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
+        telemetryManager.ModifyMessagesLogged("Robot Status", "Calibrating Hardware");
         calibrateHardware();
+        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
+        telemetryManager.ModifyMessagesLogged("Robot Status", "Waiting for start...");
         waitForStart();
+        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
         HardwareManager.onOpModeStart();
+        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
+        telemetryManager.ModifyMessagesLogged("Robot Status", "Running!");
         main();
+        telemetryManager.ModifyMessagesLogged("Robot Status", "Stopping...");
+        HardwareManager.onOpModeStop();
+        telemetryManager.StopTelemetryLoop();
+    }
+
+    private void stopOpMode() {
+        HardwareManager.onOpModeStop();
+        telemetryManager.StopTelemetryLoop();
     }
 
     /**

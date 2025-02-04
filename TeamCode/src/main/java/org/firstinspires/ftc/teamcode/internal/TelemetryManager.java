@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.BuildConfig;
 import org.firstinspires.ftc.teamcode.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -21,6 +22,9 @@ public class TelemetryManager {
     final private String randomMessage;
     private List<Error> errors = new ArrayList<>();
     private List<FunctionToLog> functionsToLog = new ArrayList<>();
+    private HashMap<String, String> messagesToLog = new HashMap<>();
+
+    private Thread thread = null;
 
     public TelemetryManager(Telemetry telemetry, Context context) {
         instance = this;
@@ -87,20 +91,32 @@ public class TelemetryManager {
                 }
 
             }
+            for (String key : messagesToLog.keySet()) {
+                telemetry.addData(key, messagesToLog.get(key));
+            }
             //endregion
 
             telemetry.update();
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                return;
             }
         }
     }
 
     public void StartTelemetryLoop() {
-        Thread thread = new Thread(this::TelemetryLoop);
+        thread = new Thread(this::TelemetryLoop);
         thread.start();
+    }
+
+    public void StopTelemetryLoop() {
+        try {
+            thread.interrupt();
+        } catch (NullPointerException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void AddError(Error err) {
@@ -119,6 +135,14 @@ public class TelemetryManager {
         functionsToLog.add(new FunctionToLog(name, function));
 
     }
+
+    public void ModifyMessagesLogged(String name, String message) {
+        messagesToLog.put(name, message);
+    }
+    public void RemoveMessageLogged(String name) {
+        messagesToLog.remove(name);
+    }
+
     public void RemoveFunctionFromLogging(String name) {
         for (FunctionToLog variable : functionsToLog) {
             if (variable.name.equals(name)) {

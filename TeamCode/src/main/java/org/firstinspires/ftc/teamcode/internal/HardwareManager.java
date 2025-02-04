@@ -68,7 +68,12 @@ public class HardwareManager {
         if (!hw.isInitialized) {
             return new Error(hw, 201, "Could not calibrate hardware element: " + hw.getClass().getSimpleName() + ". Hardware is not initialized.", null);
         }
-        calibrationLatch = new CountDownLatch(hardwareElements.size());
+        if (calibrationLatch == null) {
+            calibrationLatch = new CountDownLatch(1);
+        } else {
+            calibrationLatch = new CountDownLatch((int)calibrationLatch.getCount()+1);
+        }
+
         new Thread(new Runnable() {
             @Override
             public void run() {
