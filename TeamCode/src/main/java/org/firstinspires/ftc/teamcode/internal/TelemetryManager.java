@@ -7,7 +7,6 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.BuildConfig;
 import org.firstinspires.ftc.teamcode.R;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -97,6 +96,11 @@ public class TelemetryManager {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public void StartTelemetryLoop() {
+        Thread thread = new Thread(this::TelemetryLoop);
+        thread.start();
     }
 
     public void AddError(Error err) {

@@ -37,7 +37,6 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
-import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -53,9 +52,9 @@ public abstract class MainAuto extends BaseOpMode {
     @Override
     public void runOpMode() {
         //region Hardware Initialization
-        ConfigureHardware(false);
+        //ConfigureHardware(false);
         if (!CrossOpModeData.isInitialized) {
-            BotInitialization.InitializeRobot(this);
+            //BotInitialization.InitializeRobot(this);
             CrossOpModeData.isInitialized = true;
         }
         //endregion
@@ -128,5 +127,16 @@ public abstract class MainAuto extends BaseOpMode {
     }
 
     public abstract TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose);
+
+    public void main() {
+        // This is the main method for the auto
+    }
+    public void initializeHardware() {
+        // This is the method to initialize the hardware
+    }
+
+    public void calibrateHardware() {
+        // This is the method to calibrate the hardware
+    }
 
 }   // end class

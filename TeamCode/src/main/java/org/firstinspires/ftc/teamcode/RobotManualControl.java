@@ -3,80 +3,67 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.actions.manual.ManualBucket;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualCollector;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualDrive;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualSlide;
+import org.firstinspires.ftc.teamcode.hardware.Bucket;
+import org.firstinspires.ftc.teamcode.hardware.Collector;
+import org.firstinspires.ftc.teamcode.hardware.Drive;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
+import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 @TeleOp(name = "Robot Manual Control", group = "Competition Ready")
 public class RobotManualControl extends BaseOpMode {
-    //region Hardware
+    // Hardwarez
+    private final Bucket HW_Bucket = new Bucket();
+    private final Collector HW_Collector = new Collector();
+    private final Drive HW_Drive = new Drive();
+    private final Slide HW_Slide = new Slide();
 
-    public double armSmallHorizontal = 0.52;
-    public double armVertical = 0.57;
-    //endregion
-
-    // Targets
-
-
-    // Held down checks
-    private boolean isBackheld = false;
-
-    // Bot Config
+    // Manual Actions
+    private final ManualBucket AC_Bucket = new ManualBucket();
+    private final ManualCollector AC_Collector = new ManualCollector();
+    private final ManualDrive AC_Drive = new ManualDrive();
+    private final ManualSlide AC_Slide = new ManualSlide();
 
 
     @Override
-    public void runOpMode() {
-        initOpMode();
-        waitForStart();
+    public void initializeHardware() {
+        // Initialize the hardware
+        HardwareManager.init(HW_Bucket, hardwareMap);
+        HardwareManager.init(HW_Collector, hardwareMap);
+        HardwareManager.init(HW_Drive, hardwareMap);
+        HardwareManager.init(HW_Slide, hardwareMap);
+    }
+
+    @Override
+    public void calibrateHardware() {
+        // Calibrate the hardware
+        HardwareManager.calibrate_async(HW_Bucket);
+        HardwareManager.calibrate_async(HW_Collector);
+        try {
+            HardwareManager.waitForCalibrations();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        HardwareManager.calibrate(HW_Slide);
+        // unsure if this is needed with my lib, but better safe than sorry.
+        HardwareManager.calibrate(HW_Drive);
+    }
+
+    @Override
+    public void main() {
+        HardwareManager.StartAction(AC_Drive);
         while (opModeIsActive()) {
-            loopOpMode();
-        }
-    }
-
-    //region Initialization
-    public void initOpMode() {
-    }
-    //endregion
-
-    //region Primary Loop
-    public void loopOpMode() {
-        //region Controller 2
-        boolean isSlowModeActive = !gamepad2.left_bumper;
-
-
-        //region Slide / Second Stage
-        // Slide
-
-        //endregion
-
-        //region Arm Assist
-        if (gamepad2.share || gamepad2.back) {
-            if (!isBackheld) {
-                isBackheld = true;
-                if (AssistRunning) {
-                    StopPieceAssist();
-                } else {
-                    StartPieceAssist();
-                }
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
-        } else {
-            isBackheld = false;
         }
-        //endregion
-
-        //endregion
-
-        //region Telemetry
-        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
-        telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
-        telemetry.addData("Assist", AssistRunning);
-//        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
-//        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
-
-        telemetry.addLine("Arm Vertical: " + stage1Arm.getCurrentPosition());
-
-        telemetry.update();
-        //endregion
     }
-    //endregion
 
 }
 
