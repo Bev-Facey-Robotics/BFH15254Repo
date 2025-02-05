@@ -10,7 +10,7 @@ public class ManualSlide extends ActionElement {
         // Reserve the hardware
         Slide slide = (Slide) HardwareManager.ReserveHardware(this, "Slide");
 
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             double slidePower = HardwareManager.opMode.gamepad2.right_trigger - HardwareManager.opMode.gamepad2.left_trigger;
             slide.MovePower(slidePower);
             Thread.sleep(20);

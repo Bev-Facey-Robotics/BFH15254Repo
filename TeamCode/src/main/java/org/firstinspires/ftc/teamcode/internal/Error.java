@@ -28,7 +28,9 @@ public class Error {
         this.exception = e;
         this.action = action;
         TelemetryManager.instance.AddError(this);
-        HardwareManager.StopAction(action);
+        if (code != 205) {
+            HardwareManager.StopAction(action);
+        }
     }
 
     public Error (int code, String message, ErrorTypes type, Exception e) {

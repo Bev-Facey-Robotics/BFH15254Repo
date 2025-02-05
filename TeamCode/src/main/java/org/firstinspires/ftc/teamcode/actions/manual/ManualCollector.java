@@ -10,7 +10,7 @@ public class ManualCollector extends ActionElement {
         // Reserve the hardware
         Collector collector = (Collector) HardwareManager.ReserveHardware(this,"Collector");
 
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             // Scoop
             double armScoop = (HardwareManager.opMode.gamepad2.b ? 1 : 0) + (HardwareManager.opMode.gamepad2.a ? -1 : 0);
             collector.RotateScoop(armScoop);

@@ -13,3 +13,4 @@ error 201: generic action error
 error 202: action failed to initialize
 error 203: action failed to reserve hardware
 error 204: action failed to execute
+error 205: action failed to stop

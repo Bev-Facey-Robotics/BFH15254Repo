@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * This class handles telemetry and error management for the robot.
@@ -20,7 +21,7 @@ public class TelemetryManager {
 
     final private Telemetry telemetry;
     final private String randomMessage;
-    private List<Error> errors = new ArrayList<>();
+    private List<Error> errors = new CopyOnWriteArrayList<>();
     private List<FunctionToLog> functionsToLog = new ArrayList<>();
     private HashMap<String, String> messagesToLog = new HashMap<>();
 
@@ -42,18 +43,23 @@ public class TelemetryManager {
             telemetry.addLine("Build Date: " + BuildConfig.BUILD_DATE);
             telemetry.addLine(randomMessage);
             telemetry.addLine();
+
             //region Error Handling
             if (!errors.isEmpty()) {
-                // TODO: Add color
                 telemetry.addLine("An error has occurred!");
-                telemetry.addLine("This will be logged to the disk."); // TODO: make this true
+                telemetry.addLine("This will be logged to the disk.");
                 telemetry.addLine();
+
                 for (Error err : errors) {
                     switch (err.type) {
                         case HARDWARE_ERROR:
                             telemetry.addLine("A hardware exception has occurred.");
                             telemetry.addLine("The hardware element that caused this error is now disabled.");
-                            telemetry.addLine("Hardware Element: " + err.hw.getClass().getSimpleName());
+                            if (err.hw != null) {
+                                telemetry.addLine("Hardware Element: " + err.hw.getClass().getSimpleName());
+                            } else {
+                                telemetry.addLine("Hardware Element: Unknown");
+                            }
                             break;
                         case ACTION_ERROR:
                             telemetry.addLine("An exception with a running action has occurred.");
@@ -69,7 +75,7 @@ public class TelemetryManager {
                             telemetry.addLine("An unknown exception has occurred.");
                             break;
                     }
-                    telemetry.addLine("Error code: " + err.code); // todo make dis better. Include the ErrorType somehow with this.
+                    telemetry.addLine("Error code: " + err.code);
                     telemetry.addLine(err.message);
                     if (err.exception != null) {
                         telemetry.addLine();
@@ -82,17 +88,24 @@ public class TelemetryManager {
             //endregion
 
             //region Logging
-            for (FunctionToLog variable : functionsToLog) {
-                try {
-                    Object dataToLog = variable.value.getValue();
-                    telemetry.addData(variable.name, dataToLog);
-                } catch (Exception e) {
-                    RemoveFunctionFromLogging(variable.name);
+            try {
+                synchronized (functionsToLog) {
+                    for (FunctionToLog variable : functionsToLog) {
+                        try {
+                            Object dataToLog = variable.value.getValue();
+                            telemetry.addData(variable.name, dataToLog);
+                        } catch (Exception e) {
+                            RemoveFunctionFromLogging(variable.name);
+                        }
+                    }
                 }
-
-            }
-            for (String key : messagesToLog.keySet()) {
-                telemetry.addData(key, messagesToLog.get(key));
+                synchronized (messagesToLog) {
+                    for (String key : messagesToLog.keySet()) {
+                        telemetry.addData(key, messagesToLog.get(key));
+                    }
+                }
+            } catch (Exception e) {
+                //blank
             }
             //endregion
 

@@ -14,7 +14,7 @@ public class ManualBucket extends ActionElement {
         // Reserve the hardware
         Bucket bucket = (Bucket) HardwareManager.ReserveHardware(this, "Bucket");
 
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             if (HardwareManager.opMode.gamepad2.dpad_down) {
                 verticalTarget = -11;
             } else if (HardwareManager.opMode.gamepad2.dpad_up) {

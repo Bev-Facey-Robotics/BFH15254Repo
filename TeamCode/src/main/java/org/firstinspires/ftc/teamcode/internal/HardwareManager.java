@@ -7,7 +7,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.CountDownLatch;
 
@@ -131,17 +133,20 @@ public class HardwareManager {
     //region Actions
 
     public static void StartAction(ActionElement action) {
-        // Run the action in a seperate thread (with a try-catch)
-        runningActionElements.add(action);
+        // Run the action in a separate thread (with a try-catch-finally)
         action.runThread = new Thread(() -> {
             try {
                 action.run();
-                FinishAction(action);
+            } catch (InterruptedException ignored) {
+                // Thread interruption handled by finally block
             } catch (Exception e) {
                 new Error(action, 204, "An error occurred while running action", e);
+            } finally {
+                FinishAction(action);
             }
         });
         action.runThread.start();
+        runningActionElements.add(action);
     }
 
     /**
@@ -150,23 +155,51 @@ public class HardwareManager {
      * @param action The action to finish.
      */
     private static void FinishAction(ActionElement action) {
-        runningActionElements.remove(action);
-        action.runThread = null;
+        synchronized (runningActionElements) {
+            runningActionElements.remove(action);
+        }
 
-        List<HardwareElement> reservedHardware = new ArrayList<>();
-        for (HardwareElement hardwareElement : HardwareReserves.keySet()) {
-            if (HardwareReserves.get(hardwareElement) == action) {
-                reservedHardware.add(hardwareElement);
-                init(hardwareElement, hardwareMap);
-                hardwareElement.isReserved = false;
-                hardwareElement.reservedWithPriority = -1;
-                HardwareReserves.remove(hardwareElement);
+        Thread actionThread = action.runThread;
+        if (actionThread != null && actionThread.isAlive()) {
+            // Avoid interrupting/joining the current thread
+            if (Thread.currentThread() != actionThread) {
+                actionThread.interrupt();
+                try {
+                    actionThread.join(3000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    new Error(action, 205, "Interrupted waiting for action to stop", e);
+                }
+                if (actionThread.isAlive()) {
+                    new Error(action, 205, "Action stop timeout", null);
+                }
             }
         }
 
+        // Release hardware AFTER ensuring thread is stopped
+        List<HardwareElement> reservedHardware = new ArrayList<>();
+        synchronized (HardwareReserves) {
+            Iterator<Map.Entry<HardwareElement, ActionElement>> iterator = HardwareReserves.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<HardwareElement, ActionElement> entry = iterator.next();
+                if (entry.getValue() == action) {
+                    HardwareElement hw = entry.getKey();
+                    hw.isReserved = false;
+                    hw.reservedWithPriority = -1;
+                    reservedHardware.add(hw);
+                    iterator.remove();
+                }
+            }
+        }
+
+        // Handle auto-restart logic safely
         if (action.isAutoRestart()) {
-            stoppedActions.add(action);
-            actionHardwareMap.put(action, reservedHardware);
+            synchronized (stoppedActions) {
+                stoppedActions.add(action);
+            }
+            synchronized (actionHardwareMap) {
+                actionHardwareMap.put(action, reservedHardware);
+            }
         }
 
         checkAndRestartActions();
@@ -181,34 +214,61 @@ public class HardwareManager {
 //    }
 
     private static void checkAndRestartActions() {
+        List<ActionElement> copyStoppedActions;
+        synchronized (stoppedActions) {
+            copyStoppedActions = new ArrayList<>(stoppedActions); // Thread-safe copy
+        }
+
         PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.getPriority()));
-        actionQueue.addAll(stoppedActions);
+        actionQueue.addAll(copyStoppedActions);
 
         while (!actionQueue.isEmpty()) {
             ActionElement action = actionQueue.poll();
-            List<HardwareElement> reservedHardware = actionHardwareMap.get(action);
-            boolean allAvailable = true;
-            for (HardwareElement hardwareElement : reservedHardware) {
-                if (hardwareElement.isReserved) {
-                    allAvailable = false;
-                    break;
-                }
+            List<HardwareElement> reservedHardware;
+            synchronized (actionHardwareMap) {
+                reservedHardware = actionHardwareMap.get(action);
             }
+
+            boolean allAvailable = true;
+            if (reservedHardware != null) {
+                for (HardwareElement hardwareElement : reservedHardware) {
+                    if (hardwareElement.isReserved) {
+                        allAvailable = false;
+                        break;
+                    }
+                }
+            } else {
+                allAvailable = false;
+            }
+
             if (allAvailable) {
+                synchronized (stoppedActions) {
+                    stoppedActions.remove(action);
+                }
+                synchronized (actionHardwareMap) {
+                    actionHardwareMap.remove(action);
+                }
                 StartAction(action);
-                stoppedActions.remove(action);
-                actionHardwareMap.remove(action);
             }
         }
     }
+
 
     /**
      * Forcibly stops an action and releases all hardware elements reserved by it.
      * @param action The action to stop.
      */
     public static void StopAction(ActionElement action) {
-        action.runThread.interrupt();
-        FinishAction(action);
+        try {
+            if (action.runThread != null && action.runThread.isAlive()) {
+                action.runThread.interrupt();
+            }
+            FinishAction(action);
+        } catch (Exception e) {
+            new Error(action, 205, "An error occurred while stopping action", e);
+            throw new RuntimeException(e);
+        }
+
     }
 
     /**
@@ -218,29 +278,39 @@ public class HardwareManager {
      * @return The hardware element, or an error if not found.
      */
     public static HardwareElement ReserveHardware(ActionElement action, String className) {
-        HardwareElement hw = getElementByClassName(className);
-        if (hw == null || !hw.isInitialized || hw.isBroken) {
-            new Error(action, 203, "Could not reserve hardware element: " + className, null);
-            return null;
-        }
-        if (hw.isReserved) {
-            if (action.getPriority() >= hw.reservedWithPriority) {
-                ActionElement actionToRelease = HardwareReserves.get(hw);
-                if (actionToRelease != null) {
-                    StopAction(actionToRelease);
+        try {
+            HardwareElement hw = getElementByClassName(className);
+            if (hw == null || !hw.isInitialized || hw.isBroken) {
+                new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                return null;
+            }
+            if (hw.isReserved) {
+                if (action.getPriority() >= hw.reservedWithPriority) {
+                    ActionElement actionToRelease = HardwareReserves.get(hw);
+                    if (actionToRelease != null) {
+                        try {
+                            StopAction(actionToRelease);
+                        } catch (Exception e) {
+                            new Error(action, 203, "Could not reserve hardware element: " + className, e);
+                            return null;
+                        }
+                    } else {
+                        new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                        return null;
+                    }
                 } else {
                     new Error(action, 203, "Could not reserve hardware element: " + className, null);
                     return null;
                 }
-            } else {
-                new Error(action, 203, "Could not reserve hardware element: " + className, null);
-                return null;
             }
+            hw.isReserved = true;
+            hw.reservedWithPriority = action.getPriority();
+            HardwareReserves.put(hw, action);
+            return hw;
+        } catch (Exception e) {
+            new Error(action, 203, "Could not reserve hardware element: " + className, null);
+            return null;
         }
-        hw.isReserved = true;
-        hw.reservedWithPriority = action.getPriority();
-        HardwareReserves.put(hw, action);
-        return hw;
     }
     //endregion
 

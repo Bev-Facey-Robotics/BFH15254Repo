@@ -12,7 +12,7 @@ public class ManualDrive extends ActionElement {
         // Reserve the hardware
         Drive drive = (Drive) HardwareManager.ReserveHardware(this,"Drive");
 
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
 
             double speed = 1.0;
             if (HardwareManager.opMode.gamepad1.left_trigger > 0.15) {

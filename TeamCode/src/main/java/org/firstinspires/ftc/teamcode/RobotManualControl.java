@@ -65,17 +65,18 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.StartAction(AC_Bucket);
 
         while (opModeIsActive()) {
-            try {
+
                 if (gamepad1.share && !isShareButtonPressed) {
                     isShareButtonPressed = true;
                     HardwareManager.StartAction(AC_PieceDelivery);
                 } else if (!gamepad1.share) {
                     isShareButtonPressed = false;
                 }
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
         }
     }
 
