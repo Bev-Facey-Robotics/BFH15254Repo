@@ -201,7 +201,7 @@ public abstract class MainAuto extends DeepHorOpMode {
         }
     }
 
-    //Method to make lowering the slide easier
+    //Method to lower the slide easier
     public Action slideDown () {
         return new slideDown();
     }
@@ -218,7 +218,7 @@ public abstract class MainAuto extends DeepHorOpMode {
             }
     }
 
-    //Class for dropping the piece
+    //Class for dropping the sample
     public class bucketPlace implements Action {
         private boolean initialized = false;
 
@@ -246,21 +246,39 @@ public abstract class MainAuto extends DeepHorOpMode {
         //Actions with telem
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
-                stage2Swing
+                stage2Swing.setPower(-0.1);
                 initialized = true;
             }
-    }
+
+        double bucketArmPos = stage2Swing.getCurrentPosition();
+            packet.put("SwingPos", bucketArmPos);
+
+            return false;
+        }
 
     //Class for sample intake
     public class sampleGrab implements Action {
         private boolean initialized = false;
-
-        //Actions with telem
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
-                stage1Arm.setPower(-0.8);
-                initialized = true;
+                stage1Scoop.setPower(1.0);
+                sleep(1500);
+                return true;
+            } else {
+                return false;
             }
+
+        }
+
+    //Method for sample intake
+    public Action sampleGrab () {
+        return new sampleGrab();
+
+
+    }
+
+
+
     }
 
     //Class for piece transfer
@@ -270,9 +288,21 @@ public abstract class MainAuto extends DeepHorOpMode {
         //Actions with telem
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
-                stage1Arm.setPower(-0.8);
+                bucketTargetPosition = 0.05;
+                MoveSlidePos(-1821);
+
+
+
                 initialized = true;
+
+                //moves the intake to transfer to the bucket
+                stage1Arm.setTargetPosition(255);
+                stage1Arm.setPower(0.3);
+
+
             }
+
     }
 
-}   // end class
+}
+// end class
