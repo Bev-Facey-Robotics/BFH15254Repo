@@ -32,8 +32,15 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
@@ -42,12 +49,17 @@ import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
+
 public abstract class MainAuto extends DeepHorOpMode {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     private MecanumDrive mecanumDrive = null; // Road Runner
     //endregion
+
+    //Feedback loop for the Robot to have a greater degree of accurcy while following RR trajectories
+
+
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -87,6 +99,9 @@ public abstract class MainAuto extends DeepHorOpMode {
             telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
             telemetry.update();
         }
+
+
+
 
         if (isStopRequested()) {
             return;
@@ -128,5 +143,31 @@ public abstract class MainAuto extends DeepHorOpMode {
     }
 
     public abstract TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose);
+
+
+    //Roadrunner Actions, such as raising and lowering slides, implementing bucket states (raised, lowered and dropping), and intake + transfer shit
+    public class SlideUp implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage1Arm.setPower(0.8);
+                initialized = true;
+            }
+
+            //Look to see where the slides are
+            double SlidePos = stage1Arm.getCurrentPosition();
+            packet.put("SlidePos", SlidePos);
+
+            //Logic to make it go up until telem limits are reached
+            if (SlidePos < -10000) {
+                return true;
+            } else {
+                stage1Arm.setPower(0.5);
+                return false;
+            }
+        }
+    }
 
 }   // end class
