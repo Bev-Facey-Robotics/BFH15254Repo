@@ -146,7 +146,9 @@ public abstract class MainAuto extends DeepHorOpMode {
 
 
     //Roadrunner Actions, such as raising and lowering slides, implementing bucket states (raised, lowered and dropping), and intake + transfer shit
-    public class SlideUp implements Action {
+
+    //Raising slide action
+    public class slideUp implements Action {
         private boolean initialized = false;
 
         //Actions with telem
@@ -169,5 +171,49 @@ public abstract class MainAuto extends DeepHorOpMode {
             }
         }
     }
+
+    //Method to make raising the slide easier
+    public Action slideUp() {
+        return new slideUp();
+    }
+
+    public class slideDown implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage1Arm.setPower(-0.8);
+                initialized = true;
+            }
+
+            //Look to see where the slides are
+            double SlidePos = stage1Arm.getCurrentPosition();
+            packet.put("SlidePos", SlidePos);
+
+            //Logic to make it go up until telem limits are reached
+            if (SlidePos > 0) {
+                return true;
+            } else {
+                stage1Arm.setPower(-0.5);
+                return false;
+            }
+        }
+    }
+
+    //Method to make lowering the slide easier
+    public Action slideDown () {
+        return new slideDown();
+    }
+
+    //Class for raising the bucket
+
+    //Class for dropping the piece
+
+    //Class for lowering the bucket
+
+    //Class for sample intake
+
+    //Class for piece transfer
 
 }   // end class
