@@ -187,7 +187,7 @@ public abstract class MainAuto extends DeepHorOpMode {
                 initialized = true;
             }
 
-            //Look to see where the slides are
+            //Look to see where the slides are and put it on the driver station
             double SlidePos = stage1Arm.getCurrentPosition();
             packet.put("SlidePos", SlidePos);
 
@@ -207,13 +207,72 @@ public abstract class MainAuto extends DeepHorOpMode {
     }
 
     //Class for raising the bucket
+    public class bucketUp implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage2Swing
+                initialized = true;
+            }
+    }
 
     //Class for dropping the piece
+    public class bucketPlace implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage2Bucket.setPosition(0.1);
+                initialized = true;
+            }
+
+        double piecePlace = stage2Bucket.getPosition();
+        packet.put("BucketPos", piecePlace);
+        if (piecePlace != 0.3) {
+            return true;
+        } else {
+            stage2Bucket.setPosition(0.3);
+            return false;
+        }
+    }
 
     //Class for lowering the bucket
+    public class bucketDown implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage2Swing
+                initialized = true;
+            }
+    }
 
     //Class for sample intake
+    public class sampleGrab implements Action {
+        private boolean initialized = false;
+
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage1Arm.setPower(-0.8);
+                initialized = true;
+            }
+    }
 
     //Class for piece transfer
+    public class pieceSwap implements Action {
+        private boolean initialized = false;
+///*TODO: Borrow Share functionality and put in this action
+        //Actions with telem
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!initialized) {
+                stage1Arm.setPower(-0.8);
+                initialized = true;
+            }
+    }
 
 }   // end class
