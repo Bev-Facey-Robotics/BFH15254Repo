@@ -42,6 +42,7 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.BotInitialization;
@@ -57,7 +58,6 @@ public abstract class MainAuto extends DeepHorOpMode {
     private MecanumDrive mecanumDrive = null; // Road Runner
     //endregion
 
-    //Feedback loop for the Robot to have a greater degree of accurcy while following RR trajectories
 
 
 
@@ -136,8 +136,14 @@ public abstract class MainAuto extends DeepHorOpMode {
         });
 
 
-        Actions.runBlocking(parkingRun.build());
+
         while (opModeIsActive()) {
+
+            // To make sure that the piece isn't flung out of the basket
+            if (!stage2BucketSync) {
+                StartBucketSync();
+            }
+
             telemetry.addLine("Finished!");
         }
     }
@@ -192,7 +198,7 @@ public abstract class MainAuto extends DeepHorOpMode {
             packet.put("SlidePos", SlidePos);
 
             //Logic to make it go up until telem limits are reached
-            if (SlidePos > 0) {
+            if (SlidePos > 50) {
                 return true;
             } else {
                 stage1Arm.setPower(-0.5);
@@ -205,36 +211,39 @@ public abstract class MainAuto extends DeepHorOpMode {
     public Action slideDown () {
         return new slideDown();
     }
+        
 
-    //Class for raising the bucket
-    public class bucketUp implements Action {
-        private boolean initialized = false;
-
-        //Actions with telem
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!initialized) {
-                stage2Swing
-                initialized = true;
-            }
-    }
-
-    //Class for dropping the sample
+    //Class for raising the second stage arm + bucket, them dropping the sample
     public class bucketPlace implements Action {
         private boolean initialized = false;
 
         //Actions with telem
         public boolean run(@NonNull TelemetryPacket packet) {
             if (!initialized) {
-                stage2Bucket.setPosition(0.1);
+                //Raise stage 2 arm
+                double verticalTarget = -130;
+                stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                stage2Swing.setTargetPosition((int) verticalTarget);
+                stage2Swing.setPower(0.5);
+                //Raise stage 2 bucket
+                bucketTargetPosition = 0.05;
+                stage2Bucket.setPosition(bucketTargetPosition);
+                sleep(500);
+
+            //Wait for sample to be dropped into basket
+                bucketTargetPosition = 0.25;
+                stage2Bucket.setPosition(bucketTargetPosition);
+                sleep(1500);
                 initialized = true;
             }
 
         double piecePlace = stage2Bucket.getPosition();
         packet.put("BucketPos", piecePlace);
-        if (piecePlace != 0.3) {
+        if (piecePlace == 0.25) {
             return true;
         } else {
-            stage2Bucket.setPosition(0.3);
+            bucketTargetPosition = 0.25;
+            stage2Swing.setTargetPosition(-11);
             return false;
         }
     }
@@ -256,6 +265,8 @@ public abstract class MainAuto extends DeepHorOpMode {
             return false;
         }
 
+
+
     //Class for sample intake
     public class sampleGrab implements Action {
         private boolean initialized = false;
@@ -263,6 +274,7 @@ public abstract class MainAuto extends DeepHorOpMode {
             if (!initialized) {
                 stage1Scoop.setPower(1.0);
                 sleep(1500);
+                stage1Scoop.setPower(0.0);
                 return true;
             } else {
                 return false;
