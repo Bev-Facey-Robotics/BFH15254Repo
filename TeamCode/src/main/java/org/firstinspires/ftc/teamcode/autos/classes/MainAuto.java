@@ -183,6 +183,8 @@ public abstract class MainAuto extends DeepHorOpMode {
         return new slideUp();
     }
 
+
+    //Lowering slide action
     public class slideDown implements Action {
         private boolean initialized = false;
 
@@ -211,9 +213,9 @@ public abstract class MainAuto extends DeepHorOpMode {
     public Action slideDown () {
         return new slideDown();
     }
-        
 
-    //Class for raising the second stage arm + bucket, them dropping the sample
+
+    //Class for raising the second stage arm + bucket, then dropping the sample
     public class bucketPlace implements Action {
         private boolean initialized = false;
 
@@ -230,91 +232,126 @@ public abstract class MainAuto extends DeepHorOpMode {
                 stage2Bucket.setPosition(bucketTargetPosition);
                 sleep(500);
 
-            //Wait for sample to be dropped into basket
+                //Wait for sample to be dropped into basket
                 bucketTargetPosition = 0.25;
                 stage2Bucket.setPosition(bucketTargetPosition);
                 sleep(1500);
                 initialized = true;
             }
 
-        double piecePlace = stage2Bucket.getPosition();
-        packet.put("BucketPos", piecePlace);
-        if (piecePlace == 0.25) {
-            return true;
-        } else {
-            bucketTargetPosition = 0.25;
-            stage2Swing.setTargetPosition(-11);
-            return false;
-        }
-    }
-
-    //Class for lowering the bucket
-    public class bucketDown implements Action {
-        private boolean initialized = false;
-
-        //Actions with telem
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!initialized) {
-                stage2Swing.setPower(-0.1);
-                initialized = true;
-            }
-
-        double bucketArmPos = stage2Swing.getCurrentPosition();
-            packet.put("SwingPos", bucketArmPos);
-
-            return false;
-        }
-
-
-
-    //Class for sample intake
-    public class sampleGrab implements Action {
-        private boolean initialized = false;
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!initialized) {
-                stage1Scoop.setPower(1.0);
-                sleep(1500);
-                stage1Scoop.setPower(0.0);
+            double piecePlace = stage2Bucket.getPosition();
+            packet.put("BucketPos", piecePlace);
+            if (piecePlace == 0.25) {
                 return true;
             } else {
+                bucketTargetPosition = 0.25;
+                stage2Swing.setTargetPosition(-11);
                 return false;
             }
+        }
+    }
 
+        //Class for lowering the bucket
+        public class bucketDown implements Action {
+            private boolean initialized = false;
+
+            //Actions with telem
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    stage2Swing.setPower(-0.1);
+                    initialized = true;
+                }
+
+                double bucketArmPos = stage2Swing.getCurrentPosition();
+                packet.put("SwingPos", bucketArmPos);
+
+                return false;
+            }
         }
 
-    //Method for sample intake
-    public Action sampleGrab () {
-        return new sampleGrab();
 
+            //Class for sample intake
+            public class sampleGrab implements Action {
+                private boolean initialized = false;
 
-    }
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    if (!initialized) {
+                        stage1Scoop.setPower(1.0);
+                        sleep(1500);
+                        stage1Scoop.setPower(0.0);
+                        initialized = true;
+                        return true;
+                    } else {
+                        return false;
+                    }
 
-
-
-    }
-
-    //Class for piece transfer
-    public class pieceSwap implements Action {
-        private boolean initialized = false;
-///*TODO: Borrow Share functionality and put in this action
-        //Actions with telem
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!initialized) {
-                bucketTargetPosition = 0.05;
-                MoveSlidePos(-1821);
-
-
-
-                initialized = true;
-
-                //moves the intake to transfer to the bucket
-                stage1Arm.setTargetPosition(255);
-                stage1Arm.setPower(0.3);
-
-
+                }
             }
 
-    }
+            //Method for sample intake
+            public Action sampleGrab() {
+                return new sampleGrab();
+            }
 
-}
+
+            //Class for piece transfer
+            public class pieceSwap implements Action {
+                private boolean initialized = false;
+
+                /// *TODO: Borrow Share functionality and put in this action
+                //Actions with telem
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    if (!initialized) {
+
+
+                        //Bunch of telemetry info
+                        //Slide Pos
+                        double slidePos = motorSlide.getCurrentPosition();
+                        //S2Bucket Pos
+                        double S2BPos = stage2Bucket.getPosition();
+                        //S1Scoop Pwr
+                        double S1ScoopPwr = stage1Scoop.getPower();
+                        //S1 Arm
+                        double S1Arm = stage1Arm.getCurrentPosition();
+                        //S2Arm
+                        double S2Swing = stage2Swing.getCurrentPosition();
+
+                        //Moves bucket and slides down
+                        bucketTargetPosition = 0.05;
+                        stage2Bucket.setPosition(0.05);
+                        sleep(250);
+                        motorSlide.setTargetPosition(-1821);
+                        motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        motorSlide.setPower(-0.3);
+                        sleep(250);
+
+
+                        //moves the intake to transfer to the bucket
+                        stage1Arm.setTargetPosition(255);
+                        stage1Arm.setPower(0.3);
+
+                        //Transfers piece to bucket
+                        stage1Scoop.setPower(1.0);
+                        sleep(1000);
+                        stage1Scoop.setPower(0);
+
+                        initialized = true;
+
+                        packet.put("SlidePos", slidePos);
+                        packet.put("S2SwingPos", S2Swing);
+                        packet.put("S2BucketPos", S2BPos);
+                        packet.put("S1ScoopPwr", S1ScoopPwr);
+                        packet.put("S1ArmPos", S1Arm);
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+
+
+                }
+            }
+        }
+
+
 // end class
