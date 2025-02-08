@@ -8,9 +8,12 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 
 public class RedAuto extends MainAuto {
+
+
     public TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
-        return mecanumDrive.actionBuilder(initialPose) // TODO: Set this up with red values
-                .splineTo(new Vector2d(33.74, -47.38), Math.toRadians(18.36))
-                .splineTo(new Vector2d(52.28, -62.51), Math.toRadians(-39.21));
+        return mecanumDrive.actionBuilder(initialPose);
     }
 }
+
+
+
