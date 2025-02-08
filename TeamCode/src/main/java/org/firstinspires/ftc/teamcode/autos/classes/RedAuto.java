@@ -19,10 +19,11 @@ import org.openftc.apriltag.AprilTagPose;
 public class RedAuto extends MainAuto {
         //Go get initialpose, boi
         public Pose2d initialPose = super.initialPose;
+        public MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
 
 
-     TrajectoryActionBuilder ThreeYellows = mecanumDrive.actionBuilder(initialPose)
+     public TrajectoryActionBuilder ThreeYellows = mecanumDrive.actionBuilder(initialPose)
                 .setTangent(0)
                 // Line up with first yellow
                 .splineToConstantHeading(new Vector2d(-34, -25.6), 0)
