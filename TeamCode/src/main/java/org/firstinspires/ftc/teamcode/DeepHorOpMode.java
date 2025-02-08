@@ -322,8 +322,8 @@ public abstract class DeepHorOpMode extends LinearOpMode {
     public void PieceAssist() {
         try {
             // This automatically moves the slide & arm to the correct position to transfer, then raises the slide & piece bucket to be delivered into the bucket
-            bucketTargetPosition = 0.05;
-            MoveSlidePos(-1821);
+            bucketTargetPosition = 0;
+            MoveSlidePos(-1809);
             Thread.sleep(2000);
             // wait for slide to move down
             while (motorSlide.isBusy() && AssistRunning) {
@@ -372,10 +372,13 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             bucketTargetPosition = 0.2;
             Thread.sleep(3000);
 
+            if (!AssistRunning) return;
+
             stage2Swing.setTargetPosition(-130);
             stage2Swing.setPower(0.3);
             while (stage2Swing.isBusy() && AssistRunning) {
                 telemetry.addData("Arm Position", stage2Swing.getCurrentPosition());
+                telemetry.addData("Bucket Position", stage2Bucket.getPosition());
                 telemetry.update();
                 Thread.sleep(20);
             }

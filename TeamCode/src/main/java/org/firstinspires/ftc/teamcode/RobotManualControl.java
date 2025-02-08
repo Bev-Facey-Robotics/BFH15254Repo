@@ -114,10 +114,10 @@ public class RobotManualControl extends DeepHorOpMode {
             // Second stage bucket
             bucketTargetPosition = -0.1;
             if (gamepad2.right_bumper) {
-                bucketTargetPosition = 0.25;
+                bucketTargetPosition = 0.2;
             }
             if (gamepad2.left_bumper) {
-                bucketTargetPosition = 0.05;
+                bucketTargetPosition = 0;
             }
 
 
@@ -149,6 +149,7 @@ public class RobotManualControl extends DeepHorOpMode {
         //region Telemetry
         telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
         telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
+        telemetry.addData("Bucket Position", stage2Bucket.getPosition());
         telemetry.addData("Assist", AssistRunning);
 //        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
 //        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
