@@ -53,14 +53,13 @@ import org.firstinspires.ftc.teamcode.RedSideAuto;
 import org.firstinspires.ftc.teamcode.autos.opmodes.autonomus.RedSideAutoAuto;
 
 
-public class MainAuto extends DeepHorOpMode  {
+public abstract class MainAuto extends DeepHorOpMode  {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     public MecanumDrive mecanumDrive = null; // Road Runner
+
     protected Pose2d initialPose = null;
-
-
     //endregion
 
 
@@ -104,7 +103,6 @@ public class MainAuto extends DeepHorOpMode  {
             telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
             telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
             telemetry.update();
-            initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
         }
 
 
@@ -116,7 +114,7 @@ public class MainAuto extends DeepHorOpMode  {
         //endregion
 
 
-
+         initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
 
         aprilTagPosFinder.StopStreaming();
 
@@ -204,9 +202,9 @@ public class MainAuto extends DeepHorOpMode  {
     }
 
 
-
-
-
+    public TrajectoryActionBuilder ThreeYellows(MecanumDrive mecanumDrive, Pose2d initialPose) {
+        return mecanumDrive.actionBuilder(initialPose);
+    }
 
 
     //Roadrunner Actions, such as raising and lowering slides, implementing bucket states (raised, lowered and dropping), and intake + transfer shit
