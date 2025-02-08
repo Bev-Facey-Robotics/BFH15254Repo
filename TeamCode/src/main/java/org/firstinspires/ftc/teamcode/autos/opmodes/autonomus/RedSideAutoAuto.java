@@ -32,7 +32,7 @@ public class RedSideAutoAuto extends RedAuto {
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     public MecanumDrive mecanumDrive; // Road Runner
 
-    public Pose2d initialPose = new Pose2d(-10.9,-50,90);
+    Pose2d initialPose = new Pose2d(11.8, 61.7, Math.toRadians(90));
     //endregion
 
 
