@@ -6,28 +6,23 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 
-import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
-import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
-import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
-
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.vision.apriltag.AprilTagPoseFtc;
-import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import org.openftc.apriltag.AprilTagPose;
 
 
 public class RedAuto extends MainAuto {
         //Go get initialpose, boi
-        public Pose2d initialPose = super.initialPose;
+        public Pose2d initialPose = new Pose2d(-10.9,-50,90);
 
 
 
     public void runOpMode() {
 
+    }
 
+    public Action threeYellowTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         TrajectoryActionBuilder ThreeYellows = null;
         if (initialPose != null) {
-            ThreeYellows = mecanumDrive.actionBuilder(initialPose)
+            mecanumDrive.actionBuilder(initialPose)
                     .setTangent(0)
                     // Line up with first yellow
                     .splineToConstantHeading(new Vector2d(-34, -25.6), 0)
@@ -70,19 +65,14 @@ public class RedAuto extends MainAuto {
                     .waitSeconds(1);
 
 
-
         } else {
             telemetry.addLine("Null, boi");
             telemetry.update();
         }
-
-
-        Action threeYellowActions = ThreeYellows.build();
-
-        waitForStart();
-
-        Actions.runBlocking(threeYellowActions);
+        return null;
     }
+
+
 
 }
 
