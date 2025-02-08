@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import java.util.Vector;
 
-@TeleOp(name = "EM: Drive Only", group = "Emergancy")
-public class LoganTestBot extends OpMode {
+@TeleOp(name = "EM: Drive Only", group = "Emergency")
+public class EmergencyDriveOnly extends OpMode {
 
     private DcMotor motorFL = null; // Front Left
     private DcMotor motorFR = null; // Front Right

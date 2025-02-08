@@ -1,0 +1,16 @@
+error 0: generic error
+error 1: generic error
+
+# Hardware
+error 101: generic hardware error
+error 102: hardware update loop error
+error 103. hardware initialization failed
+error 104: hardware already initalized
+error 105
+
+# Actions
+error 201: generic action error
+error 202: action failed to initialize
+error 203: action failed to reserve hardware
+error 204: action failed to execute
+error 205: action failed to stop

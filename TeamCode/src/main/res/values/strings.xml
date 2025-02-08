@@ -1,4 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    <string-array name="telemetry_messages">
+        <item>Beep boop. Boop Beep?</item>
+        <item>It\'s only the fourth rewrite.</item>
+        <item>It\'s not a bug, it\'s a feature.</item>
+        <item>Thanks REV, very cool.</item>
+        <item>Let\'s go gambling!!!</item>
+        <item>Shadow Wizard Money Gang $$$$$</item>
+        <item>Dank memes only</item>
+        <item>And then is surprised when we don\'t have money</item>
+        <item>Powered by sleep deprivation.</item>
+        <item>"8–10$" according to cybereagles. It was 80$.</item>
+        <item>NONE OF US DECIDED TO MEASURE BEFORE WE BUILT</item>
+        <item>Sleep deprived Prime</item>
+        <item>Blåhaj (friend)</item>
+        <item>Who the fuck needs sleep?</item>
+        <item>Not my odo pods!</item>
+        <item>I wonder if you can tell who wrote these messages?</item>
+        <item>Colliding with ground no longer teleports you into the sun</item>
+        <item>Dear god in heaven please help</item>
+        <item>Shut the fuck up, this is the future!</item>
+        <item>Can the Facey welding team even measure jack shit?</item>
+        <item>Rrrrrooaaad Runnnner</item>
+        <item>Welp, the slide fucked itself.</item>
+        <item>Because why not</item>
+        <item>rip auto</item>
+        <item>RIP Toolbox, we will only slightly miss you</item>
+        <item>The place where broken brains go to die harder</item>
+        <item>Robot Two:Robot harder</item>
+        <item>We can\'t go to hell if we\'re already there</item>
+        <item>what doth be sleep</item>
+        <item>ideas are hard.</item>
+        <item>No money?</item>
+        <item>Broke Shadow Wizard Money Gang</item>
+        <item>Why don\'t you just get more money</item>
+        <item>Selling our souls to the robotics devils</item>
+        <item>We are robotics cultists</item>
+        <item>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</item>
+        <item>Something along those lines</item>
+        <item>Let\'s all sell our soul!</item>
+        <item>Teaching this robot Failure Management</item>
+        <item>IED lite: serving you since 1888</item>
+    </string-array>
 </resources>

@@ -21,6 +21,9 @@ android {
     packagingOptions {
         jniLibs.useLegacyPackaging true
     }
+    buildTypes.each { buildType ->
+        buildType.buildConfigField "String", "BUILD_DATE", "\"${new Date().format('yyyy-MM-dd HH:mm:ss')}\""
+    }
 }
 
 repositories {
