@@ -2,24 +2,27 @@ package org.firstinspires.ftc.teamcode.autos.opmodes.autonomus;
 
 import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.sun.tools.javac.main.Main;
+
 
 import org.firstinspires.ftc.teamcode.autos.classes.RedAuto;
 
 @Autonomous(name="Auto: Red Side", group = "Competition Ready")
 public class RedSideAutoAuto extends RedAuto {
 
-    public Pose2d getInitialPose = ;
-    public RedSideAutoAuto (Pose2d initialPose) {
-       Pose2d getInitialPose = initialPose;
+    private Pose2d myInitialPose;
 
+    public Object recivePose(Pose2d initialPose) {
+        return super.recivePose(initialPose);
     }
 
-    public void runOpMode()  {
+    public void runOpMode() {
         // Access the initialPose from the parent class
-        Pose2d myInitialPose = getInitialPose
+        Pose2d initialPose = null;
+        myInitialPose = (Pose2d) recivePose(initialPose);
 
     }
-
+}
 
 
     //            .setTangent(0)

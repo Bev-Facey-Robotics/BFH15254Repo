@@ -49,14 +49,16 @@ import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.autos.opmodes.autonomus.BlueSideAutoAuto;
 
 
-public abstract class MainAuto extends DeepHorOpMode {
+public abstract class MainAuto extends DeepHorOpMode  {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     private MecanumDrive mecanumDrive = null; // Road Runner
     //endregion
+
 
 
 
@@ -108,6 +110,7 @@ public abstract class MainAuto extends DeepHorOpMode {
         }
         //endregion
 
+
         Pose2d initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
         aprilTagPosFinder.StopStreaming();
 
@@ -115,6 +118,7 @@ public abstract class MainAuto extends DeepHorOpMode {
         //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(aprilTagPosFinder.yaw));
 
         waitForStart(); // We shouldn't need this, but better to be safe than sorry!
+
 
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -146,6 +150,10 @@ public abstract class MainAuto extends DeepHorOpMode {
 
             telemetry.addLine("Finished!");
         }
+    }
+
+    public Object recivePose(Pose2d initialPose) {
+        return(initialPose);
     }
 
     public abstract TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose);
