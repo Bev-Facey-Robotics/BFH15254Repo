@@ -68,7 +68,7 @@ public class RedAuto extends MainAuto {
     public void runOpMode(){
 
 
-        Action threeYellowActions = ThreeYellows(mecanumDrive, initialPose).build();
+        Action threeYellowActions = ThreeYellows.build();
 
         waitForStart();
 
