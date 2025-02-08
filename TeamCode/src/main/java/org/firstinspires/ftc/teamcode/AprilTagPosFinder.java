@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Size;
 
+import com.acmerobotics.roadrunner.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 
@@ -27,6 +28,11 @@ public class AprilTagPosFinder {
     final private boolean STREAM_CAMERA = false; // do not enable
 
 
+
+
+
+
+
     //region Hardware
     private AprilTagProcessor aprilTagProcessor;
     private VisionPortal visionPortal;
@@ -47,6 +53,8 @@ public class AprilTagPosFinder {
     final private YawPitchRollAngles cameraOrientation = new YawPitchRollAngles(AngleUnit.DEGREES,
             0, -90, 0, 0);
     //endregion
+
+
 
     /**
      * Initializes the AprilTag processor and camera.
@@ -84,7 +92,7 @@ public class AprilTagPosFinder {
         builder.enableLiveView(true);
 
         // Set the stream format; MJPEG uses less bandwidth than default YUY2.
-        //builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
+        builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
 
         // Choose whether or not LiveView stops if no processors are enabled.
         // If set "true", monitor shows solid orange screen if no processors enabled.
@@ -167,6 +175,8 @@ public class AprilTagPosFinder {
             return false;
         }
     }
+
+
 
     public void StopStreaming() {
         visionPortal.close();
