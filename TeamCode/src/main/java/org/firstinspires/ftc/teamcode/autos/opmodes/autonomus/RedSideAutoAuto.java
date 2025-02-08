@@ -32,7 +32,7 @@ public class RedSideAutoAuto extends RedAuto {
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     public MecanumDrive mecanumDrive; // Road Runner
 
-    protected Pose2d initialPose = null;
+    public Pose2d initialPose = new Pose2d(-10.9,-50,90);
     //endregion
 
 
@@ -48,48 +48,48 @@ public class RedSideAutoAuto extends RedAuto {
             BotInitialization.InitializeRobot(this);
             CrossOpModeData.isInitialized = true;
         }
-        //endregion
+//        //endregion
+//
+//        //region April Tag Initialization
+//        // Let's get our position finder ready
+//        aprilTagPosFinder.Initialize(
+//                hardwareMap,
+//                telemetry
+//        );
+//
+//        boolean hasFoundAprilTag = false;
+//
+//        while (!hasFoundAprilTag && !isStopRequested()) {
+//            telemetry.addLine("Looking for Initial April Tag");
+//            telemetry.update();
+//            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
+//        }
+//
+//        if (isStopRequested()) {
+//            return;
+//        }
+//
+//        while (opModeInInit()) {
+////            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
+//            aprilTagPosFinder.ProcessAprilTagData();
+//            telemetry.addLine("Ready to rumble!");
+//            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
+//            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
+//            telemetry.update();
+//        }
 
-        //region April Tag Initialization
-        // Let's get our position finder ready
-        aprilTagPosFinder.Initialize(
-                hardwareMap,
-                telemetry
-        );
 
-        boolean hasFoundAprilTag = false;
 
-        while (!hasFoundAprilTag && !isStopRequested()) {
-            telemetry.addLine("Looking for Initial April Tag");
-            telemetry.update();
-            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
-        }
 
         if (isStopRequested()) {
             return;
         }
-
-        while (opModeInInit()) {
-//            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
-            aprilTagPosFinder.ProcessAprilTagData();
-            telemetry.addLine("Ready to rumble!");
-            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
-            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
-            telemetry.update();
-        }
-
-
-
-
-        if (isStopRequested()) {
-            return;
-        }
         //endregion
 
 
-        initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
-
-        aprilTagPosFinder.StopStreaming();
+//        initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
+//
+//        aprilTagPosFinder.StopStreaming();
 
         threeYellowTraj(mecanumDrive, initialPose);
 

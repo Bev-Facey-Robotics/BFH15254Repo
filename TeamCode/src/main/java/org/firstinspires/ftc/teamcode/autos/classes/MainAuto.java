@@ -59,7 +59,7 @@ public abstract class MainAuto extends DeepHorOpMode  {
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     public MecanumDrive mecanumDrive; // Road Runner
 
-    protected Pose2d initialPose = null;
+    public Pose2d initialPose = new Pose2d(-10.9,-50,90);;
     //endregion
 
 
