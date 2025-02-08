@@ -17,7 +17,7 @@ public class HardwareManager {
     public static List<HardwareElement> hardwareElements = new ArrayList<>();
     public static List<ActionElement> runningActionElements = new ArrayList<>();
     public static HashMap<HardwareElement, ActionElement> HardwareReserves = new HashMap<>();
-    private static List<ActionElement> stoppedActions = new ArrayList<>();
+    private static final List<ActionElement> stoppedActions = new ArrayList<>();
     private static HashMap<ActionElement, List<HardwareElement>> actionHardwareMap = new HashMap<>();
 
     private static volatile boolean opModeActive = false;
@@ -159,23 +159,6 @@ public class HardwareManager {
             runningActionElements.remove(action);
         }
 
-        Thread actionThread = action.runThread;
-        if (actionThread != null && actionThread.isAlive()) {
-            // Avoid interrupting/joining the current thread
-            if (Thread.currentThread() != actionThread) {
-                actionThread.interrupt();
-                try {
-                    actionThread.join(3000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    new Error(action, 205, "Interrupted waiting for action to stop", e);
-                }
-                if (actionThread.isAlive()) {
-                    new Error(action, 205, "Action stop timeout", null);
-                }
-            }
-        }
-
         // Release hardware AFTER ensuring thread is stopped
         List<HardwareElement> reservedHardware = new ArrayList<>();
         synchronized (HardwareReserves) {
@@ -202,7 +185,9 @@ public class HardwareManager {
             }
         }
 
-        checkAndRestartActions();
+        if (!action.isStoppingDueToPriority) {
+            checkAndRestartActions();
+        }
     }
 
 //    // Call this method when hardware is released
@@ -222,8 +207,7 @@ public class HardwareManager {
         PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.getPriority()));
         actionQueue.addAll(copyStoppedActions);
 
-        while (!actionQueue.isEmpty()) {
-            ActionElement action = actionQueue.poll();
+        for (ActionElement action : copyStoppedActions) {
             List<HardwareElement> reservedHardware;
             synchronized (actionHardwareMap) {
                 reservedHardware = actionHardwareMap.get(action);
@@ -248,8 +232,10 @@ public class HardwareManager {
                 synchronized (actionHardwareMap) {
                     actionHardwareMap.remove(action);
                 }
+                action.isStoppingDueToPriority = false;
                 StartAction(action);
             }
+
         }
     }
 
@@ -260,8 +246,21 @@ public class HardwareManager {
      */
     public static void StopAction(ActionElement action) {
         try {
-            if (action.runThread != null && action.runThread.isAlive()) {
-                action.runThread.interrupt();
+            Thread actionThread = action.runThread;
+            if (actionThread != null && actionThread.isAlive()) {
+                // Avoid interrupting/joining the current thread
+                if (Thread.currentThread() != actionThread) {
+                    actionThread.interrupt();
+                    try {
+                        actionThread.join(3000);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        new Error(action, 205, "Interrupted waiting for action to stop", e);
+                    }
+                    if (actionThread.isAlive()) {
+                        new Error(action, 205, "Action stop timeout", null);
+                    }
+                }
             }
             FinishAction(action);
         } catch (Exception e) {
@@ -289,6 +288,7 @@ public class HardwareManager {
                     ActionElement actionToRelease = HardwareReserves.get(hw);
                     if (actionToRelease != null) {
                         try {
+                            actionToRelease.isStoppingDueToPriority = true;
                             StopAction(actionToRelease);
                         } catch (Exception e) {
                             new Error(action, 203, "Could not reserve hardware element: " + className, e);

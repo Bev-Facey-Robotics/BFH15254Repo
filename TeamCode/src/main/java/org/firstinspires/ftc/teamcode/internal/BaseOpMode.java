@@ -7,26 +7,46 @@ public abstract class BaseOpMode extends LinearOpMode {
     public TelemetryManager telemetryManager = null;
 
     public void runOpMode() {
-        telemetryManager = new TelemetryManager(telemetry, hardwareMap.appContext);
-        telemetryManager.StartTelemetryLoop();
-        HardwareManager.opMode = this;
-        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
-        telemetryManager.ModifyMessagesLogged("Robot Status", "Initializing Hardware");
-        initializeHardware();
-        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
-        telemetryManager.ModifyMessagesLogged("Robot Status", "Calibrating Hardware");
-        calibrateHardware();
-        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
-        telemetryManager.ModifyMessagesLogged("Robot Status", "Waiting for start...");
-        waitForStart();
-        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
-        HardwareManager.onOpModeStart();
-        if (!opModeIsActive()&&!opModeInInit()) {stopOpMode();return;}
-        telemetryManager.ModifyMessagesLogged("Robot Status", "Running!");
-        main();
-        telemetryManager.ModifyMessagesLogged("Robot Status", "Stopping...");
-        HardwareManager.onOpModeStop();
-        telemetryManager.StopTelemetryLoop();
+        try {
+            telemetryManager = new TelemetryManager(telemetry, hardwareMap.appContext);
+            telemetryManager.StartTelemetryLoop();
+            HardwareManager.opMode = this;
+            if (!opModeIsActive() && !opModeInInit()) {
+                stopOpMode();
+                return;
+            }
+            telemetryManager.ModifyMessagesLogged("Robot Status", "Initializing Hardware");
+            initializeHardware();
+            if (!opModeIsActive() && !opModeInInit()) {
+                stopOpMode();
+                return;
+            }
+            telemetryManager.ModifyMessagesLogged("Robot Status", "Calibrating Hardware");
+            calibrateHardware();
+            if (!opModeIsActive() && !opModeInInit()) {
+                stopOpMode();
+                return;
+            }
+            telemetryManager.ModifyMessagesLogged("Robot Status", "Waiting for start...");
+            waitForStart();
+            if (!opModeIsActive() && !opModeInInit()) {
+                stopOpMode();
+                return;
+            }
+            HardwareManager.onOpModeStart();
+            if (!opModeIsActive() && !opModeInInit()) {
+                stopOpMode();
+                return;
+            }
+            telemetryManager.ModifyMessagesLogged("Robot Status", "Running!");
+            main();
+            telemetryManager.ModifyMessagesLogged("Robot Status", "Stopping...");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        finally {
+            stopOpMode();
+        }
     }
 
     private void stopOpMode() {

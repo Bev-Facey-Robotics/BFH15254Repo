@@ -21,6 +21,7 @@ public class ManualSlide extends ActionElement {
     public boolean isAutoRestart() {
         return true;
     }
+
     @Override
     public int getPriority() {
         return 1;
