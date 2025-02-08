@@ -120,7 +120,6 @@ public abstract class MainAuto extends DeepHorOpMode  {
         waitForStart(); // We shouldn't need this, but better to be safe than sorry!
 
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
         TrajectoryActionBuilder parkingRun = parkingRun(mecanumDrive, initialPose);
 

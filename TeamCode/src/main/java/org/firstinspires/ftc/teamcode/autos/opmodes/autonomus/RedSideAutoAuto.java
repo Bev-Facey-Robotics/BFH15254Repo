@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.autos.opmodes.autonomus;
 
+import android.annotation.SuppressLint;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,31 +16,80 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Trajectory;
 
 
-
+import org.firstinspires.ftc.teamcode.BotInitialization;
+import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.autos.classes.RedAuto;
 
 @Autonomous(name="Auto: Red Side", group = "Competition Ready")
 public class RedSideAutoAuto extends RedAuto {
-
-    private Pose2d myInitialPose;
-    public static Pose2d initialPose = new Pose2d(0,0,0);
-
-    public RedSideAutoAuto() {
-        initialPose =  (Pose2d) recivePose(initialPose);
-    }
-
-    public Pose2d recivePose(Pose2d initialPose) {
-        return super.recivePose(initialPose);
-    }
+    private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
+    private MecanumDrive mecanumDrive = null; // Road Runner
+    //endregion
 
 
+
+
+
+    @SuppressLint("DefaultLocale")
+    @Override
     public void runOpMode() {
-        // Access the initialPose from the parent class
+        //region Hardware Initialization
+        ConfigureHardware(false);
+        if (!CrossOpModeData.isInitialized) {
+            BotInitialization.InitializeRobot(this);
+            CrossOpModeData.isInitialized = true;
+        }
+        //endregion
 
-        myInitialPose = (Pose2d) recivePose(initialPose);
+        //region April Tag Initialization
+        // Let's get our position finder ready
+        aprilTagPosFinder.Initialize(
+                hardwareMap,
+                telemetry
+        );
+
+        boolean hasFoundAprilTag = false;
+
+        while (!hasFoundAprilTag && !isStopRequested()) {
+            telemetry.addLine("Looking for Initial April Tag");
+            telemetry.update();
+            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
+        }
+
+        if (isStopRequested()) {
+            return;
+        }
+
+        while (opModeInInit()) {
+//            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
+            aprilTagPosFinder.ProcessAprilTagData();
+            telemetry.addLine("Ready to rumble!");
+            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
+            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
+            telemetry.update();
+        }
+
+
+
+
+        if (isStopRequested()) {
+            return;
+        }
+        //endregion
+
+
+        Pose2d initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
+        aprilTagPosFinder.StopStreaming();
+
+        // for debugging
+        //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(aprilTagPosFinder.yaw));
+
+        waitForStart();
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+
 
         Action ThreeYellows = drive.actionBuilder(initialPose)
                 .setTangent(0)
@@ -89,7 +140,6 @@ public class RedSideAutoAuto extends RedAuto {
 
 
         .build();
-        waitForStart();
 
 
         Actions.runBlocking(
