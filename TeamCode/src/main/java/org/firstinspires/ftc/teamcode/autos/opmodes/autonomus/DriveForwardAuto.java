@@ -19,8 +19,8 @@ public class DriveForwardAuto extends DeepHorOpMode {
         }
         //endregion
 
-        stage1Arm.setTargetPosition(255);
-        stage1Arm.setPower(0.3);
+//        stage1Arm.setTargetPosition(255);
+//        stage1Arm.setPower(0.3);
 
         waitForStart();
 

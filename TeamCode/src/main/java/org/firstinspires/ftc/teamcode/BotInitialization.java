@@ -11,12 +11,12 @@ public class BotInitialization {
         // Calibration
         //region Stage 1 Arm & Stage 2 Swing
         // Modes
-        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        // Calibration powers
-        robot.stage1Arm.setPower(-0.3);
-        robot.stage2Swing.setPower(0.2);
+//        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//
+//        // Calibration powers
+//        robot.stage1Arm.setPower(-0.3);
+//        robot.stage2Swing.setPower(0.2);
 
         // Sleep for 3 second to wait for everything to reach the limits
         try {
@@ -29,28 +29,28 @@ public class BotInitialization {
         //region Clean up after calibration
 
         //region Stage 1 Arm
-        robot.stage1Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.stage1Arm.setPower(0);
-        robot.stage1Arm.setTargetPosition(0);
-        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //endregion
-
-        //region Stage 2 Swing
-        robot.stage2Swing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.stage2Swing.setPower(0);
-        robot.stage2Swing.setTargetPosition(0);
-        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.stage1Arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.stage1Arm.setPower(0);
+//        robot.stage1Arm.setTargetPosition(0);
+//        robot.stage1Arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        //endregion
+//
+//        //region Stage 2 Swing
+//        robot.stage2Swing.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.stage2Swing.setPower(0);
+//        robot.stage2Swing.setTargetPosition(0);
+//        robot.stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //endregion
 
         //endregion
 
         // The slide initialization must be done at the end to avoid conflicts with the arms.
         //region Slide
-        robot.motorSlide.setPower(0);
-        robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.motorSlide.setTargetPosition(0);
-        robot.motorSlide.setPower(0);
-        robot.motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.motorSlide.setPower(0);
+//        robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.motorSlide.setTargetPosition(0);
+//        robot.motorSlide.setPower(0);
+//        robot.motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // The following is for our slide. Currently our limit switch detection code is
         // commented out due to us having to remove it for height restrictions. When
@@ -70,9 +70,9 @@ public class BotInitialization {
 //                robot.telemetry.addData("Limit 2", robot.slideLimit2.isPressed());
 //                robot.telemetry.update();
 //            }
-        robot.motorSlide.setPower(0);
-        robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        robot.motorSlide.setPower(0);
+//        robot.motorSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         //endregion
 
     }

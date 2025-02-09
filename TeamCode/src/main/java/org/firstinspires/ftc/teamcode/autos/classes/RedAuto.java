@@ -20,8 +20,10 @@ import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
 
 
 
-public class RedAuto extends DeepHorOpMode {
+public class RedAuto extends MainAuto {
     //Go get initialpose, boi
+
+
 
     public TrajectoryActionBuilder redThreeYellows(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return  mecanumDrive.actionBuilder(initialPose)
