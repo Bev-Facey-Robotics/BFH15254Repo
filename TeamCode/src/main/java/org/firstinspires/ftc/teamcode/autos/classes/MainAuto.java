@@ -34,14 +34,9 @@ import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
@@ -49,19 +44,24 @@ import org.firstinspires.ftc.teamcode.BotInitialization;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.RedSideAuto;
 
 
-public abstract class MainAuto extends DeepHorOpMode  {
+public class MainAuto extends DeepHorOpMode {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     public MecanumDrive mecanumDrive; // Road Runner
 
-    public Pose2d initialPose = new Pose2d(-10.9,-50,90);;
+    public static Pose2d initialPose;
     //endregion
 
 
+
+
+    public Pose2d getinitialPose()
+    {
+        return initialPose;
+    }
 
 
 
@@ -116,6 +116,8 @@ public abstract class MainAuto extends DeepHorOpMode  {
          initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
 
         aprilTagPosFinder.StopStreaming();
+
+
 
 
         waitForStart();// We shouldn't need this, but better to be safe than sorry!

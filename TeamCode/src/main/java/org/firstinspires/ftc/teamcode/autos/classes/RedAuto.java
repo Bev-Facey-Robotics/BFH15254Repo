@@ -16,16 +16,23 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
 
 
-@Autonomous(name = "RedTest")
-public class RedAuto extends LinearOpMode {
+
+public class RedAuto extends DeepHorOpMode {
     //Go get initialpose, boi
+
+
+
 
 
     @Override
     public void runOpMode() {
-        Pose2d initialPose = new Pose2d(-10.9, -50, Math.toRadians(90));
+
+
+
+        Pose2d initialPose = new Pose2d( -10.9, -50.8, Math.toRadians(90)); //Dumb value, need to get Preloading to get the initialValue from Mainauto since it has the vision segments.
         MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
 
