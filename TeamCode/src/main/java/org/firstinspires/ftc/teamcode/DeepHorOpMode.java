@@ -187,7 +187,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
      */
     public void MoveSlidePwr(double power) {
         // Adjust slidePower based on position limits
-        if (motorSlide.getCurrentPosition() <= -10800 && power < 0) {
+        if (motorSlide.getCurrentPosition() <= -10373 && power < 0) {
             // Prevent the motor from moving further negative
             power = 0;
         } else
@@ -353,7 +353,7 @@ public abstract class DeepHorOpMode extends LinearOpMode {
             Thread.sleep(500);
 
             // Move slide to the top
-            MoveSlidePos(-10800);
+            MoveSlidePos(-10373);
             while (motorSlide.isBusy() && AssistRunning) {
                 telemetry.addData("Slide Position", motorSlide.getCurrentPosition());
                 telemetry.update();
