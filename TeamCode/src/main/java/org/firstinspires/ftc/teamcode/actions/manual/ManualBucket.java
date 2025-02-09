@@ -6,6 +6,7 @@ import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
+@Deprecated
 public class ManualBucket extends ActionElement {
     public double verticalTarget = -4;
 

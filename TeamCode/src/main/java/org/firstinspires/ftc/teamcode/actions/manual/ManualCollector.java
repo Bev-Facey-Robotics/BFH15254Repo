@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.hardware.Collector;
 import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
+@Deprecated
 public class ManualCollector extends ActionElement {
     @Override
     public void run() throws InterruptedException {

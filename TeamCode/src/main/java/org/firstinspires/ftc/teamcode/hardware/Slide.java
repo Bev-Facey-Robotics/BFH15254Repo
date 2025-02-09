@@ -7,8 +7,10 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
 
 /**
- * The mechanism that brings game pieces from the first stage bucket, up to the top basket
+ * This hardware will be reused in the future, but as of now does not function.
+ * Do not use this class until this has been migrated to the new slides
  */
+@Deprecated
 public class Slide extends HardwareElement {
     final private int slideNegativeLimit = -10800;
     final private int slidePositiveLimit = 0;

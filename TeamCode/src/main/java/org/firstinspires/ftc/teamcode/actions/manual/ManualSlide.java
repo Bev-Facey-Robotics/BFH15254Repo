@@ -4,6 +4,9 @@ import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
+/**
+ * Usage of this is highly unrecommended, due to rebuild.
+ */
 public class ManualSlide extends ActionElement {
     @Override
     public void run() throws InterruptedException {
