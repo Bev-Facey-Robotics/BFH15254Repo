@@ -37,6 +37,10 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
@@ -46,7 +50,7 @@ import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 
-public class MainAuto extends DeepHorOpMode {
+public abstract class MainAuto extends DeepHorOpMode {
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
@@ -124,6 +128,21 @@ public class MainAuto extends DeepHorOpMode {
 
 
 
+        Action trajChosen;
+        trajChosen = redThreeYellows(mecanumDrive, initialPose).build();
+
+        waitForStart();
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        trajChosen
+                )
+        );
+
+
+
+
+
 
 
 
@@ -154,6 +173,12 @@ public class MainAuto extends DeepHorOpMode {
             telemetry.addLine("Finished!");
         }
     }
+
+    public abstract TrajectoryActionBuilder redThreeYellows (MecanumDrive mecanumDrive, Pose2d initialPose);
+
+
+
+
 
 
 
