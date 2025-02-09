@@ -20,10 +20,11 @@ public class HardwareManager {
     private static final List<ActionElement> stoppedActions = new ArrayList<>();
     private static HashMap<ActionElement, List<HardwareElement>> actionHardwareMap = new HashMap<>();
 
-    private static volatile boolean opModeActive = false;
+    public static volatile boolean opModeActive = false;
     private static CountDownLatch calibrationLatch;
     public static HardwareMap hardwareMap;
     public static OpMode opMode = null;
+    public static boolean isCurrentlyStopping = false;
 
     //region Initalization & Calibration
     public static Error init(HardwareElement hw, HardwareMap hardwareMap) {

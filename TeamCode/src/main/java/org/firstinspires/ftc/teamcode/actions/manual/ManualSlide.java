@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
  */
 public class ManualSlide extends ActionElement {
     @Override
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, NullPointerException  {
         // Reserve the hardware
         Slide slide = (Slide) HardwareManager.ReserveHardware(this, "Slide");
 

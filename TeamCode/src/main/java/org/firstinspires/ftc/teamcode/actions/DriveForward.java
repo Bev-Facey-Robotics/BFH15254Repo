@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.internal.TelemetryManager;
  */
 public class DriveForward extends ActionElement {
     @Override
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, NullPointerException  {
         Drive drive = (Drive)HardwareManager.ReserveHardware(this, "Drive");
 
         ElapsedTime runtime = new ElapsedTime();

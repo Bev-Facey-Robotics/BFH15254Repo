@@ -115,6 +115,14 @@ public class TelemetryManager {
             } catch (InterruptedException e) {
                 return;
             }
+            if (Thread.currentThread().isInterrupted()) {
+                return;
+            }
+            if ((HardwareManager.opModeActive && !HardwareManager.isCurrentlyStopping) && HardwareManager.opMode == null) {
+                // The opmode has stopped, but we are still running, lets terminate everything to avoid leaking of resources.
+                HardwareManager.onOpModeStop();
+                return;
+            }
         }
     }
 

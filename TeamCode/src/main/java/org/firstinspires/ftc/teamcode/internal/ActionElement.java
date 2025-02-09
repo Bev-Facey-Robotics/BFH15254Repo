@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.internal;
 
 public abstract class ActionElement {
-    public abstract void run() throws InterruptedException;
+    public abstract void run() throws InterruptedException, NullPointerException ;
 
     public Thread runThread = null;
 
