@@ -1,6 +1,6 @@
 # Facey Cyberflex
 ## Team #15254
-
+![Our Robot as of Febuary 8th 2025](https://github.com/Bev-Facey-Robotics/BFH15254Repo/blob/main/resources/robotrev2.jpg?raw=true)
 This repo is where we keep our robot code, assets, and some docs.
 
 ## Currently implemented
