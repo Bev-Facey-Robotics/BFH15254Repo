@@ -21,7 +21,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 @Autonomous(name = "RedTest")
 public class RedAuto extends LinearOpMode {
     //Go get initialpose, boi
-     
+
 
     @Override
     public void runOpMode() {
