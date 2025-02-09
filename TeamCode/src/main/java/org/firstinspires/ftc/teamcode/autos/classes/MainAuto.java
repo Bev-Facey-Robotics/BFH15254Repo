@@ -50,7 +50,6 @@ import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.RedSideAuto;
-import org.firstinspires.ftc.teamcode.autos.opmodes.autonomus.RedSideAutoAuto;
 
 
 public abstract class MainAuto extends DeepHorOpMode  {

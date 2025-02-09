@@ -26,7 +26,7 @@
 //
 //
 //@Autonomous(name = "Auto: Red Side", group = "Competition Ready")
-//public class RedSideAutoAuto extends RedAuto {
+//public class RedSideAutoAuto extends DeepHorOpMode {
 //
 //
 //    private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
@@ -126,8 +126,8 @@
 //        while (opModeIsActive()) {
 //
 //            // To make sure that the piece isn't flung out of the basket
-//            if (!stage2BucketSync) {
-//                StartBucketSync();
+////            if (!stage2BucketSync) {
+////                StartBucketSync();
 //            }
 //
 //            telemetry.addLine("Finished!");

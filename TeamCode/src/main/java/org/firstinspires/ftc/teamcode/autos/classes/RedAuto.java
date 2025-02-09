@@ -17,15 +17,17 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.DeepHorOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
-@Config
+
 @Autonomous(name = "RedTest")
 public class RedAuto extends LinearOpMode {
     //Go get initialpose, boi
-    public Pose2d initialPose = new Pose2d(-10.9, -50, 90);
-    MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
+     
 
-
+    @Override
     public void runOpMode() {
+        Pose2d initialPose = new Pose2d(-10.9, -50, Math.toRadians(90));
+        MecanumDrive mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
+
 
         TrajectoryActionBuilder ThreeYellows = mecanumDrive.actionBuilder(initialPose)
                 .setTangent(0)
