@@ -120,10 +120,16 @@ public abstract class MainAuto extends DeepHorOpMode {
 
         waitForStart();// We shouldn't need this, but better to be safe than sorry!
 
-
-
         Action trajChosen;
-        trajChosen = redThreeYellows(mecanumDrive, initialPose).build();
+
+if (aprilTagPosFinder.x > 0) {
+    trajChosen = redSpeciAuton(mecanumDrive, initialPose).build();
+
+} else if (aprilTagPosFinder.x < 0) {
+    trajChosen = redThreeYellows(mecanumDrive, initialPose).build();
+} else  {
+    trajChosen = parkRun(mecanumDrive, initialPose).build();
+}
 
         waitForStart();
 
@@ -169,7 +175,9 @@ public abstract class MainAuto extends DeepHorOpMode {
     }
 
     public abstract TrajectoryActionBuilder redThreeYellows (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder redSpeciAuton (MecanumDrive mecanumDrive, Pose2d initialPose);
 
+    public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, Pose2d initialPose);
 }
 
 

@@ -21,8 +21,86 @@ import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
 
 
 public class RedAuto extends MainAuto {
-    //Go get initialpose, boi
 
+
+    public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
+        return mecanumDrive.actionBuilder(initialPose)
+                .setTangent(0)
+                .waitSeconds(25)
+                .strafeToLinearHeading(new Vector2d(46,-65), Math.toRadians(90));
+    }
+
+
+    public TrajectoryActionBuilder redSpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose) {
+        return mecanumDrive.actionBuilder(initialPose)
+                ///When Actions are implemented, this auto should be able to do a 50 point auto on red
+                .setTangent(0)
+                ///Score preloaded speci on high chamber
+                .strafeToSplineHeading(new Vector2d(7.5,-32), Math.toRadians(270))
+                //.Action.SlideSpecScore
+                .waitSeconds(0.5)
+
+                .strafeTo(new Vector2d(7.5,-36))
+
+
+
+                ///Sample Sweep into obv zone
+                .strafeTo(new Vector2d(7.5,-42))
+                .strafeToLinearHeading(new Vector2d(34, -25), Math.toRadians(0))
+                .turnTo(Math.toRadians(0))
+                .strafeTo(new Vector2d(36, -25)) //Add VelConstraints so piece isn't rammed into
+                //.Action.Sweep
+                .waitSeconds(1)
+                .strafeTo(new Vector2d(43,-25))
+                .waitSeconds(1)
+                //.Action.Sweep
+                .strafeTo(new Vector2d(54,-25))
+                .waitSeconds(1)
+                //.Action.Sweep
+                .waitSeconds(1)
+                ///Obv Run
+                .strafeToLinearHeading(new Vector2d(45,-50), Math.toRadians(90))
+                .strafeTo(new Vector2d(45,-60))
+
+                ///HighChamber Run
+                .strafeToSplineHeading(new Vector2d(6.5,-32), Math.toRadians(270))
+                //.Action.SlideSpecScore
+                .waitSeconds(0.5)
+
+                .strafeTo(new Vector2d(6.5,-36))
+                ///Obv Run
+                .strafeToLinearHeading(new Vector2d(45,-50), Math.toRadians(90))
+                .strafeTo(new Vector2d(45,-60))
+
+                ///HighChamber Run
+                .strafeToSplineHeading(new Vector2d(5.5,-32), Math.toRadians(270))
+                //.Action.SlideSpecScore
+                .waitSeconds(0.5)
+
+                .strafeTo(new Vector2d(5.5,-36))
+                ///Obv Run
+                .strafeToLinearHeading(new Vector2d(45,-50), Math.toRadians(90))
+                //.Action.SlideSpecGrab
+                .strafeTo(new Vector2d(45,-60))
+
+
+                ///HighChamber Run
+                .strafeToSplineHeading(new Vector2d(4.5,-32), Math.toRadians(270))
+                //.Action.SlideSpecScore
+                .waitSeconds(0.5)
+
+                .strafeTo(new Vector2d(4.5,-36))
+
+                ///Obv Run
+                .strafeToLinearHeading(new Vector2d(45,-50), Math.toRadians(90))
+                //.Action.SlideSpecGrab
+                .strafeTo(new Vector2d(45,-60))
+
+                ///HighChamber Run
+                .strafeToSplineHeading(new Vector2d(3.5,-32), Math.toRadians(270))
+                //.Action.SlideSpecScore
+                .waitSeconds(0.5);
+    }
 
 
     public TrajectoryActionBuilder redThreeYellows(MecanumDrive mecanumDrive, Pose2d initialPose) {
