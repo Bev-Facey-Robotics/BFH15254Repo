@@ -28,6 +28,9 @@ public class TelemetryManager {
     private Thread thread = null;
 
     public TelemetryManager(Telemetry telemetry, Context context) {
+        if (instance != null) {
+
+        }
         instance = this;
         this.telemetry = telemetry;
         Resources res = context.getResources();
@@ -118,9 +121,10 @@ public class TelemetryManager {
             if (Thread.currentThread().isInterrupted()) {
                 return;
             }
-            if ((HardwareManager.opModeActive && !HardwareManager.isCurrentlyStopping) && HardwareManager.opMode == null) {
+            if (HardwareManager.opMode == null || HardwareManager.opMode.isStopped) {
                 // The opmode has stopped, but we are still running, lets terminate everything to avoid leaking of resources.
                 HardwareManager.onOpModeStop();
+                instance = null;
                 return;
             }
         }

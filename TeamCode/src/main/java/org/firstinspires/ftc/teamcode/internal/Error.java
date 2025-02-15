@@ -23,8 +23,10 @@ public class Error {
         this.hw = hw;
         Log.e(LOG_TAG, "Hardware Error [" + code + "]: " + message, e);
 
-        TelemetryManager.instance.AddError(this);
-        HardwareManager.GracefullyFailHardware(hw);
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            HardwareManager.GracefullyFailHardware(hw);
+        }
     }
 
     public Error (ActionElement action, int code, String message, Exception e) {
@@ -33,11 +35,14 @@ public class Error {
         this.type = ErrorTypes.ACTION_ERROR;
         this.exception = e;
         this.action = action;
-        TelemetryManager.instance.AddError(this);
-        if (code != 205) {
-            HardwareManager.StopAction(action);
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            if (code != 205) {
+                action.isStoppingDueToError = true;
+                HardwareManager.StopAction(action);
+            }
+            Log.e(LOG_TAG, "Action Error [" + code + "]: " + message, e);
         }
-        Log.e(LOG_TAG, "Action Error [" + code + "]: " + message, e);
     }
 
     public Error (int code, String message, ErrorTypes type, Exception e) {
@@ -45,7 +50,9 @@ public class Error {
         this.code = code;
         this.type = type;
         this.exception = e;
-        TelemetryManager.instance.AddError(this);
-        Log.e(LOG_TAG, type + " [" + code + "]: " + message, e);
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            Log.e(LOG_TAG, type + " [" + code + "]: " + message, e);
+        }
     }
 }

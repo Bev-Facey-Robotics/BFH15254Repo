@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 public abstract class BaseOpMode extends LinearOpMode {
     public TelemetryManager telemetryManager = null;
+    public boolean isStopped = false;
 
     public void runOpMode() {
         try {
@@ -42,7 +43,7 @@ public abstract class BaseOpMode extends LinearOpMode {
             main();
             telemetryManager.ModifyMessagesLogged("Robot Status", "Stopping...");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+
         }
         finally {
             stopOpMode();
@@ -50,8 +51,7 @@ public abstract class BaseOpMode extends LinearOpMode {
     }
 
     private void stopOpMode() {
-        HardwareManager.onOpModeStop();
-        telemetryManager.StopTelemetryLoop();
+        isStopped = true;
     }
 
     /**

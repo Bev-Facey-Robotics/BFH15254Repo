@@ -15,6 +15,7 @@ public abstract class ActionElement {
     public abstract boolean isAutoRestart();
 
     public boolean isStoppingDueToPriority = false;
+    public boolean isStoppingDueToError = false;
     /**
      * the higher the number, the more important the action is. 0 is the lowest priority. A higher priority means that when the action is called, it will override any actions with a lower priority.
      * @return the priority of the action

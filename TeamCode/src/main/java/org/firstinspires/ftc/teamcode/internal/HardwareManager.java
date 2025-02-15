@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ public class HardwareManager {
     public static volatile boolean opModeActive = false;
     private static CountDownLatch calibrationLatch;
     public static HardwareMap hardwareMap;
-    public static OpMode opMode = null;
+    public static BaseOpMode opMode = null;
     public static boolean isCurrentlyStopping = false;
 
     //region Initalization & Calibration
@@ -32,7 +33,9 @@ public class HardwareManager {
             HardwareManager.hardwareMap = hardwareMap; // im lazy ok?
         }
         if (getElementByClassName(hw.getClass().getSimpleName()) != null) {
-            return new Error(hw, 104, "Hardware element already exists: " + hw.getClass().getSimpleName(), null);
+            hardwareElements.remove(getElementByClassName(hw.getClass().getSimpleName()));
+            return init(hw, hardwareMap); // this is a hacky way to work around having multiple hardware elements
+            //return new Error(hw, 104, "Hardware element already exists: " + hw.getClass().getSimpleName(), null);
         }
         try {
             hw.init(hardwareMap);
@@ -177,7 +180,7 @@ public class HardwareManager {
         }
 
         // Handle auto-restart logic safely
-        if (action.isAutoRestart()) {
+        if (action.isAutoRestart() && !action.isStoppingDueToError) {
             synchronized (stoppedActions) {
                 stoppedActions.add(action);
             }
@@ -321,6 +324,8 @@ public class HardwareManager {
         opModeActive = true;
         for (HardwareElement hardwareElement : hardwareElements) {
                 try {
+                    if (hardwareElement.isBroken)
+                        continue;
                     Method updateMethod = hardwareElement.getClass().getMethod("update");
                     if (updateMethod.getDeclaringClass() != HardwareElement.class) {
                         hardwareElement.updateThread = new Thread(new Runnable() {
@@ -348,8 +353,15 @@ public class HardwareManager {
 
     public static void onOpModeStop() {
         opModeActive = false;
-        for (ActionElement actionElement : runningActionElements) {
+        List<ActionElement> actionElementsCopy;
+        synchronized (runningActionElements) {
+            actionElementsCopy = new ArrayList<>(runningActionElements);
+        }
+        for (ActionElement actionElement : actionElementsCopy) {
             StopAction(actionElement);
+        }
+        synchronized (runningActionElements) {
+            runningActionElements.clear();
         }
         for (HardwareElement hardwareElement : hardwareElements) {
             if (hardwareElement.updateThread != null) {
