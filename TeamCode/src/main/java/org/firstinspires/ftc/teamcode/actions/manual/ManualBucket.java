@@ -6,11 +6,12 @@ import org.firstinspires.ftc.teamcode.hardware.Bucket;
 import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
+@Deprecated
 public class ManualBucket extends ActionElement {
     public double verticalTarget = -4;
 
     @Override
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, NullPointerException  {
         // Reserve the hardware
         Bucket bucket = (Bucket) HardwareManager.ReserveHardware(this, "Bucket");
 

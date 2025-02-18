@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.internal;
 
+import android.util.Log;
+
 public class Error {
     public int code;
     public String message;
@@ -10,6 +12,8 @@ public class Error {
     public HardwareElement hw = null;
     public ActionElement action = null;
 
+    private static final String LOG_TAG = "FTCCode"; // Constant log tag
+
     public Error (HardwareElement hw, int code, String message, Exception e) {
         hw.isBroken = true;
         this.message = message;
@@ -17,19 +21,27 @@ public class Error {
         this.type = ErrorTypes.HARDWARE_ERROR;
         this.exception = e;
         this.hw = hw;
-        TelemetryManager.instance.AddError(this);
-        HardwareManager.GracefullyFailHardware(hw);
+        Log.e(LOG_TAG, "Hardware Error [" + code + "]: " + message, e);
+
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            HardwareManager.GracefullyFailHardware(hw);
+        }
     }
 
     public Error (ActionElement action, int code, String message, Exception e) {
         this.message = message;
         this.code = code;
-        this.type = ErrorTypes.HARDWARE_ERROR;
+        this.type = ErrorTypes.ACTION_ERROR;
         this.exception = e;
         this.action = action;
-        TelemetryManager.instance.AddError(this);
-        if (code != 205) {
-            HardwareManager.StopAction(action);
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            if (code != 205) {
+                action.isStoppingDueToError = true;
+                HardwareManager.StopAction(action);
+            }
+            Log.e(LOG_TAG, "Action Error [" + code + "]: " + message, e);
         }
     }
 
@@ -38,6 +50,9 @@ public class Error {
         this.code = code;
         this.type = type;
         this.exception = e;
-        TelemetryManager.instance.AddError(this);
+        if (TelemetryManager.instance != null) {
+            TelemetryManager.instance.AddError(this);
+            Log.e(LOG_TAG, type + " [" + code + "]: " + message, e);
+        }
     }
 }

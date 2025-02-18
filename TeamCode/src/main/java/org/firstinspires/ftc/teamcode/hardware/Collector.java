@@ -7,9 +7,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
 
 /**
- * This collects game pieces from the floor.
- * This is part of the first stage.
+ * This hardware will not be present in newer versions of the robot, and is thus deprecated.
+ * Usage is not recommended!!!
  */
+@Deprecated
 public class Collector extends HardwareElement {
     public DcMotor arm = null;
     public CRServo scoop = null;

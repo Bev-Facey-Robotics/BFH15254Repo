@@ -8,7 +8,7 @@ public class ManualDrive extends ActionElement {
     private final double deadzone = 0.1;
 
     @Override
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, NullPointerException  {
         // Reserve the hardware
         Drive drive = (Drive) HardwareManager.ReserveHardware(this,"Drive");
 

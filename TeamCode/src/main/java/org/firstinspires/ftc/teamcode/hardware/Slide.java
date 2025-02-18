@@ -1,48 +1,29 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
+import org.firstinspires.ftc.teamcode.internal.TelemetryManager;
 
-/**
- * The mechanism that brings game pieces from the first stage bucket, up to the top basket
- */
 public class Slide extends HardwareElement {
-    final private int slideNegativeLimit = -10800;
-    final private int slidePositiveLimit = 0;
+    final private int slideNegativeLimit = 0;
+    final private int slidePositiveLimit = 3050;
 
     public boolean areLimitsEnabled = true;
-
     public DcMotor motorSlide = null;
 
-    //region Limit Switches
-    /**
-     * Slide limit switches to prevent the slide from going too far.
-     * These are used at the beginning of the match to calibrate the slide before the match starts.
-     * TODO: Figure out which limit switch is which
-     */
-    public TouchSensor slideLimit1 = null;
-
-    /**
-     * Slide limit switches to prevent the slide from going too far.
-     * These are used at the beginning of the match to calibrate the slide before the match starts.
-     * TODO: Figure out which limit switch is which
-     */
-    public TouchSensor slideLimit2 = null;
-    //endregion
 
     public void init(HardwareMap hardwareMap) {
         this.motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
         this.motorSlide.setPower(0);
         this.motorSlide.setTargetPosition(0);
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.motorSlide.setDirection(DcMotorSimple.Direction.REVERSE);
         this.motorSlide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        // Limit Switches
-        // TODO: Make limit switches respect FIRST high restrictions.
-        // this.slideLimit1 = this.hardwareMap.get(TouchSensor.class, "slideLimit1");
-        // this.slideLimit2 = this.hardwareMap.get(TouchSensor.class, "slideLimit2");
+        TelemetryManager.instance.AddFunctionToLogging("Slide Pos", () -> motorSlide.getCurrentPosition());
     }
 
     public void calibrate() {

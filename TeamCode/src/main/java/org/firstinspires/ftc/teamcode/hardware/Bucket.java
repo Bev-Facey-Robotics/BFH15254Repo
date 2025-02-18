@@ -6,6 +6,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
 
+/**
+ * This hardware will not be present in newer versions of the robot, and is thus deprecated.
+ * Usage is not recommended!!!
+ */
+@Deprecated
 public class Bucket extends HardwareElement {
     public DcMotor arm = null;
     public Servo bucket = null;

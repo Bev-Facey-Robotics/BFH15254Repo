@@ -36,8 +36,8 @@ public class RobotManualControl extends BaseOpMode {
     @Override
     public void initializeHardware() {
         // Initialize the hardware
-        HardwareManager.init(HW_Bucket, hardwareMap);
-        HardwareManager.init(HW_Collector, hardwareMap);
+//        HardwareManager.init(HW_Bucket, hardwareMap);
+//        HardwareManager.init(HW_Collector, hardwareMap);
         HardwareManager.init(HW_Drive, hardwareMap);
         HardwareManager.init(HW_Slide, hardwareMap);
     }
@@ -45,13 +45,13 @@ public class RobotManualControl extends BaseOpMode {
     @Override
     public void calibrateHardware() {
         // Calibrate the hardware
-        HardwareManager.calibrate_async(HW_Bucket);
-        HardwareManager.calibrate_async(HW_Collector);
-        try {
-            HardwareManager.waitForCalibrations();
-        } catch (InterruptedException e) {
-            return;
-        }
+//        HardwareManager.calibrate_async(HW_Bucket);
+//        HardwareManager.calibrate_async(HW_Collector);
+//        try {
+//            HardwareManager.waitForCalibrations();
+//        } catch (InterruptedException e) {
+//            return;
+//        }
         HardwareManager.calibrate(HW_Slide);
         // unsure if this is needed with my lib, but better safe than sorry.
         HardwareManager.calibrate(HW_Drive);
@@ -61,8 +61,8 @@ public class RobotManualControl extends BaseOpMode {
     public void main() {
         HardwareManager.StartAction(AC_Drive);
         HardwareManager.StartAction(AC_Slide);
-        HardwareManager.StartAction(AC_Collector);
-        HardwareManager.StartAction(AC_Bucket);
+//        HardwareManager.StartAction(AC_Collector);
+//        HardwareManager.StartAction(AC_Bucket);
 
         while (opModeIsActive()) {
 
