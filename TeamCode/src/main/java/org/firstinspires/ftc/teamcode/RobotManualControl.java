@@ -3,162 +3,82 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.actions.AutoPieceDelivery;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualBucket;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualCollector;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualDrive;
+import org.firstinspires.ftc.teamcode.actions.manual.ManualSlide;
+import org.firstinspires.ftc.teamcode.hardware.Bucket;
+import org.firstinspires.ftc.teamcode.hardware.Collector;
+import org.firstinspires.ftc.teamcode.hardware.Drive;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
+import org.firstinspires.ftc.teamcode.internal.HardwareManager;
+
 @TeleOp(name = "Robot Manual Control", group = "Competition Ready")
-public class RobotManualControl extends DeepHorOpMode {
-    //region Hardware
+public class RobotManualControl extends BaseOpMode {
+    // Hardwarez
+    private final Bucket HW_Bucket = new Bucket();
+    private final Collector HW_Collector = new Collector();
+    private final Drive HW_Drive = new Drive();
+    private final Slide HW_Slide = new Slide();
 
-    public double armSmallHorizontal = 0.52;
-    public double armVertical = 0.57;
-    //endregion
+    // Manual Actions
+    private final ManualBucket AC_Bucket = new ManualBucket();
+    private final ManualCollector AC_Collector = new ManualCollector();
+    private final ManualDrive AC_Drive = new ManualDrive();
+    private final ManualSlide AC_Slide = new ManualSlide();
 
-    // Targets
-    public double verticalTarget = -4;
+    private final AutoPieceDelivery AC_PieceDelivery = new AutoPieceDelivery();
 
-    // Held down checks
-    private boolean isBackheld = false;
-
-    // Bot Config
-    double deadzone = 0.1;
+    private boolean isShareButtonPressed = false;
 
     @Override
-    public void runOpMode() {
-        initOpMode();
-        waitForStart();
+    public void initializeHardware() {
+        // Initialize the hardware
+//        HardwareManager.init(HW_Bucket, hardwareMap);
+//        HardwareManager.init(HW_Collector, hardwareMap);
+        HardwareManager.init(HW_Drive, hardwareMap);
+        HardwareManager.init(HW_Slide, hardwareMap);
+    }
+
+    @Override
+    public void calibrateHardware() {
+        // Calibrate the hardware
+//        HardwareManager.calibrate_async(HW_Bucket);
+//        HardwareManager.calibrate_async(HW_Collector);
+//        try {
+//            HardwareManager.waitForCalibrations();
+//        } catch (InterruptedException e) {
+//            return;
+//        }
+        HardwareManager.calibrate(HW_Slide);
+        // unsure if this is needed with my lib, but better safe than sorry.
+        HardwareManager.calibrate(HW_Drive);
+    }
+
+    @Override
+    public void main() {
+        HardwareManager.StartAction(AC_Drive);
+        HardwareManager.StartAction(AC_Slide);
+//        HardwareManager.StartAction(AC_Collector);
+//        HardwareManager.StartAction(AC_Bucket);
+
         while (opModeIsActive()) {
-            loopOpMode();
-        }
-    }
 
-    //region Initialization
-    public void initOpMode() {
-        ConfigureHardware(true);
-        if (!CrossOpModeData.isInitialized) {
-            BotInitialization.InitializeRobot(this);
-            CrossOpModeData.isInitialized = true;
-        }
-
-        telemetry.addLine("Ready to Start");
-        telemetry.update();
-    }
-    //endregion
-
-    //region Primary Loop
-    public void loopOpMode() {
-        //region Drive
-        double speed = 1.0;
-        if (gamepad1.left_trigger > 0.15) {
-            speed = 0.5;
-        }
-        if (gamepad1.right_trigger > 0.15) {
-            speed = 0.25;
-        }
-
-
-        // Apply deadzone to joystick inputs
-        double drive = Math.abs(gamepad1.left_stick_y) > deadzone ? -gamepad1.left_stick_y : 0;
-        double strafe = Math.abs(gamepad1.left_stick_x) > deadzone ? -gamepad1.left_stick_x : 0;
-        double turn = Math.abs(gamepad1.right_stick_x) > deadzone ? -gamepad1.right_stick_x : 0;
-
-        MoveRobot(drive, strafe, turn);
-        UpdateMoveRobot(speed);
-        //endregion
-
-        //region Controller 2
-        boolean isSlowModeActive = !gamepad2.left_bumper;
-
-        //region Collection Arm / First Stage
-
-        if (!AssistRunning) {
-            // Scoop
-            double armScoop = (gamepad2.b ? 1 : 0) + (gamepad2.a ? -1 : 0);
-            MoveArmScoop(armScoop);
-
-            // First stage bucket
-            if (gamepad2.x) {
-                stage1Arm.setTargetPosition(5);
-                stage1Arm.setPower(0.1);
-            }
-            if (gamepad2.y) {
-                stage1Arm.setTargetPosition(255);
-                stage1Arm.setPower(0.3);
-            }
-
-            // First stage bucket power control
-            if (stage1Arm.getTargetPosition() == 5) {
-                if (stage1Arm.getCurrentPosition() < 30) {
-                    stage1Arm.setPower(0);
-                } else {
-                    stage1Arm.setPower(0.1);
+                if (gamepad1.share && !isShareButtonPressed) {
+                    isShareButtonPressed = true;
+                    HardwareManager.StartAction(AC_PieceDelivery);
+                } else if (!gamepad1.share) {
+                    isShareButtonPressed = false;
                 }
-            }
-        }
-        //endregion
-
-        //region Slide / Second Stage
-        // Slide
-
-        if (!AssistRunning) {
-            double slidePower = gamepad2.right_trigger - gamepad2.left_trigger;
-            MoveSlidePwr(slidePower);
-
-            // Second stage arm
-            if (gamepad2.dpad_down) {
-                verticalTarget = -11;
-            } else if (gamepad2.dpad_up) {
-                verticalTarget = -130;
-            }
-            stage2Swing.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            stage2Swing.setTargetPosition((int) verticalTarget);
-            stage2Swing.setPower(0.5);
-
-            // Second stage bucket
-            bucketTargetPosition = -0.1;
-            if (gamepad2.right_bumper) {
-                bucketTargetPosition = 0.25;
-            }
-            if (gamepad2.left_bumper) {
-                bucketTargetPosition = 0.05;
-            }
-
-
-        }
-        // Bucket syncing (since this moves!)
-        if (!stage2BucketSync) {
-            StartBucketSync();
-        }
-
-        //endregion
-
-        //region Arm Assist
-        if (gamepad2.share || gamepad2.back) {
-            if (!isBackheld) {
-                isBackheld = true;
-                if (AssistRunning) {
-                    StopPieceAssist();
-                } else {
-                    StartPieceAssist();
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-            }
-        } else {
-            isBackheld = false;
         }
-        //endregion
-
-        //endregion
-
-        //region Telemetry
-        telemetry.addLine("Slide Position " + motorSlide.getCurrentPosition());
-        telemetry.addLine("Swing Position " + stage2Swing.getCurrentPosition());
-        telemetry.addData("Assist", AssistRunning);
-//        telemetry.addLine("Top Bucket Position (servo) " + stage2Bucket.getPosition());
-//        telemetry.addLine("Bucket Target Position (servo)" + bucketTargetPosition);
-
-        telemetry.addLine("Arm Vertical: " + stage1Arm.getCurrentPosition());
-
-        telemetry.update();
-        //endregion
     }
-    //endregion
 
 }
 
