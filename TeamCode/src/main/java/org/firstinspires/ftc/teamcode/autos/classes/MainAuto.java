@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -109,7 +110,25 @@ public abstract class MainAuto extends BaseOpMode {
 
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
-        TrajectoryActionBuilder parkingRun = parkingRun(mecanumDrive, initialPose);
+
+
+        Action trajChosen;
+
+        if (aprilTagPosFinder.x > 0) {
+            trajChosen = redSpeciAuton(mecanumDrive, initialPose).build();
+
+        } else if (aprilTagPosFinder.x < 0) {
+            trajChosen = redThreeYellows(mecanumDrive, initialPose).build();
+        } else  {
+            trajChosen = parkRun(mecanumDrive, initialPose).build();
+        }
+
+        waitForStart();
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        trajChosen
+                ));
 
         new Thread(() -> {
             while (opModeIsActive()) {
@@ -123,61 +142,28 @@ public abstract class MainAuto extends BaseOpMode {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
+
+
+
             }
         });
 
 
-        Actions.runBlocking(parkingRun.build());
+
         while (opModeIsActive()) {
             telemetry.addLine("Finished!");
         }
     }
 
-    public abstract TrajectoryActionBuilder parkingRun(MecanumDrive mecanumDrive, Pose2d initialPose);
-    public Slide Slideup;
-
-    //Trying out actions
-
-    public class Slide {
-        private DcMotor motorSlide;
-
-        public Slide(HardwareMap hardwareMap) {
-            motorSlide = hardwareMap.get(DcMotor.class, "slideMotor");
-
-        }
-
-        public class SlideUp implements Action {
-
-            private Boolean initalized = false;
-
-
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                while (initalized) {
-                    if (motorSlide.getCurrentPosition() < -10000); {
-                        motorSlide.setPower(0);
-                    }
-
-
-                }
 
 
 
-                if (!initalized) {
-                    motorSlide.setPower(0.3);
-                    initalized = true;
-                }
+    public abstract TrajectoryActionBuilder redThreeYellows (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder redSpeciAuton (MecanumDrive mecanumDrive, Pose2d initialPose);
 
-                double vel = motorSlide.getPower();
-                packet.put("Slide Power", vel);
-                return vel < 0.4;
-            }
+    public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, Pose2d initialPose);
 
-            public Action slideUp() {
-                return new SlideUp();
-            }
-        }
-    }
+
 
 
 
