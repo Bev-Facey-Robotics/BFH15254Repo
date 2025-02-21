@@ -4,6 +4,7 @@ import org.firstinspires.ftc.teamcode.hardware.FrontCombine;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
+import org.firstinspires.ftc.teamcode.internal.TelemetryManager;
 
 public class ManualFrontCombine extends ActionElement {
 
@@ -12,6 +13,9 @@ public class ManualFrontCombine extends ActionElement {
     @Override
     public void run() throws InterruptedException, NullPointerException {
         FrontCombine frontCombine = (FrontCombine) HardwareManager.ReserveHardware(this, "FrontCombine");
+        TelemetryManager.instance.AddFunctionToLogging("FrontCombine Rotation", () -> frontCombine.unitRotate.getPosition());
+        TelemetryManager.instance.AddFunctionToLogging("Intake Actuator Position", () -> frontCombine.intakeActuator.getCurrentPosition());
+
         while (!Thread.currentThread().isInterrupted()) {
             // the collecting of the piece
             if (HardwareManager.opMode.gamepad2.a) {

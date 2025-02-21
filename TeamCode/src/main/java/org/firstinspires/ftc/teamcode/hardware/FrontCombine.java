@@ -13,7 +13,7 @@ public class FrontCombine extends HardwareElement {
     private CRServo leftIntake = null;
     private CRServo rightIntake = null;
 
-    private DcMotor intakeActuator = null;
+    public DcMotor intakeActuator = null;
 
     public boolean isIntakeActive = false;
 
