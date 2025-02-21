@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.Vector2d;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
-/// TODO: NEED TO SWAP FOR BLUE VALUES
 
     public class BlueAuto extends MainAuto {
         public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
@@ -18,7 +17,7 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
         }
 
 
-        public TrajectoryActionBuilder blueSpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose) {
+        public TrajectoryActionBuilder SpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose) {
             return mecanumDrive.actionBuilder(initialPose)
                     ///When Actions are implemented, this auto should be able to do a 50 point auto on blue
                     .setTangent(0)

@@ -32,22 +32,16 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.jetbrains.annotations.NotNull;
 
 public abstract class MainAuto extends BaseOpMode {
 
@@ -110,27 +104,11 @@ public abstract class MainAuto extends BaseOpMode {
 
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
-
-
-        Action trajChosen;
-
-       if (aprilTagPosFinder.aprilTagId == 15) {
-           trajChosen = redSpeciAuton(mecanumDrive,initialPose).build();
-       } else if (aprilTagPosFinder.aprilTagId == 13) {
-           trajChosen = blueSpeciAuton(mecanumDrive,initialPose).build();
-
-       } else {
-           trajChosen = null;
-       }
-
-
-
-
         waitForStart();
 
         Actions.runBlocking(
                 new SequentialAction(
-                        trajChosen
+                        SpeciAuton(mecanumDrive, initialPose).build()
                 ));
 
         new Thread(() -> {
@@ -162,11 +140,9 @@ public abstract class MainAuto extends BaseOpMode {
 
 
     public abstract TrajectoryActionBuilder redThreeYellows (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder redSpeciAuton (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder SpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose);
 
     public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, Pose2d initialPose);
-
-    public abstract TrajectoryActionBuilder blueSpeciAuton (MecanumDrive mecanumDrive, Pose2d initialPose);
 
 
 

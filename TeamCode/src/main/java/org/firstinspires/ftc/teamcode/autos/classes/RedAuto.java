@@ -33,7 +33,7 @@ import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
         }
 
 
-        public TrajectoryActionBuilder redSpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose) {
+        public TrajectoryActionBuilder SpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose) {
             return mecanumDrive.actionBuilder(initialPose)
                     ///When Actions are implemented, this auto should be able to do a 50 point auto on red
                     .setTangent(0)
