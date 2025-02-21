@@ -3,8 +3,6 @@ package org.firstinspires.ftc.teamcode.autos.opmodes.autonomus;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.actions.DriveForward;
-import org.firstinspires.ftc.teamcode.hardware.Bucket;
-import org.firstinspires.ftc.teamcode.hardware.Collector;
 import org.firstinspires.ftc.teamcode.hardware.Drive;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
@@ -16,16 +14,12 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
  */
 @Autonomous(name="the most basic auto mode", group = "Competition Ready")
 public class DriveForwardAuto extends BaseOpMode {
-    private final Bucket HW_Bucket = new Bucket();
-    private final Collector HW_Collector = new Collector();
     private final Drive HW_Drive = new Drive();
     private final Slide HW_Slide = new Slide();
 
     @Override
     public void initializeHardware() {
         // Initialize the hardware
-        HardwareManager.init(HW_Bucket, hardwareMap);
-        HardwareManager.init(HW_Collector, hardwareMap);
         HardwareManager.init(HW_Drive, hardwareMap);
         HardwareManager.init(HW_Slide, hardwareMap);
     }
@@ -49,13 +43,6 @@ public class DriveForwardAuto extends BaseOpMode {
     }
 
     private void calibrateRest() {
-        HardwareManager.calibrate_async(HW_Bucket);
-        HardwareManager.calibrate_async(HW_Collector);
-        try {
-            HardwareManager.waitForCalibrations();
-        } catch (InterruptedException e) {
-            return;
-        }
         HardwareManager.calibrate(HW_Slide);
     }
 }
