@@ -114,14 +114,17 @@ public abstract class MainAuto extends BaseOpMode {
 
         Action trajChosen;
 
-        if (aprilTagPosFinder.x > 0) {
-            trajChosen = redSpeciAuton(mecanumDrive, initialPose).build();
+       if (aprilTagPosFinder.aprilTagId == 15) {
+           trajChosen = redSpeciAuton(mecanumDrive,initialPose).build();
+       } else if (aprilTagPosFinder.aprilTagId == 13) {
+           trajChosen = blueSpeciAuton(mecanumDrive,initialPose).build();
 
-        } else if (aprilTagPosFinder.x < 0) {
-            trajChosen = redThreeYellows(mecanumDrive, initialPose).build();
-        } else  {
-            trajChosen = parkRun(mecanumDrive, initialPose).build();
-        }
+       } else {
+           trajChosen = null;
+       }
+
+
+
 
         waitForStart();
 
@@ -163,7 +166,7 @@ public abstract class MainAuto extends BaseOpMode {
 
     public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, Pose2d initialPose);
 
-
+    public abstract TrajectoryActionBuilder blueSpeciAuton (MecanumDrive mecanumDrive, Pose2d initialPose);
 
 
 
