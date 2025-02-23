@@ -32,18 +32,63 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 public abstract class MainAuto extends BaseOpMode {
+
+
+    public class upSlide extends ActionElement implements Action {
+
+        Slide slide = (Slide) HardwareManager.ReserveHardware(this, "Slide");
+
+        //Logic to set the motor to the correct runmode in case it isn't
+        private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+                if (!initialized) {
+                    slide.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    initialized = true;
+                }
+                //reserves the slide
+                if (!slide.isReserved) {
+                    return true;
+                }
+                //Logic to get the slide's current position
+                double slidePos = slide.motorSlide.getCurrentPosition();
+                packet.put("SlidePos", slidePos);
+                //Logic for the slide to check where it is and return either true or false
+                if ((slidePos < 1700) && (slidePos > 1650)) {
+                    return true;
+                } else {
+                    slide.motorSlide.setPower(0.0);
+                    slide.isReserved = false;
+                    return false;
+                }
+            }
+        }
+
+        public Action slideUp() {
+            return new upSlide();
+
+        }
+
 
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
