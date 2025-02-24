@@ -149,11 +149,50 @@ public abstract class MainAuto extends BaseOpMode {
 
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
+        //build all the trajectories here
+        Action aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose).build();
+        Action aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose).build();
+        Action aCkickSample3Traj = kickSample3Traj(mecanumDrive, initialPose).build();
+        Action aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose).build();
+
+
+
+
         waitForStart();
 
-        Actions.runBlocking(
-                new SequentialAction(
-                        SpeciAuton(mecanumDrive, initialPose).build()
+        Actions.runBlocking(new SequentialAction(
+                aCscoreStartingSpecimenTraj,
+                //insert parellel slide up
+                //insert sequential slide wall
+
+                aCkickSample1Traj,
+                //insert sequential kicker
+                aCkickSample2Traj,
+                //insert sequential kicker
+                aCkickSample3Traj,
+                //insert sequential kicker
+                aCwallSpecimenTraj,
+                aCscoreSecondSpecimenTraj,
+                //insert parellel slide up
+                //insert sequential slide wall
+                aCwallSpecimenTraj,
+                aCscoreThirdSpecimenTraj,
+                //insert parellel slide up
+                //insert sequential slide wall
+                aCwallSpecimenTraj,
+                aCscoreFourthSpecimenTraj,
+                //insert parellel slide up
+                //insert sequential slide wall
+                aCwallSpecimenTraj,
+                aCscoreFifthSpecimenTraj
+                //insert parellel slide up
+                //insert parellel slide wall
+                //closeout
                 ));
 
         new Thread(() -> {
@@ -183,11 +222,16 @@ public abstract class MainAuto extends BaseOpMode {
 
 
 
+    public abstract TrajectoryActionBuilder wallSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder kickSample1Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder kickSample2Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder kickSample3Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreSecondSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreThirdSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
 
-    public abstract TrajectoryActionBuilder redThreeYellows (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder SpeciAuton(MecanumDrive mecanumDrive, Pose2d initialPose);
-
-    public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, Pose2d initialPose);
 
 
 
