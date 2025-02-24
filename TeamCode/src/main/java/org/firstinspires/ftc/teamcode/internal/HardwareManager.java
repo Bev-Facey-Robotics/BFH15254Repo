@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.CountDownLatch;
 
+// this was a mistake
 public class HardwareManager {
     public static List<HardwareElement> hardwareElements = new ArrayList<>();
     public static List<ActionElement> runningActionElements = new ArrayList<>();
@@ -313,6 +314,39 @@ public class HardwareManager {
             return hw;
         } catch (Exception e) {
             new Error(action, 203, "Could not reserve hardware element: " + className, null);
+            return null;
+        }
+    }
+    //endregion
+
+    //region Road Runner Compatibility
+    public static HardwareElement ReserveHardwareForRoadRunner(String className) {
+        try {
+            HardwareElement hw = getElementByClassName(className);
+            if (hw == null || !hw.isInitialized || hw.isBroken) {
+                new Error(203, "Could not reserve hardware element: " + className, ErrorTypes.ROAD_RUNNER_ERROR, null);
+                return null;
+            }
+            if (hw.isReserved) {
+                    ActionElement actionToRelease = HardwareReserves.get(hw);
+                    if (actionToRelease != null) {
+                        try {
+                            actionToRelease.isStoppingDueToPriority = true;
+                            StopAction(actionToRelease);
+                        } catch (Exception e) {
+                            new Error(203, "Could not reserve hardware element: " + className, ErrorTypes.ROAD_RUNNER_ERROR, e);
+                            return null;
+                        }
+                    } else {
+                        new Error(203, "Could not reserve hardware element: " + className,  ErrorTypes.ROAD_RUNNER_ERROR, null);
+                        return null;
+                    }
+            }
+            hw.isReserved = true;
+            hw.reservedWithPriority = 999999999;
+            return hw;
+        } catch (Exception e) {
+            new Error(203, "Could not reserve hardware element: " + className,  ErrorTypes.ROAD_RUNNER_ERROR, null);
             return null;
         }
     }
