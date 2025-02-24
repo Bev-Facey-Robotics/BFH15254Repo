@@ -1,7 +1,27 @@
 package org.firstinspires.ftc.teamcode.internal;
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+
 public abstract class ActionElement {
     public abstract void run() throws InterruptedException, NullPointerException ;
+
+//    @Override
+//    public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+//        try {
+//            run();
+//        } catch (InterruptedException e) {
+//
+//        } catch (NullPointerException e) {
+//            if (isAutoRestart()) {
+//                runThread.interrupt();
+//            }
+//            return false;
+//        }
+//        return true;
+//    }
 
     public Thread runThread = null;
 

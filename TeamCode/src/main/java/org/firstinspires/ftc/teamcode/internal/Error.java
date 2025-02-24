@@ -38,8 +38,10 @@ public class Error {
         if (TelemetryManager.instance != null) {
             TelemetryManager.instance.AddError(this);
             if (code != 205) {
-                action.isStoppingDueToError = true;
-                HardwareManager.StopAction(action);
+                if (action != null) {
+                    action.isStoppingDueToError = true;
+                    HardwareManager.StopAction(action);
+                }
             }
             Log.e(LOG_TAG, "Action Error [" + code + "]: " + message, e);
         }
