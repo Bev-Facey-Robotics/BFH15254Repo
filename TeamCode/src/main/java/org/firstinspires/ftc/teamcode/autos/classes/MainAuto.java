@@ -109,18 +109,18 @@ public abstract class MainAuto extends BaseOpMode {
 
         //region April Tag Initialization
         // Let's get our position finder ready
-        aprilTagPosFinder.Initialize(
-                hardwareMap,
-                telemetry
-        );
-
-        boolean hasFoundAprilTag = false;
-
-        while (!hasFoundAprilTag && !isStopRequested()) {
-            telemetry.addLine("Looking for Initial April Tag");
-            telemetry.update();
-            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
-        }
+//        aprilTagPosFinder.Initialize(
+//                hardwareMap,
+//                telemetry
+//        );
+//
+//        boolean hasFoundAprilTag = false;
+//
+//        while (!hasFoundAprilTag && !isStopRequested()) {
+//            telemetry.addLine("Looking for Initial April Tag");
+//            telemetry.update();
+//            hasFoundAprilTag = aprilTagPosFinder.ProcessAprilTagData();
+//        }
 
         if (isStopRequested()) {
             return;
@@ -128,7 +128,7 @@ public abstract class MainAuto extends BaseOpMode {
 
         while (opModeInInit()) {
 //            telemetry.addData("April Tag Found", "ID: %d", positionFinder.firstObtainedAprilTagID);
-            aprilTagPosFinder.ProcessAprilTagData();
+    //        aprilTagPosFinder.ProcessAprilTagData();
 //            telemetry.addLine("Ready to rumble!");
 //            telemetry.addData("April Tag Position", "X: %f, Y: %f", aprilTagPosFinder.x, aprilTagPosFinder.y);
 //            telemetry.addData("April Tag Yaw", "Yaw: %f", aprilTagPosFinder.yaw);
@@ -140,8 +140,8 @@ public abstract class MainAuto extends BaseOpMode {
         }
         //endregion
 
-        Pose2d initialPose = new Pose2d(aprilTagPosFinder.x, aprilTagPosFinder.y, Math.toRadians(aprilTagPosFinder.yaw));
-        aprilTagPosFinder.StopStreaming();
+        Pose2d initialPose = new Pose2d(60,-25, Math.toRadians(aprilTagPosFinder.yaw));
+        //aprilTagPosFinder.StopStreaming();
 
         // for debugging
         //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(aprilTagPosFinder.yaw));
