@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -45,7 +46,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
-import org.firstinspires.ftc.teamcode.internal.ActionElement;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
@@ -76,19 +76,77 @@ public abstract class MainAuto extends BaseOpMode {
             packet.put("SlidePos", slidePos);
             //Logic for the slide to check where it is and return either true or false
             if ((slidePos < 1700) && (slidePos > 1650)) {
-                return true;
-            } else {
                 slide.motorSlide.setPower(0.0);
                 slide.isReserved = false;
                 return false;
+            } else {
+                slide.motorSlide.setPower(0.5);
+                slide.isReserved = true;
+                return true;
+            }
+
+        }
+    }
+
+    public Action slideHighChamber() {
+        return new upSlide(); }
+
+    public class downSlide implements Action {
+        Slide slide = (Slide) HardwareManager.ReserveHardware(null, "Slide");
+        private boolean initialized = false;
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+            if (!initialized) {
+                slide.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                initialized = true;
+            }
+
+            double slidePos = slide.motorSlide.getCurrentPosition();
+            packet.put("SlidePos", slidePos);
+            if ((slidePos > 750) && (slidePos < 775)) {
+                slide.motorSlide.setPower(0.0);
+                slide.isReserved = false;
+                return false;
+            } else {
+                slide.motorSlide.setPower(-0.5);
+                slide.isReserved = true;
+                return true;
+            }
+        }
+    }
+    public Action slideWall() {
+        return new downSlide(); }
+
+
+
+    public class someDownSlide implements Action {
+        Slide slide = (Slide) HardwareManager.ReserveHardware(null, "Slide");
+        private boolean initialized = false;
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+            if (!initialized) {
+                slide.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                initialized = true;
+            }
+            double slidePos = slide.motorSlide.getCurrentPosition();
+            packet.put("SlidePos", slidePos);
+            if ((slidePos > 790) && (slidePos < 800)) {
+                slide.motorSlide.setPower(0.0);
+                slide.isReserved = false;
+                return false;
+            } else {
+                slide.motorSlide.setPower(-0.5);
+                slide.isReserved = true;
+                return true;
             }
         }
     }
 
-        public Action slideUp() {
-            return new upSlide();
+public Action slideReleaseSpeci() {
+    return new someDownSlide();}
 
-        }
+
 
 
     //region Position
@@ -150,7 +208,9 @@ public abstract class MainAuto extends BaseOpMode {
 
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
-        //build all the trajectories here
+        //build all the trajectories here. Yes there is a lot
+
+
         Action aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose).build();
         Action aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose).build();
@@ -167,7 +227,12 @@ public abstract class MainAuto extends BaseOpMode {
         waitForStart();
 
         Actions.runBlocking(new SequentialAction(
-                aCscoreStartingSpecimenTraj,
+                new ParallelAction(
+                        aCscoreStartingSpecimenTraj,
+                        
+
+    new SequentialAction(
+
                 //insert parellel slide up
                 //insert sequential slide wall
 
