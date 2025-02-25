@@ -32,111 +32,26 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
-import androidx.annotation.NonNull;
-
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
-import org.firstinspires.ftc.teamcode.hardware.Slide;
+import org.firstinspires.ftc.teamcode.autos.rractions.RRSlide;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.internal.HardwareManager;
-
 
 
 public abstract class MainAuto extends BaseOpMode {
-
-    public class upSlide implements Action {
-
-        Slide slide = (Slide) HardwareManager.ReserveHardwareForRoadRunner( "Slide");
-
-        //Logic to set the motor to the correct runmode in case it isn't
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
-            //Logic to get the slide's current position
-            double slidePos = slide.motorSlide.getCurrentPosition();
-            packet.put("SlidePos", slidePos);
-            //Logic for the slide to check where it is and return either true or false
-            slide.MovePosition(1650);
-            return slide.motorSlide.isBusy();
-
-        }
-    }
-
-    public Action slideHighChamber() {
-        return new upSlide(); }
-
-    public class downSlide implements Action {
-        Slide slide = (Slide) HardwareManager.ReserveHardware(null, "Slide");
-        private boolean initialized = false;
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
-            if (!initialized) {
-                slide.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                initialized = true;
-            }
-
-            double slidePos = slide.motorSlide.getCurrentPosition();
-            packet.put("SlidePos", slidePos);
-            if ((slidePos > 750) && (slidePos < 775)) {
-                slide.motorSlide.setPower(0.0);
-                slide.isReserved = false;
-                return false;
-            } else {
-                slide.motorSlide.setPower(-0.5);
-                slide.isReserved = true;
-                return true;
-            }
-        }
-    }
-    public Action slideWall() {
-        return new downSlide(); }
-
-
-
-    public class someDownSlide implements Action {
-        Slide slide = (Slide) HardwareManager.ReserveHardware(null, "Slide");
-        private boolean initialized = false;
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
-            if (!initialized) {
-                slide.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                initialized = true;
-            }
-            double slidePos = slide.motorSlide.getCurrentPosition();
-            packet.put("SlidePos", slidePos);
-            if ((slidePos > 790) && (slidePos < 800)) {
-                slide.motorSlide.setPower(0.0);
-                slide.isReserved = false;
-                return false;
-            } else {
-                slide.motorSlide.setPower(-0.5);
-                slide.isReserved = true;
-                return true;
-            }
-        }
-    }
-
-public Action slideReleaseSpeci() {
-    return new someDownSlide();}
-
-
-
-
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     private MecanumDrive mecanumDrive = null; // Road Runner
     //endregion
+
+    public RRSlide slide = null;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -148,6 +63,8 @@ public Action slideReleaseSpeci() {
             CrossOpModeData.isInitialized = true;
         }
         //endregion
+
+        slide = new RRSlide();
 
         //region April Tag Initialization
         // Let's get our position finder ready
@@ -212,7 +129,7 @@ public Action slideReleaseSpeci() {
 
         Actions.runBlocking(new SequentialAction(
                         aCscoreStartingSpecimenTraj,
-                slideHighChamber()
+                slide.MoveToHighChamber()
 
                 //insert parellel slide up
                 //insert sequential slide wall
