@@ -41,8 +41,11 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
 import org.firstinspires.ftc.teamcode.autos.rractions.RRSlide;
+import org.firstinspires.ftc.teamcode.hardware.Drive;
+import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 
 public abstract class MainAuto extends BaseOpMode {
@@ -63,7 +66,6 @@ public abstract class MainAuto extends BaseOpMode {
             CrossOpModeData.isInitialized = true;
         }
         //endregion
-
         slide = new RRSlide();
 
         //region April Tag Initialization
@@ -211,12 +213,17 @@ public abstract class MainAuto extends BaseOpMode {
     public void main() {
         // This is the main method for the auto
     }
+
+    private Slide HW_Slide = new Slide();
+
     public void initializeHardware() {
         // This is the method to initialize the hardware
+        HardwareManager.init(HW_Slide, hardwareMap);
     }
 
     public void calibrateHardware() {
         // This is the method to calibrate the hardware
+        HardwareManager.calibrate(HW_Slide);
     }
 
 }   // end class
