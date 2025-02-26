@@ -66,7 +66,7 @@ public abstract class MainAuto extends BaseOpMode {
             CrossOpModeData.isInitialized = true;
         }
         //endregion
-        slide = new RRSlide();
+        slide = new RRSlide(hardwareMap);
 
         //region April Tag Initialization
         // Let's get our position finder ready
@@ -214,16 +214,13 @@ public abstract class MainAuto extends BaseOpMode {
         // This is the main method for the auto
     }
 
-    private Slide HW_Slide = new Slide();
-
     public void initializeHardware() {
         // This is the method to initialize the hardware
-        HardwareManager.init(HW_Slide, hardwareMap);
+
     }
 
     public void calibrateHardware() {
         // This is the method to calibrate the hardware
-        HardwareManager.calibrate(HW_Slide);
     }
 
 }   // end class

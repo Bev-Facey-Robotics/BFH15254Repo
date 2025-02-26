@@ -4,16 +4,19 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.hardware.Slide;
 import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 public class RRSlide {
 
-    private Slide slide = null;
+    private Slide slide = new Slide();
 
-    public RRSlide() {
-        slide = (Slide) HardwareManager.ReserveHardwareForRoadRunner("Slide");
+    public RRSlide(HardwareMap hardwareMap) {
+        HardwareManager.init(slide, hardwareMap);
+        HardwareManager.calibrate(slide);
+        HardwareManager.ReserveHardwareForRoadRunner("Slide");
     }
 
     public class MoveToHighChamber implements Action {
