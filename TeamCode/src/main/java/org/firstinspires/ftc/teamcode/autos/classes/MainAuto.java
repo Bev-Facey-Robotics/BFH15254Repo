@@ -33,6 +33,7 @@ import android.annotation.SuppressLint;
 
 
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -127,38 +128,59 @@ public abstract class MainAuto extends BaseOpMode {
 
 
 
+
+
         waitForStart();
 
         Actions.runBlocking(new SequentialAction(
+                ///Placing the preloaded specimen on high rung
+                new ParallelAction(
                         aCscoreStartingSpecimenTraj,
-                slide.MoveToHighChamber()
+                        slide.MoveToHighChamber()
+                ),
+                ///Releasing the specimens on high chamber
+                new SequentialAction(
+                        slide.MoveToWall()),
+                ///Batting the other specimens into the obv zone + grabbing a specimen
+                new SequentialAction(
+                       aCkickSample1Traj,
+                        aCkickSample2Traj,
+                        aCkickSample3Traj,
+                        aCwallSpecimenTraj),
 
-                //insert parellel slide up
-                //insert sequential slide wall
+                ///grabbing the specimen
+                new ParallelAction(
+                        aCscoreSecondSpecimenTraj,
+                        slide.MoveToHighChamber()),
+                ///Releasing the specimen
+                new SequentialAction(
+                        slide.MoveToWall()),
 
-                ///aCkickSample1Traj,
-                //insert sequential kicker
-                ///aCkickSample2Traj,
-                //insert sequential kicker
-                ///aCkickSample3Traj,
-                //insert sequential kicker
-                ///aCwallSpecimenTraj,
-                ///aCscoreSecondSpecimenTraj,
-                //insert parellel slide up
-                //insert sequential slide wall
-                ///aCwallSpecimenTraj,
-                ///aCscoreThirdSpecimenTraj,
-                //insert parellel slide up
-                //insert sequential slide wall
-                ///aCwallSpecimenTraj,
-                ///aCscoreFourthSpecimenTraj,
-                //insert parellel slide up
-                //insert sequential slide wall
-                ///aCwallSpecimenTraj,
-                ///aCscoreFifthSpecimenTraj
-                //insert parellel slide up
-                //insert parellel slide wall
-                //closeout
+                ///grabbing the specimen
+                new ParallelAction(
+                        aCscoreThirdSpecimenTraj,
+                        slide.MoveToHighChamber()),
+                ///Releasing the specimen
+                new SequentialAction(
+                        slide.MoveToWall()),
+
+                ///grabbing the specimen
+                new ParallelAction(
+                        aCscoreFourthSpecimenTraj,
+                        slide.MoveToHighChamber()),
+                ///Releasing the specimen
+                new SequentialAction(
+                        slide.MoveToWall()),
+                ///grabbing the specimen
+
+                new ParallelAction(
+                        aCscoreFifthSpecimenTraj,
+                        slide.MoveToHighChamber()),
+                ///Releasing the specimen
+                new SequentialAction(
+                        slide.MoveToWall())
+
+
                 ));
 
         new Thread(() -> {

@@ -35,35 +35,36 @@ public class RedAuto extends MainAuto {
     //Scores the preloaded specimen on high chamber
     public TrajectoryActionBuilder scoreStartingSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToSplineHeading(new Vector2d(7.5, -32), Math.toRadians(270));
+                .splineToSplineHeading(new Pose2d(7.5, -32, Math.toRadians(270)), -10);
     }
 
     //Moves the bot over an inch to score the second specimen. Ditto with 3-5specimenTraj, but I can't think of a way to make it simpler
     public TrajectoryActionBuilder scoreSecondSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToSplineHeading(new Vector2d(6.5, -32), Math.toRadians(270));
+                .splineToSplineHeading(new Pose2d(6.5, -32, Math.toRadians(270)), -10);
     }
 
     public TrajectoryActionBuilder scoreThirdSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToSplineHeading(new Vector2d(5.5, -32), Math.toRadians(270));
+                .splineToSplineHeading(new Pose2d(5.5, -32, Math.toRadians(270)), -10);
     }
 
     public TrajectoryActionBuilder scoreFourthSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToSplineHeading(new Vector2d(4.5, -32), Math.toRadians(270));
+                .splineToSplineHeading(new Pose2d(4.5, -32, Math.toRadians(270)), -10);
     }
 
     public TrajectoryActionBuilder scoreFifthSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToSplineHeading(new Vector2d(3.5, -32), Math.toRadians(270));
+                .splineToSplineHeading(new Pose2d(3.5, -32, Math.toRadians(270)), -10);
+
     }
 
     /// Uses the kicker in the front of the bot to kick the samples into the obv zones
     public TrajectoryActionBuilder kickSample1Traj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
                 .strafeTo(new Vector2d(7.5, -42))
-                .strafeToLinearHeading(new Vector2d(34, -25), Math.toRadians(0))
+                .splineToLinearHeading(new Pose2d(36, -25, Math.toRadians(0)), 10)
 
                 .strafeTo(new Vector2d(36, -25));
     }
@@ -82,7 +83,7 @@ public class RedAuto extends MainAuto {
     public TrajectoryActionBuilder wallSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
 
-                .strafeToLinearHeading(new Vector2d(45, -50), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(45, -55, Math.toRadians(90)), 0)
                 .strafeTo(new Vector2d(45, -60));
     }
 }
