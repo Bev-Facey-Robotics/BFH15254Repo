@@ -90,7 +90,6 @@ public class FrontCombine extends HardwareElement {
             } else {
                 this.intakeActuator.setPower(0.25);
             }
-            this.intakeActuator.setPower(1);
         }
     }
 
