@@ -90,6 +90,12 @@ public class RedAuto extends MainAuto {
                 .splineToSplineHeading(new Pose2d(45, -55, Math.toRadians(90)), 0)
                 .strafeTo(new Vector2d(45, -60));
     }
+
+    public TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose) {
+        return mecanumDrive.actionBuilder(initialPose)
+
+        .splineToSplineHeading(new Pose2d(15, -55, Math.toRadians(180)), 0);
+    }
 }
 
 
