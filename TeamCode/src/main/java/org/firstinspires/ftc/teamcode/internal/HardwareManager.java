@@ -6,84 +6,117 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ConcurrentHashMap;
 
-// this was a mistake
 public class HardwareManager {
-    public static List<HardwareElement> hardwareElements = new ArrayList<>();
-    public static List<ActionElement> runningActionElements = new ArrayList<>();
-    public static HashMap<HardwareElement, ActionElement> HardwareReserves = new HashMap<>();
-    private static final List<ActionElement> stoppedActions = new ArrayList<>();
-    private static HashMap<ActionElement, List<HardwareElement>> actionHardwareMap = new HashMap<>();
+    private static final Object initLock = new Object();
+    private static final Object calibrationLock = new Object();
+    private static final Object actionLock = new Object();
+
+    private static final List<HardwareElement> hardwareElements =
+            Collections.synchronizedList(new ArrayList<>());
+    private static final List<ActionElement> runningActionElements =
+            Collections.synchronizedList(new ArrayList<>());
+    private static final Map<HardwareElement, ActionElement> hardwareReserves =
+            Collections.synchronizedMap(new HashMap<>());
+    private static final List<ActionElement> stoppedActions =
+            Collections.synchronizedList(new ArrayList<>());
+    private static final Map<ActionElement, List<HardwareElement>> actionHardwareMap =
+            Collections.synchronizedMap(new HashMap<>());
 
     public static volatile boolean opModeActive = false;
-    private static CountDownLatch calibrationLatch;
-    public static HardwareMap hardwareMap;
-    public static BaseOpMode opMode = null;
-    public static boolean isCurrentlyStopping = false;
+    private static volatile CountDownLatch calibrationLatch;
+    public static volatile HardwareMap hardwareMap;
+    public static volatile BaseOpMode opMode = null;
+    public static volatile boolean isCurrentlyStopping = false;
 
-    //region Initalization & Calibration
-    public static Error init(HardwareElement hw, HardwareMap hardwareMap) {
-        if (HardwareManager.hardwareMap == null) {
-            HardwareManager.hardwareMap = hardwareMap; // im lazy ok?
-        }
-        if (getElementByClassName(hw.getClass().getSimpleName()) != null) {
-            hardwareElements.remove(getElementByClassName(hw.getClass().getSimpleName()));
-            return init(hw, hardwareMap); // this is a hacky way to work around having multiple hardware elements
-            //return new Error(hw, 104, "Hardware element already exists: " + hw.getClass().getSimpleName(), null);
-        }
-        try {
-            hw.init(hardwareMap);
-            hw.isInitialized = true;
-            hardwareElements.add(hw);
-            return null;
-        } catch (Exception e) {
-            return new Error(hw, 103, "An error occurred while initializing hardware", e);
+    public static void Reset() {
+        synchronized (initLock) {
+            hardwareElements.clear();
+            runningActionElements.clear();
+            hardwareReserves.clear();
+            stoppedActions.clear();
+            actionHardwareMap.clear();
+            calibrationLatch = null;
+            hardwareMap = null;
+            opMode = null;
+            isCurrentlyStopping = false;
         }
     }
 
-    public static Error init_array(HardwareElement[] elementsToInit, HardwareMap hardwareMap) {
-        for (HardwareElement hardwareElement : hardwareElements) {
-            Error result = init(hardwareElement, hardwareMap);
-            if (result != null) {
-                return result; // there's probably a better way to do this.
+    public static Error init(HardwareElement hw, HardwareMap hwMap) {
+        synchronized (initLock) {
+            if (hardwareMap == null) {
+                hardwareMap = hwMap;
+            }
+
+            HardwareElement existing = getElementByClassName(hw.getClass().getSimpleName());
+            if (existing != null) {
+                hardwareElements.remove(existing);
+                return init(hw, hwMap);
+            }
+
+            try {
+                hw.init(hwMap);
+                hw.isInitialized = true;
+                hardwareElements.add(hw);
+                return null;
+            } catch (Exception e) {
+                return new Error(hw, 103, "An error occurred while initializing hardware", e);
             }
         }
-        return null;
+    }
+
+    public static Error init_array(HardwareElement[] elementsToInit, HardwareMap hwMap) {
+        synchronized (initLock) {
+            for (HardwareElement element : elementsToInit) {
+                Error result = init(element, hwMap);
+                if (result != null) {
+                    return result;
+                }
+            }
+            return null;
+        }
     }
 
     public static Error calibrate(HardwareElement hw) {
-        if (!hw.isInitialized) {
-            return new Error(hw, 201, "Could not calibrate hardware element: " + hw.getClass().getSimpleName() + ". Hardware is not initialized.", null);
-        }
-        try {
-            hw.calibrate();
-            hw.isCalibrated = true;
-            return null;
-        } catch (Exception e) {
-            return new Error(hw, 202, "An error occurred while calibrating hardware", e);
+        synchronized (calibrationLock) {
+            if (!hw.isInitialized) {
+                return new Error(hw, 201,
+                        "Could not calibrate hardware element: " + hw.getClass().getSimpleName() +
+                                ". Hardware is not initialized.", null);
+            }
+            try {
+                hw.calibrate();
+                hw.isCalibrated = true;
+                return null;
+            } catch (Exception e) {
+                return new Error(hw, 202, "An error occurred while calibrating hardware", e);
+            }
         }
     }
 
     public static Error calibrate_async(HardwareElement hw) {
-        if (!hw.isInitialized) {
-            return new Error(hw, 201, "Could not calibrate hardware element: " + hw.getClass().getSimpleName() + ". Hardware is not initialized.", null);
-        }
-        if (calibrationLatch == null) {
-            calibrationLatch = new CountDownLatch(1);
-        } else {
-            calibrationLatch = new CountDownLatch((int)calibrationLatch.getCount()+1);
-        }
+        synchronized (calibrationLock) {
+            if (!hw.isInitialized) {
+                return new Error(hw, 201,
+                        "Could not calibrate hardware element: " + hw.getClass().getSimpleName() +
+                                ". Hardware is not initialized.", null);
+            }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
+            if (calibrationLatch == null) {
+                calibrationLatch = new CountDownLatch(1);
+            } else {
+                calibrationLatch = new CountDownLatch((int)calibrationLatch.getCount() + 1);
+            }
+
+            new Thread(() -> {
                 try {
                     hw.calibrate();
                     hw.isCalibrated = true;
@@ -92,317 +125,253 @@ public class HardwareManager {
                 } finally {
                     calibrationLatch.countDown();
                 }
-            }
-        }).start();
-        return null;
+            }).start();
+            return null;
+        }
     }
 
     public static void waitForCalibrations() throws InterruptedException {
-        if (calibrationLatch != null) {
-            calibrationLatch.await();
+        CountDownLatch latch = calibrationLatch;
+        if (latch != null) {
+            latch.await();
         }
     }
-
-    //endregion
-
-    //region Failure Management
-    // i had to name it that
 
     public static void GracefullyFailHardware(HardwareElement hw) {
-        hw.isBroken = true;
-        for (ActionElement actionElement : runningActionElements) {
-            if (HardwareReserves.get(hw) == actionElement) {
-                StopAction(actionElement);
-            }
-        }
-
-    }
-
-    //endregion
-
-    /**
-     * Get a hardware element by its class name.
-     * WARNING: This does no checks to see if the device is working.
-     * @param className The class name of the hardware element.
-     * @return The hardware element, or null if not found.
-     */
-    private static HardwareElement getElementByClassName(String className) {
-        for (HardwareElement hardwareElement : hardwareElements) {
-            if (hardwareElement.getClass().getSimpleName().equals(className)) {
-                return hardwareElement;
-            }
-        }
-        return null; // Return null if no matching element is found
-    }
-
-    //region Actions
-
-    public static void StartAction(ActionElement action) {
-        // Run the action in a separate thread (with a try-catch-finally)
-        action.runThread = new Thread(() -> {
-            try {
-                action.run();
-            } catch (InterruptedException ignored) {
-                // Thread interruption handled by finally block
-            } catch (Exception e) {
-                new Error(action, 204, "An error occurred while running action", e);
-            } finally {
-                FinishAction(action);
-            }
-        });
-        action.runThread.start();
-        runningActionElements.add(action);
-    }
-
-    /**
-     * Finishes an action and releases all hardware elements reserved by it.
-     * This assumes that the thread has already been stopped
-     * @param action The action to finish.
-     */
-    private static void FinishAction(ActionElement action) {
-        synchronized (runningActionElements) {
-            runningActionElements.remove(action);
-        }
-
-        // Release hardware AFTER ensuring thread is stopped
-        List<HardwareElement> reservedHardware = new ArrayList<>();
-        synchronized (HardwareReserves) {
-            Iterator<Map.Entry<HardwareElement, ActionElement>> iterator = HardwareReserves.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<HardwareElement, ActionElement> entry = iterator.next();
-                if (entry.getValue() == action) {
-                    HardwareElement hw = entry.getKey();
-                    hw.isReserved = false;
-                    hw.reservedWithPriority = -1;
-                    reservedHardware.add(hw);
-                    iterator.remove();
+        synchronized (actionLock) {
+            hw.isBroken = true;
+            for (ActionElement action : runningActionElements) {
+                if (hardwareReserves.get(hw) == action) {
+                    StopAction(action);
                 }
             }
         }
+    }
 
-        // Handle auto-restart logic safely
-        if (action.isAutoRestart() && !action.isStoppingDueToError) {
-            synchronized (stoppedActions) {
-                stoppedActions.add(action);
+    private static HardwareElement getElementByClassName(String className) {
+        synchronized (hardwareElements) {
+            for (HardwareElement element : hardwareElements) {
+                if (element.getClass().getSimpleName().equals(className)) {
+                    return element;
+                }
             }
-            synchronized (actionHardwareMap) {
-                actionHardwareMap.put(action, reservedHardware);
-            }
-        }
-
-        if (!action.isStoppingDueToPriority) {
-            checkAndRestartActions();
+            return null;
         }
     }
 
-//    // Call this method when hardware is released
-//    private static void releaseHardware(HardwareElement hardwareElement) {
-//        hardwareElement.isReserved = false;
-//        hardwareElement.reservedWithPriority = -1;
-//        HardwareReserves.remove(hardwareElement);
-//        checkAndRestartActions();
-//    }
-
-    private static void checkAndRestartActions() {
-        List<ActionElement> copyStoppedActions;
-        synchronized (stoppedActions) {
-            copyStoppedActions = new ArrayList<>(stoppedActions); // Thread-safe copy
+    public static void StartAction(ActionElement action) {
+        synchronized (actionLock) {
+            action.runThread = new Thread(() -> {
+                try {
+                    action.run();
+                } catch (InterruptedException ignored) {
+                    // Thread interruption handled by finally block
+                } catch (Exception e) {
+                    new Error(action, 204, "An error occurred while running action", e);
+                } finally {
+                    FinishAction(action);
+                }
+            });
+            action.runThread.start();
+            runningActionElements.add(action);
         }
+    }
 
-        PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(Comparator.comparingInt(a -> -a.getPriority()));
-        actionQueue.addAll(copyStoppedActions);
+    private static void FinishAction(ActionElement action) {
+        synchronized (actionLock) {
+            runningActionElements.remove(action);
 
-        for (ActionElement action : copyStoppedActions) {
-            List<HardwareElement> reservedHardware;
-            synchronized (actionHardwareMap) {
-                reservedHardware = actionHardwareMap.get(action);
+            List<HardwareElement> hardwareToRelease = new ArrayList<>();
+            for (Map.Entry<HardwareElement, ActionElement> entry :
+                    new HashMap<>(hardwareReserves).entrySet()) {
+                if (entry.getValue() == action) {
+                    hardwareToRelease.add(entry.getKey());
+                }
             }
 
-            boolean allAvailable = true;
-            if (reservedHardware != null) {
-                for (HardwareElement hardwareElement : reservedHardware) {
-                    if (hardwareElement.isReserved) {
+            for (HardwareElement hw : hardwareToRelease) {
+                hw.isReserved = false;
+                hw.reservedWithPriority = -1;
+                hardwareReserves.remove(hw);
+            }
+
+            if (action.isAutoRestart() && !action.isStoppingDueToError) {
+                stoppedActions.add(action);
+                actionHardwareMap.put(action, hardwareToRelease);
+            }
+
+            if (!action.isStoppingDueToPriority) {
+                checkAndRestartActions();
+            }
+        }
+    }
+
+    private static void checkAndRestartActions() {
+        synchronized (actionLock) {
+            List<ActionElement> copyStoppedActions = new ArrayList<>(stoppedActions);
+            PriorityQueue<ActionElement> actionQueue = new PriorityQueue<>(
+                    Comparator.comparingInt(a -> -a.getPriority()));
+            actionQueue.addAll(copyStoppedActions);
+
+            for (ActionElement action : copyStoppedActions) {
+                List<HardwareElement> reservedHardware = actionHardwareMap.get(action);
+                if (reservedHardware == null) continue;
+
+                boolean allAvailable = true;
+                for (HardwareElement hw : reservedHardware) {
+                    if (hw.isReserved) {
                         allAvailable = false;
                         break;
                     }
                 }
-            } else {
-                allAvailable = false;
-            }
 
-            if (allAvailable) {
-                synchronized (stoppedActions) {
+                if (allAvailable) {
                     stoppedActions.remove(action);
-                }
-                synchronized (actionHardwareMap) {
                     actionHardwareMap.remove(action);
+                    action.isStoppingDueToPriority = false;
+                    StartAction(action);
                 }
-                action.isStoppingDueToPriority = false;
-                StartAction(action);
             }
-
         }
     }
 
-
-    /**
-     * Forcibly stops an action and releases all hardware elements reserved by it.
-     * @param action The action to stop.
-     */
     public static void StopAction(ActionElement action) {
-        try {
+        synchronized (actionLock) {
             Thread actionThread = action.runThread;
-            if (actionThread != null && actionThread.isAlive()) {
-                // Avoid interrupting/joining the current thread
-                if (Thread.currentThread() != actionThread) {
-                    actionThread.interrupt();
-                    try {
-                        actionThread.join(3000);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        new Error(action, 205, "Interrupted waiting for action to stop", e);
-                    }
-                    if (actionThread.isAlive()) {
-                        new Error(action, 205, "Action stop timeout", null);
-                    }
+            if (actionThread != null && actionThread.isAlive() &&
+                    Thread.currentThread() != actionThread) {
+                actionThread.interrupt();
+                try {
+                    actionThread.join(3000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    new Error(action, 205, "Interrupted while waiting for action to stop", e);
+                }
+                if (actionThread.isAlive()) {
+                    new Error(action, 205, "Action stop timeout", null);
                 }
             }
             FinishAction(action);
-        } catch (Exception e) {
-            new Error(action, 205, "An error occurred while stopping action", e);
-            throw new RuntimeException(e);
         }
-
     }
 
-    /**
-     * Reserves a piece of hardware for actions.
-     * This will prevent other actions from using the hardware.
-     * @param className The class name of the hardware element.
-     * @return The hardware element, or an error if not found.
-     */
     public static HardwareElement ReserveHardware(ActionElement action, String className) {
-        try {
-            HardwareElement hw = getElementByClassName(className);
-            if (hw == null || !hw.isInitialized || hw.isBroken) {
-                new Error(action, 203, "Could not reserve hardware element: " + className, null);
-                return null;
-            }
-            if (hw.isReserved) {
-                if (action.getPriority() >= hw.reservedWithPriority) {
-                    ActionElement actionToRelease = HardwareReserves.get(hw);
-                    if (actionToRelease != null) {
-                        try {
-                            actionToRelease.isStoppingDueToPriority = true;
-                            StopAction(actionToRelease);
-                        } catch (Exception e) {
-                            new Error(action, 203, "Could not reserve hardware element: " + className, e);
-                            return null;
-                        }
-                    } else {
-                        new Error(action, 203, "Could not reserve hardware element: " + className, null);
-                        return null;
-                    }
-                } else {
+        synchronized (actionLock) {
+            try {
+                HardwareElement hw = getElementByClassName(className);
+                if (hw == null || !hw.isInitialized || hw.isBroken) {
                     new Error(action, 203, "Could not reserve hardware element: " + className, null);
                     return null;
                 }
-            }
-            hw.isReserved = true;
-            hw.reservedWithPriority = action.getPriority();
-            HardwareReserves.put(hw, action);
-            return hw;
-        } catch (Exception e) {
-            new Error(action, 203, "Could not reserve hardware element: " + className, null);
-            return null;
-        }
-    }
-    //endregion
 
-    //region Road Runner Compatibility
-    public static HardwareElement ReserveHardwareForRoadRunner(String className) {
-        try {
-            HardwareElement hw = getElementByClassName(className);
-            if (hw == null || !hw.isInitialized || hw.isBroken) {
-                new Error(203, "Could not reserve hardware element: " + className, ErrorTypes.ROAD_RUNNER_ERROR, null);
-                return null;
-            }
-            if (hw.isReserved) {
-                    ActionElement actionToRelease = HardwareReserves.get(hw);
-                    if (actionToRelease != null) {
-                        try {
-                            actionToRelease.isStoppingDueToPriority = true;
-                            StopAction(actionToRelease);
-                        } catch (Exception e) {
-                            new Error(203, "Could not reserve hardware element: " + className, ErrorTypes.ROAD_RUNNER_ERROR, e);
+                synchronized (hw) {
+                    if (hw.isReserved) {
+                        if (action.getPriority() >= hw.reservedWithPriority) {
+                            ActionElement actionToRelease = hardwareReserves.get(hw);
+                            if (actionToRelease != null) {
+                                actionToRelease.isStoppingDueToPriority = true;
+                                StopAction(actionToRelease);
+                            } else {
+                                new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                                return null;
+                            }
+                        } else {
+                            new Error(action, 203, "Could not reserve hardware element: " + className, null);
                             return null;
                         }
-                    } else {
-                        new Error(203, "Could not reserve hardware element: " + className,  ErrorTypes.ROAD_RUNNER_ERROR, null);
-                        return null;
                     }
+                    hw.isReserved = true;
+                    hw.reservedWithPriority = action.getPriority();
+                    hardwareReserves.put(hw, action);
+                    return hw;
+                }
+            } catch (Exception e) {
+                new Error(action, 203, "Could not reserve hardware element: " + className, null);
+                return null;
             }
-            hw.isReserved = true;
-            hw.reservedWithPriority = 999999999;
-            return hw;
-        } catch (Exception e) {
-            new Error(203, "Could not reserve hardware element: " + className,  ErrorTypes.ROAD_RUNNER_ERROR, null);
-            return null;
         }
     }
-    //endregion
 
-    //region OpMode Lifecycle
+    public static HardwareElement ReserveHardwareForRoadRunner(String className) {
+        synchronized (actionLock) {
+            try {
+                HardwareElement hw = getElementByClassName(className);
+                if (hw == null || !hw.isInitialized || hw.isBroken) {
+                    new Error(203, "Could not reserve hardware element: " + className,
+                            ErrorTypes.ROAD_RUNNER_ERROR, null);
+                    return null;
+                }
+
+                synchronized (hw) {
+                    if (hw.isReserved) {
+                        ActionElement actionToRelease = hardwareReserves.get(hw);
+                        if (actionToRelease != null) {
+                            actionToRelease.isStoppingDueToPriority = true;
+                            StopAction(actionToRelease);
+                        } else {
+                            new Error(203, "Could not reserve hardware element: " + className,
+                                    ErrorTypes.ROAD_RUNNER_ERROR, null);
+                            return null;
+                        }
+                    }
+                    hw.isReserved = true;
+                    hw.reservedWithPriority = 999999999;
+                    return hw;
+                }
+            } catch (Exception e) {
+                new Error(203, "Could not reserve hardware element: " + className,
+                        ErrorTypes.ROAD_RUNNER_ERROR, null);
+                return null;
+            }
+        }
+    }
 
     public static void onOpModeStart() {
-        opModeActive = true;
-        for (HardwareElement hardwareElement : hardwareElements) {
+        synchronized (actionLock) {
+            opModeActive = true;
+            for (HardwareElement hw : hardwareElements) {
                 try {
-                    if (hardwareElement.isBroken)
-                        continue;
-                    Method updateMethod = hardwareElement.getClass().getMethod("update");
+                    if (hw.isBroken) continue;
+                    Method updateMethod = hw.getClass().getMethod("update");
                     if (updateMethod.getDeclaringClass() != HardwareElement.class) {
-                        hardwareElement.updateThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (opModeActive && !Thread.currentThread().isInterrupted()) {
-                                    try {
-                                        hardwareElement.update();
-                                        Thread.sleep(2);
-                                    } catch (Exception e) {
-                                        new Error(hardwareElement, 102, "An error in hardware update thread", e);
-                                        return;
-                                    }
+                        hw.updateThread = new Thread(() -> {
+                            while (opModeActive && !Thread.currentThread().isInterrupted()) {
+                                try {
+                                    hw.update();
+                                    Thread.sleep(2);
+                                } catch (InterruptedException e) {
+                                    return;
+                                } catch (Exception e) {
+                                    new Error(hw, 102, "An error in hardware update thread", e);
+                                    return;
                                 }
                             }
                         });
-                        hardwareElement.updateThread.start();
+                        hw.updateThread.start();
                     }
-                } catch (NoSuchMethodException e) {
+                } catch (NoSuchMethodException ignored) {
                     // Method not found, do nothing
                 }
-
+            }
         }
     }
 
     public static void onOpModeStop() {
-        opModeActive = false;
-        List<ActionElement> actionElementsCopy;
-        synchronized (runningActionElements) {
-            actionElementsCopy = new ArrayList<>(runningActionElements);
-        }
-        for (ActionElement actionElement : actionElementsCopy) {
-            StopAction(actionElement);
-        }
-        synchronized (runningActionElements) {
-            runningActionElements.clear();
-        }
-        for (HardwareElement hardwareElement : hardwareElements) {
-            if (hardwareElement.updateThread != null) {
-                hardwareElement.updateThread.interrupt();
+        synchronized (actionLock) {
+            opModeActive = false;
+
+            List<ActionElement> actionsCopy = new ArrayList<>(runningActionElements);
+            for (ActionElement action : actionsCopy) {
+                StopAction(action);
             }
-            hardwareElement.stop();
+            runningActionElements.clear();
+
+            for (HardwareElement hw : hardwareElements) {
+                if (hw.updateThread != null) {
+                    hw.updateThread.interrupt();
+                }
+                hw.stop();
+            }
         }
     }
-    //endregion
 }

@@ -86,4 +86,13 @@ public class Slide extends HardwareElement {
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.motorSlide = null;
     }
+    public void update() {
+        if (this.motorSlide.getTargetPosition() <= 0) {
+            if (this.motorSlide.getCurrentPosition() <= 10) {
+                this.motorSlide.setPower(0);
+                return;
+            }
+        }
+        this.motorSlide.setPower(1);
+    }
 }

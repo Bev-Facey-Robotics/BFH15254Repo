@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.internal.HardwareElement;
 
+import java.util.concurrent.TimeUnit;
+
 public class FrontCombine extends HardwareElement {
     // Hardware
     public Servo unitRotate = null;
@@ -24,7 +26,9 @@ public class FrontCombine extends HardwareElement {
 
         this.intakeActuator = hardwareMap.get(DcMotor.class, "IntakeActuator");
         //this.intakeActuator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE); // We stop giving the arm power at a certain point when the arm is on the floor.
+        this.intakeActuator.setTargetPosition(0);
         this.intakeActuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.intakeActuator.setDirection(DcMotor.Direction.REVERSE);
     }
 
     /**
@@ -51,26 +55,41 @@ public class FrontCombine extends HardwareElement {
     public void SetIntakeActive(boolean active) {
         isIntakeActive = active;
         if (active) {
-            this.intakeActuator.setTargetPosition(0);
+            this.intakeActuator.setTargetPosition(107);
         } else {
-            this.intakeActuator.setTargetPosition(255); // TODO: Make it not complete BS numbers.
+            this.intakeActuator.setTargetPosition(0); // TODO: Make it not complete BS numbers.
         }
 
     }
 
     public void calibrate() {
         // Calibration will be figured out once the hardware is actually on the robot
+        this.intakeActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.intakeActuator.setPower(-0.5);
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            return;
+        }
+        this.intakeActuator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.intakeActuator.setTargetPosition(0);
+        this.intakeActuator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void update() {
         // TODO: Revamp this to reset calibration if we are confirmed to be at the lowest position
-        if (isIntakeActive) {
-            if (this.intakeActuator.getCurrentPosition() < 30) { // TODO: Find the correct number
+        if (!isIntakeActive) { //intake is down
+            if (this.intakeActuator.getCurrentPosition() < 30) {
                 this.intakeActuator.setPower(0.01); // this makes sure that if we encounter a bump we will at least stay somewhat down.
             } else {
                 this.intakeActuator.setPower(1);
             }
         } else {
+            if (this.intakeActuator.getCurrentPosition() > 80) {
+                this.intakeActuator.setPower(0.01);
+            } else {
+                this.intakeActuator.setPower(0.25);
+            }
             this.intakeActuator.setPower(1);
         }
     }

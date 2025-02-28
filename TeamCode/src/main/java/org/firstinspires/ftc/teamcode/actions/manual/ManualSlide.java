@@ -33,7 +33,7 @@ public class ManualSlide extends ActionElement {
                 isPositionBased = true;
             }
             if (HardwareManager.opMode.gamepad2.dpad_right) {
-                slide.MovePosition(1464);
+                slide.MovePosition(645);
                 isPositionBased = true;
             }
             if (HardwareManager.opMode.gamepad2.right_trigger - HardwareManager.opMode.gamepad2.left_trigger !=0) {

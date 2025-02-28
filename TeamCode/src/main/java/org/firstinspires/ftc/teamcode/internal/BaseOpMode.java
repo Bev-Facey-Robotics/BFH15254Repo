@@ -8,6 +8,7 @@ public abstract class BaseOpMode extends LinearOpMode {
     public boolean isStopped = false;
 
     public void runOpMode() {
+        HardwareManager.Reset();
         try {
             telemetryManager = new TelemetryManager(telemetry, hardwareMap.appContext);
             telemetryManager.StartTelemetryLoop();
