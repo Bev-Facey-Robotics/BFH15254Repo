@@ -41,6 +41,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 
 import org.firstinspires.ftc.teamcode.AprilTagPosFinder;
 import org.firstinspires.ftc.teamcode.CrossOpModeData;
+import org.firstinspires.ftc.teamcode.autos.rractions.RRFrontCombine;
 import org.firstinspires.ftc.teamcode.autos.rractions.RRSlide;
 import org.firstinspires.ftc.teamcode.hardware.Drive;
 import org.firstinspires.ftc.teamcode.hardware.Slide;
@@ -56,6 +57,7 @@ public abstract class MainAuto extends BaseOpMode {
     //endregion
 
     public RRSlide slide = null;
+    public RRFrontCombine frontCombine = null;
 
     @SuppressLint("DefaultLocale")
     @Override
@@ -68,6 +70,7 @@ public abstract class MainAuto extends BaseOpMode {
         }
         //endregion
         slide = new RRSlide(hardwareMap);
+        frontCombine = new RRFrontCombine(hardwareMap);
 
         //region April Tag Initialization
         // Let's get our position finder ready
@@ -124,6 +127,7 @@ public abstract class MainAuto extends BaseOpMode {
         Action aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCmoveFromWall = moveFromWall(mecanumDrive, initialPose).build();
 
 
 
@@ -133,13 +137,19 @@ public abstract class MainAuto extends BaseOpMode {
         waitForStart();
 
         Actions.runBlocking(new SequentialAction(
+                new ParallelAction(
+                        aCmoveFromWall,
+                        frontCombine.MoveToPickup()
+
+                ),
+
                 ///Placing the preloaded specimen on high rung
                 new ParallelAction(
                         aCscoreStartingSpecimenTraj,
                         slide.MoveToHighChamber()
                 ),
                 ///Releasing the specimens on high chamber
-                new SequentialAction(
+                new ParallelAction(
                         slide.MoveToWall()),
                 ///Batting the other specimens into the obv zone + grabbing a specimen
                 new SequentialAction(
@@ -219,7 +229,7 @@ public abstract class MainAuto extends BaseOpMode {
     public abstract TrajectoryActionBuilder scoreThirdSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-
+    public abstract TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose);
 
     public abstract Pose2d initialPose ();
 

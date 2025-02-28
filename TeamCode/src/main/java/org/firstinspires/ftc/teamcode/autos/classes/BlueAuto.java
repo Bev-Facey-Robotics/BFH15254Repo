@@ -11,7 +11,7 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
     public class BlueAuto extends MainAuto {
 
         public Pose2d initialPose() {
-            return new Pose2d(23,-55, Math.toRadians(180));}
+            return new Pose2d(-23,55, Math.toRadians(180));}
 
         /// Parking run
         public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
@@ -73,6 +73,13 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
                     .strafeToLinearHeading(new Vector2d(45, -50), Math.toRadians(90))
                     .strafeTo(new Vector2d(-45, -60));
+        }
+
+        public TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose) {
+            return mecanumDrive.actionBuilder(initialPose)
+
+
+                    .splineToSplineHeading(new Pose2d(15, -55, Math.toRadians(180)), 0);
         }
 
 
