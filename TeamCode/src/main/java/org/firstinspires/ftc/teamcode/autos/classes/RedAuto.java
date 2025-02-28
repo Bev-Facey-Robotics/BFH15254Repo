@@ -24,6 +24,10 @@ import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
 
 public class RedAuto extends MainAuto {
 
+    public Pose2d initialPose() {
+        return new Pose2d(23,-55, Math.toRadians(180));}
+
+
     /// Parking run
     public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)

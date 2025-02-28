@@ -102,7 +102,7 @@ public abstract class MainAuto extends BaseOpMode {
         }
         //endregion
 
-        Pose2d initialPose = new Pose2d(60,-25, Math.toRadians(aprilTagPosFinder.yaw));
+        Pose2d initialPose = new Pose2d(23,-55, Math.toRadians(180));
         //aprilTagPosFinder.StopStreaming();
 
         // for debugging
@@ -221,7 +221,7 @@ public abstract class MainAuto extends BaseOpMode {
     public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
 
 
-
+    public abstract Pose2d initialPose ();
 
 
 
