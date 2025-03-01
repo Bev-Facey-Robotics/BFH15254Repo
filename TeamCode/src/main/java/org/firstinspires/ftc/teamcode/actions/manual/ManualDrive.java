@@ -29,7 +29,7 @@ public class ManualDrive extends ActionElement {
             double turnSpeed = Math.abs(HardwareManager.opMode.gamepad1.right_stick_x) > deadzone ? -HardwareManager.opMode.gamepad1.right_stick_x : 0;
 
             // Invert drive & strafe directions
-            if (HardwareManager.opMode.gamepad1.right_bumper) {
+            if (!HardwareManager.opMode.gamepad1.right_bumper) {
                 driveSpeed *= -1;
                 strafeSpeed *= -1;
             }
