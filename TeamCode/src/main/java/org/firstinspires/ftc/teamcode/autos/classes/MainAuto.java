@@ -141,32 +141,31 @@ public abstract class MainAuto extends BaseOpMode {
         mecanumDrive = new MecanumDrive(hardwareMap, initialPose);
 
         //build all the trajectories here. Yes there is a lot
+        TrajectoryActionBuilder aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose);
+        TrajectoryActionBuilder aCscoreStartingSpecimenTraj2 = scoreStartingSpecimenTraj2(mecanumDrive, aCscoreStartingSpecimenTraj);
+        TrajectoryActionBuilder aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, aCscoreStartingSpecimenTraj);
+        TrajectoryActionBuilder aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, aCscoreSecondSpecimenTraj);
+        TrajectoryActionBuilder aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, aCscoreThirdSpecimenTraj);
+        TrajectoryActionBuilder aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, aCscoreFourthSpecimenTraj);
+        TrajectoryActionBuilder aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, aCscoreFifthSpecimenTraj);
+        TrajectoryActionBuilder aCkickSample1Traj = kickSample1Traj(mecanumDrive, aCwallSpecimenTraj);
+        TrajectoryActionBuilder aCkickSample2Traj = kickSample2Traj(mecanumDrive, aCkickSample1Traj);
+        TrajectoryActionBuilder aCkickSample3Traj = kickSample3Traj(mecanumDrive, aCkickSample2Traj);
+        TrajectoryActionBuilder aCmoveFromWallTraj = moveFromWall(mecanumDrive, aCkickSample3Traj);
+        TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, aCmoveFromWallTraj);
 
-        TrajectoryActionBuilder aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose);
-        TrajectoryActionBuilder aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCkickSample3Traj = kickSample3Traj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreStartingSpecimenTraj2 = scoreStartingSpecimenTraj2(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCmoveFromWall = moveFromWall(mecanumDrive, initialPose)
-        TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, initialPose)
-
-        Action aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose).build();
-        Action aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose).build();
-        Action aCkickSample3Traj = kickSample3Traj(mecanumDrive, initialPose).build();
-        Action aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCscoreStartingSpecimenTraj2 = scoreStartingSpecimenTraj2(mecanumDrive, initialPose).build();
-        Action aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose).build();
-        Action aCmoveFromWall = moveFromWall(mecanumDrive, initialPose).build();
-        Action aCSleep = sleepHalfSec(mecanumDrive, initialPose).build();
+        Action aCwallSpecimenActi = aCwallSpecimenTraj.build();
+        Action aCkickSample1Acti = aCkickSample1Traj.build();
+        Action aCkickSample2Acti = aCkickSample2Traj.build();
+        Action aCkickSample3Acti = aCkickSample3Traj.build();
+        Action aCscoreStartingSpecimenActi = aCscoreStartingSpecimenTraj.build();
+        Action aCscoreStartingSpecimenActi2 = aCscoreStartingSpecimenTraj2.build();
+        Action aCscoreSecondSpecimenActi = aCscoreSecondSpecimenTraj.build();
+        Action aCscoreThirdSpecimenActi = aCscoreThirdSpecimenTraj.build();
+        Action aCscoreFourthSpecimenActi = aCscoreFourthSpecimenTraj.build();
+        Action aCscoreFifthSpecimenActi = aCscoreFifthSpecimenTraj.build();
+        Action aCmoveFromWallActi = aCmoveFromWallTraj.build();
+        Action aCSleepActi = aCSleep.build(); // something we don't know how to do lol
 
 
 
@@ -184,11 +183,11 @@ public abstract class MainAuto extends BaseOpMode {
 //                ),
 
                 ///Placing the preloaded specimen on high rung
-                aCscoreStartingSpecimenTraj,
+                aCscoreStartingSpecimenActi,
                 frontCombine.MoveToPickup(),
                 slide.MoveToHighChamber(),
-                aCscoreStartingSpecimenTraj2,
-                aCSleep,
+                aCscoreStartingSpecimenActi,
+                aCSleepActi,
                 ///Releasing the specimens on high chamber
                 slide.MoveToWall()
         ));
@@ -264,20 +263,22 @@ public abstract class MainAuto extends BaseOpMode {
 
 
 
-    public abstract TrajectoryActionBuilder wallSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder kickSample1Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder kickSample2Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder kickSample3Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder wallSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder kickSample1Traj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder kickSample2Traj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder kickSample3Traj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
     public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj2 (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder scoreSecondSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder scoreThirdSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
-    public abstract TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose);
-public abstract TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj2 (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder scoreSecondSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder scoreThirdSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
     public abstract Pose2d importedinitialPose();
-
+    public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
+                .waitSeconds(0.5);
+    }
 
 
 

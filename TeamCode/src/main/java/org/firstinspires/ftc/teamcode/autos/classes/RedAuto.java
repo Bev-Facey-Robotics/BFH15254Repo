@@ -29,8 +29,8 @@ public class RedAuto extends MainAuto {
 
 
     /// Parking run
-    public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
-        return mecanumDrive.actionBuilder(initialPose)
+    public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .setTangent(0)
                 .waitSeconds(0.5)
                 .strafeToLinearHeading(new Vector2d(46, -65), Math.toRadians(90));
@@ -43,71 +43,65 @@ public class RedAuto extends MainAuto {
 
     }
 
-    public TrajectoryActionBuilder scoreStartingSpecimenTraj2(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder scoreStartingSpecimenTraj2(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .strafeToLinearHeading(new Vector2d(0,-19), Math.toRadians(270));
     }
 
     //Moves the bot over an inch to score the second specimen. Ditto with 3-5specimenTraj, but I can't think of a way to make it simpler
-    public TrajectoryActionBuilder scoreSecondSpecimenTraj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder scoreSecondSpecimenTraj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .splineToSplineHeading(new Pose2d(6.5, -32, Math.toRadians(270)), -10);
     }
 
-    public TrajectoryActionBuilder scoreThirdSpecimenTraj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder scoreThirdSpecimenTraj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .splineToSplineHeading(new Pose2d(5.5, -32, Math.toRadians(270)), -10);
     }
 
-    public TrajectoryActionBuilder scoreFourthSpecimenTraj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder scoreFourthSpecimenTraj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .splineToSplineHeading(new Pose2d(4.5, -32, Math.toRadians(270)), -10);
     }
 
-    public TrajectoryActionBuilder scoreFifthSpecimenTraj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder scoreFifthSpecimenTraj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .splineToSplineHeading(new Pose2d(3.5, -32, Math.toRadians(270)), -10);
 
     }
 
     /// Uses the kicker in the front of the bot to kick the samples into the obv zones
-    public TrajectoryActionBuilder kickSample1Traj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder kickSample1Traj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .strafeTo(new Vector2d(7.5, -42))
                 .splineToLinearHeading(new Pose2d(36, -25, Math.toRadians(0)), 10)
 
                 .strafeTo(new Vector2d(36, -25));
     }
 
-    public TrajectoryActionBuilder kickSample2Traj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder kickSample2Traj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .strafeTo(new Vector2d(43, -25));
     }
 
-    public TrajectoryActionBuilder kickSample3Traj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder kickSample3Traj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
                 .strafeTo(new Vector2d(54, -25));
     }
 
     //The only trajectory that doesn't need to have multiple trajectories, as it needs to constantly go to the same spot
-    public TrajectoryActionBuilder wallSpecimenTraj(MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder wallSpecimenTraj(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
 
                 .splineToSplineHeading(new Pose2d(45, -55, Math.toRadians(90)), 0)
                 .strafeTo(new Vector2d(45, -60));
     }
 
-    public TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
+    public TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
 
                 .strafeToLinearHeading(new Vector2d(23,-30), Math.toRadians(270));
     }
-
-    public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, Pose2d updatedPose) {
-        return mecanumDrive.actionBuilder(updatedPose)
-                .waitSeconds(0.5);
-    }
-
 }
 
 

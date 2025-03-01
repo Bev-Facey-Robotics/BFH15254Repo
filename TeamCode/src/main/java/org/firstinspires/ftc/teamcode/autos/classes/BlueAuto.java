@@ -87,10 +87,7 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
                     .splineToSplineHeading(new Pose2d(15, -55, Math.toRadians(180)), 0);
         }
 
-        public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
-            return previousAction.endTrajectory().fresh()
-                    .waitSeconds(0.5);
-        }
+
 
 
 
