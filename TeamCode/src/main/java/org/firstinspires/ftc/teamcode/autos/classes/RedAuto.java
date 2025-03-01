@@ -94,7 +94,7 @@ public class RedAuto extends MainAuto {
     public TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
 
-        .splineToSplineHeading(new Pose2d(15, -55, Math.toRadians(180)), 0);
+                .strafeToLinearHeading(new Vector2d(23,-50), Math.toRadians(270));
     }
 }
 
