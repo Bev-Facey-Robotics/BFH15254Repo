@@ -185,6 +185,7 @@ public abstract class MainAuto extends BaseOpMode {
 //                        frontCombine.MoveToPickup()
 //
 //                ),
+                aCTwoSleepActi,
 
                 ///Placing the preloaded specimen on high rung
                 new ParallelAction(
@@ -294,7 +295,7 @@ public abstract class MainAuto extends BaseOpMode {
     }
     public  TrajectoryActionBuilder sleepTwoSec(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
         return previousAction.endTrajectory().fresh()
-                .waitSeconds(5);
+                .waitSeconds(10);
     }
 
 

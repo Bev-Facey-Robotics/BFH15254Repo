@@ -26,7 +26,7 @@ public class ManualFrontCombine extends ActionElement {
                 frontCombine.TakePiece(0);
             }
             // rotating the assembly to align with the piece
-            frontCombine.RotateAssembly(frontCombine.unitRotate.getPosition() + (HardwareManager.opMode.gamepad2.right_stick_x * sensitivity));
+            frontCombine.RotateAssembly(HardwareManager.opMode.gamepad2.right_stick_x);
             // moving the intake assembly up and down
             if (HardwareManager.opMode.gamepad2.y) {
                 frontCombine.SetIntakeActive(false);
