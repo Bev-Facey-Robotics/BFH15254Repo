@@ -9,7 +9,7 @@ public class AutoHang extends ActionElement {
     public void run() throws InterruptedException, NullPointerException {
         // Reserve the hardware
         HangExtention hangExtention = (HangExtention) HardwareManager.ReserveHardware(this, "HangExtention");
-        hangExtention.MoveToPosition(0);
+        hangExtention.MoveToPosition(100);
     }
 
     @Override

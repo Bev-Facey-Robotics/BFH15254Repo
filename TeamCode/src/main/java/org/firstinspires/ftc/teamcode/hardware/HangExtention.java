@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -58,6 +60,7 @@ public class HangExtention extends HardwareElement {
         motorHangExtension2.setTargetPosition(position);
         motorHangExtension1.setPower(1);
         motorHangExtension2.setPower(1);
+
     }
 
     public void stop() {
