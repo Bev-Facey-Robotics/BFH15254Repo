@@ -57,22 +57,21 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 public abstract class MainAuto extends BaseOpMode {
 
 
+//
+//    public class updatePose implements Action {
+//        @Override
+//        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+//            packet.put("poseUpdate", mecanumDrive.updatePoseEstimate());
+//            updatedPose = mecanumDrive.updatePoseEstimate();
+//            return true;
+//        }
+//    }
 
-    public class updatePose implements Action {
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
-            packet.put("poseUpdate", mecanumDrive.updatePoseEstimate());
-            updatedPose = mecanumDrive.updatePoseEstimate();
-            return true;
-        }
-    }
-
-    public Action updatePose() {return new updatePose();}
+//    public Action updatePose() {return new updatePose();}
 
 
 
     //region Position
-    private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     private MecanumDrive mecanumDrive = null; // Road Runner
     private Pose2d importedinitialPose = importedinitialPose();
 
@@ -143,9 +142,19 @@ public abstract class MainAuto extends BaseOpMode {
 
         //build all the trajectories here. Yes there is a lot
 
+        TrajectoryActionBuilder aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose);
+        TrajectoryActionBuilder aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCkickSample3Traj = kickSample3Traj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreStartingSpecimenTraj2 = scoreStartingSpecimenTraj2(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCmoveFromWall = moveFromWall(mecanumDrive, initialPose)
+        TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, initialPose)
 
-
-        Action poseUpdate = updatePose();
         Action aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose).build();
         Action aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose).build();
@@ -175,28 +184,14 @@ public abstract class MainAuto extends BaseOpMode {
 //                ),
 
                 ///Placing the preloaded specimen on high rung
-                new SequentialAction(
-                        aCscoreStartingSpecimenTraj,
-                        frontCombine.MoveToPickup()),
-                        updatePose(),
-
-                        new SequentialAction(
-                                slide.MoveToHighChamber(),
-                                aCscoreStartingSpecimenTraj2,
-                                updatePose()
-
-
-                                ),
-                new SequentialAction(
-                        aCSleep,
-                        updatePose()
-
-                        ),
+                aCscoreStartingSpecimenTraj,
+                frontCombine.MoveToPickup(),
+                slide.MoveToHighChamber(),
+                aCscoreStartingSpecimenTraj2,
+                aCSleep,
                 ///Releasing the specimens on high chamber
-                new SequentialAction(
-
-                        slide.MoveToWall(),
-                        updatePose())
+                slide.MoveToWall()
+        ));
 ///Batting the other specimens into the obv zone + grabbing a specimen
 //                new SequentialAction(
 //                       aCkickSample1Traj,
@@ -240,7 +235,7 @@ public abstract class MainAuto extends BaseOpMode {
 
 
 //
-                ));
+
 
         new Thread(() -> {
             while (opModeIsActive()) {
