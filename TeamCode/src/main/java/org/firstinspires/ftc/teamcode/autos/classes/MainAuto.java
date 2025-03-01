@@ -154,6 +154,7 @@ public abstract class MainAuto extends BaseOpMode {
         TrajectoryActionBuilder aCmoveFromWallTraj = moveFromWall(mecanumDrive, aCkickSample3Traj);
         TrajectoryActionBuilder aCparkRunTraj = parkRun(mecanumDrive, aCmoveFromWallTraj);
         TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, aCparkRunTraj);
+        TrajectoryActionBuilder aCSTwoSleep = sleepHalfSec(mecanumDrive, aCSleep);
 
         Action aCwallSpecimenActi = aCwallSpecimenTraj.build();
         Action aCkickSample1Acti = aCkickSample1Traj.build();
@@ -168,6 +169,7 @@ public abstract class MainAuto extends BaseOpMode {
         Action aCmoveFromWallActi = aCmoveFromWallTraj.build();
         Action aCparkRunActi = aCparkRunTraj.build();
         Action aCSleepActi = aCSleep.build(); // something we don't know how to do lol
+        Action aCTwoSleepActi = aCSTwoSleep.build();
 
 
 
@@ -193,8 +195,10 @@ public abstract class MainAuto extends BaseOpMode {
                 aCSleepActi,
                 ///Releasing the specimens on high chamber
                 slide.ReleaseSpeciminFromHigh(),
-                aCwallSpecimenActi,
+                aCTwoSleepActi,
+//                aCwallSpecimenActi,
                 aCparkRunActi
+
 
 
         ));
@@ -287,6 +291,10 @@ public abstract class MainAuto extends BaseOpMode {
     public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
         return previousAction.endTrajectory().fresh()
                 .waitSeconds(0.5);
+    }
+    public  TrajectoryActionBuilder sleepTwoSec(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
+        return previousAction.endTrajectory().fresh()
+                .waitSeconds(5);
     }
 
 

@@ -25,7 +25,7 @@ import org.firstinspires.ftc.teamcode.autos.classes.MainAuto;
 public class RedAuto extends MainAuto {
 
     public Pose2d importedinitialPose() {
-        return new Pose2d(23,-55, Math.toRadians(270));}
+        return new Pose2d(30,-60, Math.toRadians(270));}
 
     /// Parking run
     public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
@@ -38,7 +38,7 @@ public class RedAuto extends MainAuto {
     //Scores the preloaded specimen on high chamber
     public TrajectoryActionBuilder scoreStartingSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
         return mecanumDrive.actionBuilder(initialPose)
-                .strafeToLinearHeading(new Vector2d(3.5,-26), Math.toRadians(270));
+                .strafeToLinearHeading(new Vector2d(3.5,-27), Math.toRadians(270));
 
     }
 

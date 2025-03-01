@@ -86,6 +86,14 @@ public class Slide extends HardwareElement {
         motorSlide.setTargetPosition(position);
         motorSlide.setPower(1);
     }
+    public void MovePositionWithPower(int position, double power) {
+        if (motorSlide.getMode() != DcMotor.RunMode.RUN_TO_POSITION) {
+            motorSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+
+        motorSlide.setTargetPosition(position);
+        motorSlide.setPower(power);
+    }
 
 
     public void stop() {
