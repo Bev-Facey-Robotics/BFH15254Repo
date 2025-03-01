@@ -8,7 +8,7 @@ import org.firstinspires.ftc.teamcode.internal.TelemetryManager;
 
 public class ManualFrontCombine extends ActionElement {
 
-    final public double sensitivity = 0.1;
+    final public double sensitivity = 0.05;
 
     @Override
     public void run() throws InterruptedException, NullPointerException {
@@ -26,7 +26,7 @@ public class ManualFrontCombine extends ActionElement {
                 frontCombine.TakePiece(0);
             }
             // rotating the assembly to align with the piece
-            frontCombine.RotateAssembly(frontCombine.unitRotate.getPosition() + (HardwareManager.opMode.gamepad2.right_stick_y * sensitivity));
+            frontCombine.RotateAssembly(frontCombine.unitRotate.getPosition() + (HardwareManager.opMode.gamepad2.right_stick_x * sensitivity));
             // moving the intake assembly up and down
             if (HardwareManager.opMode.gamepad2.y) {
                 frontCombine.SetIntakeActive(false);

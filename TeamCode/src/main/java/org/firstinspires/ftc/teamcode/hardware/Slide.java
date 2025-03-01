@@ -86,4 +86,22 @@ public class Slide extends HardwareElement {
         this.motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.motorSlide = null;
     }
+
+    public boolean change = false;
+
+    public void update() {
+        if (this.motorSlide.getTargetPosition() <= 5) { // This is here because when it was fully down, it was still using a lot of power, and turning that power into heat.
+            if (this.motorSlide.getCurrentPosition() <= 10) {
+                if (change)
+                    return;
+                change = true;
+                this.motorSlide.setPower(0);
+                return;
+            }
+        }
+        if (!change)
+            return;
+        change = false;
+        this.motorSlide.setPower(1);
+    }
 }
