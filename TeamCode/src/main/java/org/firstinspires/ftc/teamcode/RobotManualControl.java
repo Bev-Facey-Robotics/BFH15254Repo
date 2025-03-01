@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -62,17 +61,15 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.StartAction(AC_Slide);
         HardwareManager.StartAction(AC_FrontCombine);
         HardwareManager.StartAction(AC_HangExtension);
+//        HardwareManager.StartAction(AC_HangExtension);
+
 
         while (opModeIsActive()) {
 
-            ///Quick and dirty mode to test hang extensions
-            if (gamepad1.dpad_up) {
-                HardwareManager.StartAction(AC_HangExtension);
-            }
 
                 if (gamepad1.share && !isShareButtonPressed) {
                     isShareButtonPressed = true;
-                    HardwareManager.StartAction(AC_PieceDelivery);
+                    HardwareManager.StartAction(AC_HangExtension);
                 } else if (!gamepad1.share) {
                     isShareButtonPressed = false;
                 }
