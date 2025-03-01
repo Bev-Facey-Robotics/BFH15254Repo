@@ -67,7 +67,7 @@ public class FrontCombine extends HardwareElement {
         this.intakeActuator.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         this.intakeActuator.setPower(-0.5);
         try {
-            Thread.sleep(3000);
+            Thread.sleep(2000);
         } catch (InterruptedException e) {
             return;
         }

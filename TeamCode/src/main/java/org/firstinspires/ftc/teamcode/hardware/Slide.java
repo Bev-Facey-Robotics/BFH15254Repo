@@ -66,6 +66,14 @@ public class Slide extends HardwareElement {
         motorSlide.setPower(power);
     }
 
+    public void MovePowerNoLimits (double power) {
+        if (motorSlide.getMode() != DcMotor.RunMode.RUN_USING_ENCODER) {
+            motorSlide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        motorSlide.setPower(power);
+    }
+
     /**
      * Move the slide mechanism to a given position. This does not have limits, use caution.
      * @param position The position to move the slide to.

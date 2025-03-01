@@ -152,7 +152,8 @@ public abstract class MainAuto extends BaseOpMode {
         TrajectoryActionBuilder aCkickSample2Traj = kickSample2Traj(mecanumDrive, aCkickSample1Traj);
         TrajectoryActionBuilder aCkickSample3Traj = kickSample3Traj(mecanumDrive, aCkickSample2Traj);
         TrajectoryActionBuilder aCmoveFromWallTraj = moveFromWall(mecanumDrive, aCkickSample3Traj);
-        TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, aCmoveFromWallTraj);
+        TrajectoryActionBuilder aCparkRunTraj = parkRun(mecanumDrive, aCmoveFromWallTraj);
+        TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, aCparkRunTraj);
 
         Action aCwallSpecimenActi = aCwallSpecimenTraj.build();
         Action aCkickSample1Acti = aCkickSample1Traj.build();
@@ -165,6 +166,7 @@ public abstract class MainAuto extends BaseOpMode {
         Action aCscoreFourthSpecimenActi = aCscoreFourthSpecimenTraj.build();
         Action aCscoreFifthSpecimenActi = aCscoreFifthSpecimenTraj.build();
         Action aCmoveFromWallActi = aCmoveFromWallTraj.build();
+        Action aCparkRunActi = aCparkRunTraj.build();
         Action aCSleepActi = aCSleep.build(); // something we don't know how to do lol
 
 
@@ -183,13 +185,18 @@ public abstract class MainAuto extends BaseOpMode {
 //                ),
 
                 ///Placing the preloaded specimen on high rung
-                aCscoreStartingSpecimenActi,
-                frontCombine.MoveToPickup(),
-                slide.MoveToHighChamber(),
+                new ParallelAction(
+                        aCscoreStartingSpecimenActi,
+                        slide.MoveToHighChamber()
+                ),
                 aCscoreStartingSpecimenActi,
                 aCSleepActi,
                 ///Releasing the specimens on high chamber
-                slide.MoveToWall()
+                slide.ReleaseSpeciminFromHigh(),
+                aCwallSpecimenActi,
+                aCparkRunActi
+
+
         ));
 ///Batting the other specimens into the obv zone + grabbing a specimen
 //                new SequentialAction(
@@ -274,6 +281,8 @@ public abstract class MainAuto extends BaseOpMode {
     public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
     public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
     public abstract TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+    public abstract TrajectoryActionBuilder parkRun (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction);
+
     public abstract Pose2d importedinitialPose();
     public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, TrajectoryActionBuilder previousAction) {
         return previousAction.endTrajectory().fresh()

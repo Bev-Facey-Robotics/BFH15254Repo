@@ -11,11 +11,12 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 public class RRSlide {
 
-    private Slide slide = new Slide();
+    private final Slide slide = new Slide();
 
     public RRSlide(HardwareMap hardwareMap) {
         HardwareManager.init(slide, hardwareMap);
-        HardwareManager.calibrate(slide);
+        slide.calibrate();
+        slide.isCalibrated = true;
         HardwareManager.ReserveHardwareForRoadRunner("Slide");
     }
 
@@ -24,18 +25,30 @@ public class RRSlide {
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
             //Logic for the slide to check where it is and return either true or false
-            slide.MovePosition(1462);
+            slide.MovePosition(1400);
             return slide.motorSlide.isBusy();
 
         }
     }
     public Action MoveToHighChamber() {return new MoveToHighChamber();}
 
+    public class ReleaseSpeciminFromHigh implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+            packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
+            //Logic for the slide to check where it is and return either true or false
+            slide.MovePosition(661);
+            return slide.motorSlide.isBusy();
+
+        }
+    }
+    public Action ReleaseSpeciminFromHigh() {return new ReleaseSpeciminFromHigh();}
+
     public class MoveToWall implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
-            slide.MovePosition(1462);
+            slide.MovePosition(0);
             return slide.motorSlide.isBusy();
         }
     }
@@ -45,7 +58,7 @@ public class RRSlide {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
-            slide.MovePosition(00);
+            slide.MovePosition(0);
             return slide.motorSlide.isBusy();
         }
     }

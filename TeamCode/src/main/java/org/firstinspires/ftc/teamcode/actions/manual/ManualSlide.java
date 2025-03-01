@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
  */
 public class ManualSlide extends ActionElement {
     private boolean isPositionBased = false;
+    private boolean lastRightShoulderButton = false;
 
     @Override
     public void run() throws InterruptedException, NullPointerException  {
@@ -41,7 +42,17 @@ public class ManualSlide extends ActionElement {
             }
             if (!isPositionBased){
                 double slidePower = HardwareManager.opMode.gamepad2.right_trigger - HardwareManager.opMode.gamepad2.left_trigger;
-                slide.MovePower(slidePower);
+                if (HardwareManager.opMode.gamepad2.left_bumper) {
+                    slide.MovePowerNoLimits(slidePower);
+                    lastRightShoulderButton = true;
+                } else {
+                    if (lastRightShoulderButton) {
+                        slide.calibrate();
+                        lastRightShoulderButton = false;
+                    }
+                    slide.MovePower(slidePower);
+                }
+
             }
             Thread.sleep(20);
 
