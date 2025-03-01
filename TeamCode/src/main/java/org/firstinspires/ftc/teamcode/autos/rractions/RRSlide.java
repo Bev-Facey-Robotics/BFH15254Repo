@@ -24,7 +24,7 @@ public class RRSlide {
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
             //Logic for the slide to check where it is and return either true or false
-            slide.MovePosition(1650);
+            slide.MovePosition(1462);
             return slide.motorSlide.isBusy();
 
         }
@@ -35,7 +35,7 @@ public class RRSlide {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
-            slide.MovePosition(750);
+            slide.MovePosition(1462);
             return slide.motorSlide.isBusy();
         }
     }
@@ -45,7 +45,7 @@ public class RRSlide {
         @Override
         public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
             packet.put("SlidePos", slide.motorSlide.getCurrentPosition());
-            slide.MovePosition(800);
+            slide.MovePosition(00);
             return slide.motorSlide.isBusy();
         }
     }

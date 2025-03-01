@@ -31,7 +31,7 @@ public class RobotManualControl extends BaseOpMode {
 
     private final AutoPieceDelivery AC_PieceDelivery = new AutoPieceDelivery();
 
-    private final AutoHang AC_HangExtension = new AutoHang();
+    //private final AutoHang AC_HangExtension = new AutoHang();
 
     private boolean isShareButtonPressed = false;
 
@@ -41,7 +41,7 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.init(HW_Drive, hardwareMap);
         HardwareManager.init(HW_Slide, hardwareMap);
         HardwareManager.init(HW_FrontCombine, hardwareMap);
-        HardwareManager.init(HW_HangExtension, hardwareMap);
+      //  HardwareManager.init(HW_HangExtension, hardwareMap);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.calibrate(HW_Drive);
         HardwareManager.calibrate(HW_FrontCombine);
 
-        HardwareManager.calibrate(HW_HangExtension);
+       // HardwareManager.calibrate(HW_HangExtension);
     }
 
     @Override
@@ -60,18 +60,18 @@ public class RobotManualControl extends BaseOpMode {
         HardwareManager.StartAction(AC_Drive);
         HardwareManager.StartAction(AC_Slide);
         HardwareManager.StartAction(AC_FrontCombine);
-        HardwareManager.StartAction(AC_HangExtension);
+       // HardwareManager.StartAction(AC_HangExtension);
 //        HardwareManager.StartAction(AC_HangExtension);
 
 
         while (opModeIsActive()) {
 
 
-                if (gamepad1.share && !isShareButtonPressed) {
-                    isShareButtonPressed = true;
-                    HardwareManager.StartAction(AC_HangExtension);
-                } else if (!gamepad1.share) {
-                    isShareButtonPressed = false;
+//                if (gamepad1.share && !isShareButtonPressed) {
+//                    isShareButtonPressed = true;
+//                    //HardwareManager.StartAction(AC_HangExtension);
+//                } else if (!gamepad1.share) {
+//                    isShareButtonPressed = false;
                 }
                 try {
                     Thread.sleep(20);
@@ -81,5 +81,5 @@ public class RobotManualControl extends BaseOpMode {
         }
     }
 
-}
+
 

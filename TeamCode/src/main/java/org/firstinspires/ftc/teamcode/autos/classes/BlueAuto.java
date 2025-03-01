@@ -10,14 +10,14 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
     public class BlueAuto extends MainAuto {
 
-        public Pose2d initialPose() {
-            return new Pose2d(-23,55, Math.toRadians(180));}
+        public Pose2d importedinitialPose() {
+            return new Pose2d(23,-55, Math.toRadians(90));}
 
         /// Parking run
         public TrajectoryActionBuilder parkRun(MecanumDrive mecanumDrive, Pose2d initialPose) {
             return mecanumDrive.actionBuilder(initialPose)
                     .setTangent(0)
-                    .waitSeconds(25)
+                    .waitSeconds(0.5)
                     .strafeToLinearHeading(new Vector2d(46, -65), Math.toRadians(90));
         }
 
@@ -25,6 +25,11 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
         public TrajectoryActionBuilder scoreStartingSpecimenTraj(MecanumDrive mecanumDrive, Pose2d initialPose) {
             return mecanumDrive.actionBuilder(initialPose)
                     .strafeToSplineHeading(new Vector2d(-7.5, 32), Math.toRadians(270));
+        }
+
+        public TrajectoryActionBuilder scoreStartingSpecimenTraj2(MecanumDrive mecanumDrive, Pose2d initialPose) {
+            return mecanumDrive .actionBuilder(initialPose)
+                    .strafeToLinearHeading(new Vector2d(3.5,-20.75), Math.toRadians(270));
         }
 
         //Moves the bot over an inch to score the second specimen. Ditto with 3-5specimenTraj, but I can't think of a way to make it simpler
@@ -80,6 +85,11 @@ import org.firstinspires.ftc.teamcode.internal.BaseOpMode;
 
 
                     .splineToSplineHeading(new Pose2d(15, -55, Math.toRadians(180)), 0);
+        }
+
+        public  TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, Pose2d initialPose) {
+            return mecanumDrive.actionBuilder(initialPose)
+                    .waitSeconds(0.5);
         }
 
 

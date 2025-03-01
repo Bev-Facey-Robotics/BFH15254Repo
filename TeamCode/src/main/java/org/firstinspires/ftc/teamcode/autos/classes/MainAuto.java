@@ -32,9 +32,13 @@ package org.firstinspires.ftc.teamcode.autos.classes;
 import android.annotation.SuppressLint;
 
 
+import androidx.annotation.NonNull;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
@@ -51,9 +55,30 @@ import org.firstinspires.ftc.teamcode.internal.HardwareManager;
 
 
 public abstract class MainAuto extends BaseOpMode {
+
+
+
+    public class updatePose implements Action {
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) throws NullPointerException {
+            packet.put("poseUpdate", mecanumDrive.updatePoseEstimate());
+            updatedPose = mecanumDrive.updatePoseEstimate();
+            return true;
+        }
+    }
+
+    public Action updatePose() {return new updatePose();}
+
+
+
     //region Position
     private AprilTagPosFinder aprilTagPosFinder = new AprilTagPosFinder();
     private MecanumDrive mecanumDrive = null; // Road Runner
+    private Pose2d importedinitialPose = importedinitialPose();
+
+
+
+
     //endregion
 
     public RRSlide slide = null;
@@ -71,7 +96,7 @@ public abstract class MainAuto extends BaseOpMode {
         //endregion
         slide = new RRSlide(hardwareMap);
         frontCombine = new RRFrontCombine(hardwareMap);
-
+        
         //region April Tag Initialization
         // Let's get our position finder ready
 //        aprilTagPosFinder.Initialize(
@@ -105,8 +130,9 @@ public abstract class MainAuto extends BaseOpMode {
         }
         //endregion
 
-        Pose2d initialPose = new Pose2d(23,-55, Math.toRadians(180));
+        Pose2d initialPose = importedinitialPose;
         //aprilTagPosFinder.StopStreaming();
+
 
         // for debugging
         //Pose2d initialPose = new Pose2d(0,0,Math.toRadians(aprilTagPosFinder.yaw));
@@ -118,16 +144,21 @@ public abstract class MainAuto extends BaseOpMode {
         //build all the trajectories here. Yes there is a lot
 
 
+
+        Action poseUpdate = updatePose();
         Action aCwallSpecimenTraj = wallSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCkickSample1Traj = kickSample1Traj(mecanumDrive, initialPose).build();
         Action aCkickSample2Traj = kickSample2Traj(mecanumDrive, initialPose).build();
         Action aCkickSample3Traj = kickSample3Traj(mecanumDrive, initialPose).build();
         Action aCscoreStartingSpecimenTraj = scoreStartingSpecimenTraj(mecanumDrive, initialPose).build();
+        Action aCscoreStartingSpecimenTraj2 = scoreStartingSpecimenTraj2(mecanumDrive, initialPose).build();
         Action aCscoreSecondSpecimenTraj = scoreSecondSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCscoreThirdSpecimenTraj = scoreThirdSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCscoreFourthSpecimenTraj = scoreFourthSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCscoreFifthSpecimenTraj = scoreFifthSpecimenTraj(mecanumDrive, initialPose).build();
         Action aCmoveFromWall = moveFromWall(mecanumDrive, initialPose).build();
+        Action aCSleep = sleepHalfSec(mecanumDrive, initialPose).build();
+
 
 
 
@@ -137,60 +168,78 @@ public abstract class MainAuto extends BaseOpMode {
         waitForStart();
 
         Actions.runBlocking(new SequentialAction(
-                new ParallelAction(
-                        aCmoveFromWall,
-                        frontCombine.MoveToPickup()
-
-                ),
+//                new ParallelAction(
+//                        aCmoveFromWall,
+//                        frontCombine.MoveToPickup()
+//
+//                ),
 
                 ///Placing the preloaded specimen on high rung
-                new ParallelAction(
+                new SequentialAction(
                         aCscoreStartingSpecimenTraj,
-                        slide.MoveToHighChamber()
-                ),
+                        frontCombine.MoveToPickup()),
+                        updatePose(),
+
+                        new SequentialAction(
+                                slide.MoveToHighChamber(),
+                                aCscoreStartingSpecimenTraj2,
+                                updatePose()
+
+
+                                ),
+                new SequentialAction(
+                        aCSleep,
+                        updatePose()
+
+                        ),
                 ///Releasing the specimens on high chamber
-                new ParallelAction(
-                        slide.MoveToWall()),
-                ///Batting the other specimens into the obv zone + grabbing a specimen
                 new SequentialAction(
-                       aCkickSample1Traj,
-                        aCkickSample2Traj,
-                        aCkickSample3Traj,
-                        aCwallSpecimenTraj),
 
-                ///grabbing the specimen
-                new ParallelAction(
-                        aCscoreSecondSpecimenTraj,
-                        slide.MoveToHighChamber()),
-                ///Releasing the specimen
-                new SequentialAction(
-                        slide.MoveToWall()),
+                        slide.MoveToWall(),
+                        updatePose())
+///Batting the other specimens into the obv zone + grabbing a specimen
+//                new SequentialAction(
+//                       aCkickSample1Traj,
+//                        aCkickSample2Traj,
+//                        aCkickSample3Traj,
+//                        aCwallSpecimenTraj),
+//
+//                ///grabbing the specimen
+//                new ParallelAction(
+//                        aCscoreSecondSpecimenTraj,
+//                        slide.MoveToHighChamber()),
+//                ///Releasing the specimen
+//                new SequentialAction(
+//                        slide.MoveToWall()),
+//
+//                ///grabbing the specimen
+//                new ParallelAction(
+//                        aCscoreThirdSpecimenTraj,
+//                        slide.MoveToHighChamber()),
+//                ///Releasing the specimen
+//                new SequentialAction(
+//                        slide.MoveToWall()),
+//
+//                ///grabbing the specimen
+//                new ParallelAction(
+//                        aCscoreFourthSpecimenTraj,
+//                        slide.MoveToHighChamber()),
+//                ///Releasing the specimen
+//                new SequentialAction(
+//                        slide.MoveToWall()),
+//                ///grabbing the specimen
+//
+//                new ParallelAction(
+//                        aCscoreFifthSpecimenTraj,
+//                        slide.MoveToHighChamber()),
+//                ///Releasing the specimen
+//                new SequentialAction(
+//                        slide.MoveToWall())
+//
 
-                ///grabbing the specimen
-                new ParallelAction(
-                        aCscoreThirdSpecimenTraj,
-                        slide.MoveToHighChamber()),
-                ///Releasing the specimen
-                new SequentialAction(
-                        slide.MoveToWall()),
-
-                ///grabbing the specimen
-                new ParallelAction(
-                        aCscoreFourthSpecimenTraj,
-                        slide.MoveToHighChamber()),
-                ///Releasing the specimen
-                new SequentialAction(
-                        slide.MoveToWall()),
-                ///grabbing the specimen
-
-                new ParallelAction(
-                        aCscoreFifthSpecimenTraj,
-                        slide.MoveToHighChamber()),
-                ///Releasing the specimen
-                new SequentialAction(
-                        slide.MoveToWall())
 
 
+//
                 ));
 
         new Thread(() -> {
@@ -225,13 +274,14 @@ public abstract class MainAuto extends BaseOpMode {
     public abstract TrajectoryActionBuilder kickSample2Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder kickSample3Traj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract TrajectoryActionBuilder scoreStartingSpecimenTraj2 (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreSecondSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreThirdSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreFourthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder scoreFifthSpecimenTraj (MecanumDrive mecanumDrive, Pose2d initialPose);
     public abstract TrajectoryActionBuilder moveFromWall (MecanumDrive mecanumDrive, Pose2d initialPose);
-
-    public abstract Pose2d initialPose ();
+public abstract TrajectoryActionBuilder sleepHalfSec (MecanumDrive mecanumDrive, Pose2d initialPose);
+    public abstract Pose2d importedinitialPose();
 
 
 
