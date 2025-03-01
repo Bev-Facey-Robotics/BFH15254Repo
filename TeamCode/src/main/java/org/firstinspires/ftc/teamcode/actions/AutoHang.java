@@ -10,6 +10,9 @@ public class AutoHang extends ActionElement {
         // Reserve the hardware
         HangExtention hangExtention = (HangExtention) HardwareManager.ReserveHardware(this, "HangExtention");
         hangExtention.MoveToPosition(100);
+        while (!Thread.currentThread().isInterrupted()) {
+            Thread.sleep(20);
+        }
     }
 
     @Override
