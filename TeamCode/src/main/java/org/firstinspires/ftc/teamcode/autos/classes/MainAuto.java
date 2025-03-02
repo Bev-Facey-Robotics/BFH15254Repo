@@ -154,7 +154,7 @@ public abstract class MainAuto extends BaseOpMode {
         TrajectoryActionBuilder aCmoveFromWallTraj = moveFromWall(mecanumDrive, aCkickSample3Traj);
         TrajectoryActionBuilder aCparkRunTraj = parkRun(mecanumDrive, aCmoveFromWallTraj);
         TrajectoryActionBuilder aCSleep = sleepHalfSec(mecanumDrive, aCparkRunTraj);
-        TrajectoryActionBuilder aCSTwoSleep = sleepHalfSec(mecanumDrive, aCSleep);
+        TrajectoryActionBuilder aCSTwoSleep = sleepTwoSec(mecanumDrive, aCSleep);
 
         Action aCwallSpecimenActi = aCwallSpecimenTraj.build();
         Action aCkickSample1Acti = aCkickSample1Traj.build();
@@ -193,7 +193,7 @@ public abstract class MainAuto extends BaseOpMode {
                         slide.MoveToHighChamber()
                 ),
                 aCscoreStartingSpecimenActi,
-                aCSleepActi,
+                aCTwoSleepActi,
                 ///Releasing the specimens on high chamber
                 slide.ReleaseSpeciminFromHigh(),
                 aCTwoSleepActi,
